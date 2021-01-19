@@ -5,7 +5,7 @@
 #include "registers.h"
 
 int main () {
-  setFlag(FLAG_HALF_CARRY);
+  // setFlag(FLAG_HALF_CARRY);
   unsigned char x = checkFlag(FLAG_HALF_CARRY);
   printf("0x%08x\n", registers.A);
   printf("Flags: 0x%02x\n", registers.F);

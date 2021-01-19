@@ -3,9 +3,10 @@
 #define FLAG_NEGATIVE (1 << 6)
 #define FLAG_ZERO (1 << 7)
 
-#define HALF_CARRY_NIBBLE 0x000F
-#define CARRY_LOW_BYTE 0xFF00
-#define CARRY_HIGH_BYTE 0xFFFF0000
+#define NIBBLE 0x000F
+#define BYTE 0x00FF
+#define LOW_BYTE 0xFF00
+#define HIGH_BYTE 0xFFFF0000
 
 void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);
