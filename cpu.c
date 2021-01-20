@@ -20,10 +20,18 @@ void add8bit(unsigned char n) {
     unsigned char *regA = &registers.A;
     unsigned int sum = *regA + n;
 
+    removeFlag(FLAG_NEGATIVE);
+
     if (sum & HIGH_BYTE) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
+    }
+
+    if (((*regA & NIBBLE) + (n & NIBBLE)) > NIBBLE) {
+        setFlag(FLAG_HALF_CARRY);
+    } else {
+        removeFlag(FLAG_HALF_CARRY);
     }
 
     *regA = (unsigned char)(sum & LOW_BYTE);
@@ -33,14 +41,6 @@ void add8bit(unsigned char n) {
     } else {
         setFlag(FLAG_ZERO);
     }
-
-    if (((*regA & NIBBLE) + (n & NIBBLE)) > NIBBLE) {
-        setFlag(FLAG_HALF_CARRY);
-    } else {
-        removeFlag(FLAG_HALF_CARRY);
-    }
-
-    removeFlag(FLAG_NEGATIVE);
 }
 
 void addCarry8bit (unsigned char n) {
@@ -48,6 +48,8 @@ void addCarry8bit (unsigned char n) {
     n += checkFlag(FLAG_CARRY);
     unsigned int sum = *regA + n;
 
+    removeFlag(FLAG_NEGATIVE);
+
     if (sum & HIGH_BYTE) {
         setFlag(FLAG_CARRY);
     } else {
@@ -67,8 +69,6 @@ void addCarry8bit (unsigned char n) {
     } else {
         setFlag(FLAG_ZERO);
     }
-
-    removeFlag(FLAG_NEGATIVE);
 }
 
 void sub8bit (unsigned char n) {
@@ -99,10 +99,11 @@ void sub8bit (unsigned char n) {
 void subCarry8bit (unsigned char n) {
     setFlag(FLAG_NEGATIVE);
     unsigned char *regA = &registers.A;
+    unsigned short tmpN = n;
 
-    n += checkFlag(FLAG_CARRY);
+    tmpN += checkFlag(FLAG_CARRY);
 
-    if (n > *regA) {
+    if (tmpN > *regA) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
@@ -114,11 +115,15 @@ void subCarry8bit (unsigned char n) {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *regA -= n;
+    *regA -= tmpN;
 
     if (*regA) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
     }
+}
+
+void and () {
+    
 }

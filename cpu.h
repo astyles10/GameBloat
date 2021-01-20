@@ -11,3 +11,4 @@ void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
 void add8bit (unsigned char n);
+void subCarry8bit (unsigned char n);
