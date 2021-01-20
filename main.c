@@ -7,7 +7,11 @@
 int main () {
   // setFlag(FLAG_HALF_CARRY);
   unsigned char x = checkFlag(FLAG_HALF_CARRY);
-  printf("0x%08x\n", registers.A);
+
+  unsigned char *regA = &registers.A;
+  *regA = 0xF8;
+  add8bit(0x01);
+  printf("Register A: 0x%02x\n", registers.A);
   printf("Flags: 0x%02x\n", registers.F);
   printf("Flag set: %01d\n", x);
   return 0;

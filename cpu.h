@@ -4,9 +4,8 @@
 #define FLAG_ZERO (1 << 7)
 
 #define NIBBLE 0x000F
-#define BYTE 0x00FF
-#define LOW_BYTE 0xFF00
-#define HIGH_BYTE 0xFFFF0000
+#define LOW_BYTE 0x00FF
+#define HIGH_BYTE 0xFF00
 
 void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);

@@ -19,13 +19,14 @@ unsigned char checkFlag (unsigned char flag) {
 void add8bit(unsigned char n) {
     unsigned char *regA = &registers.A;
     unsigned int sum = *regA + n;
-    if (sum & LOW_BYTE) {
+
+    if (sum & HIGH_BYTE) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *regA = (unsigned char)(sum & BYTE);
+    *regA = (unsigned char)(sum & LOW_BYTE);
 
     if (*regA) {
         removeFlag(FLAG_ZERO);
@@ -47,7 +48,7 @@ void addCarry8bit (unsigned char n) {
     n += checkFlag(FLAG_CARRY);
     unsigned int sum = *regA + n;
 
-    if (sum & LOW_BYTE) {
+    if (sum & HIGH_BYTE) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
@@ -59,7 +60,7 @@ void addCarry8bit (unsigned char n) {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *regA = (unsigned char)(sum & BYTE);
+    *regA = (unsigned char)(sum & LOW_BYTE);
 
     if (*regA) {
         removeFlag(FLAG_ZERO);
@@ -117,5 +118,7 @@ void subCarry8bit (unsigned char n) {
 
     if (*regA) {
         removeFlag(FLAG_ZERO);
+    } else {
+        setFlag(FLAG_ZERO);
     }
 }
