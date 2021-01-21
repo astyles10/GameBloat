@@ -1,6 +1,8 @@
 #include "cpu.h"
 #include "registers.h"
 
+// https://archives.glitchcity.info/wiki/GB_Programming.html
+
 void setFlag (unsigned char flag) {
     registers.F |= flag;
 }
@@ -99,11 +101,10 @@ void sub8bit (unsigned char n) {
 void subCarry8bit (unsigned char n) {
     setFlag(FLAG_NEGATIVE);
     unsigned char *regA = &registers.A;
-    unsigned short tmpN = n;
 
-    tmpN += checkFlag(FLAG_CARRY);
+    n += checkFlag(FLAG_CARRY);
 
-    if (tmpN > *regA) {
+    if (n > *regA) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
@@ -115,7 +116,7 @@ void subCarry8bit (unsigned char n) {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *regA -= tmpN;
+    *regA -= n;
 
     if (*regA) {
         removeFlag(FLAG_ZERO);
