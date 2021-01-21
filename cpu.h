@@ -10,5 +10,14 @@
 void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
-void add8bit (unsigned char n);
-void subCarry8bit (unsigned char n);
+
+void addS (unsigned char s);
+void adcS (unsigned char s);
+void subS (unsigned char s);
+void sbcS (unsigned char s);
+void and (unsigned char s);
+void or (unsigned char s);
+void xor (unsigned char s);
+void cmp (unsigned char s);
+void incS (unsigned char* s);
+void decS (unsigned char* s);

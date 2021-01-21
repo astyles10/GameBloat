@@ -10,7 +10,7 @@ int main () {
   unsigned char *regA = &registers.A;
   *regA = 0x05;
   setFlag(FLAG_CARRY);
-  subCarry8bit(0xFF);
+  sbcS(0xFF);
   // add8bit(0x01);
 
   // Move this to separate tests source
