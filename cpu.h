@@ -6,6 +6,8 @@
 #define NIBBLE 0x000F
 #define LOW_BYTE 0x00FF
 #define HIGH_BYTE 0xFF00
+#define LOW_WORD 0x0000FFFF
+#define HIGH_WORD 0xFFFF0000
 
 void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);
@@ -21,3 +23,7 @@ void xor (unsigned char s);
 void cmp (unsigned char s);
 void incS (unsigned char* s);
 void decS (unsigned char* s);
+void addSS (unsigned short ss);
+void addSPe (char e);
+void incSS (unsigned short* ss);
+void decSS (unsigned short* ss);

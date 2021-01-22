@@ -201,7 +201,7 @@ void incS (unsigned char* s) {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *s++;
+    *s += 1;
 
     if (*s) {
         removeFlag(FLAG_ZERO);
@@ -218,7 +218,7 @@ void decS (unsigned char* s) {
         setFlag(FLAG_HALF_CARRY);
     }
 
-    *s--;
+    *s -= 1;
 
     if (*s) {
         removeFlag(FLAG_ZERO);
@@ -235,7 +235,7 @@ void addSS (unsigned short ss) {
     unsigned int sum = *regHL + ss;
 
     // Carry
-    if (sum & 0xFFFF0000) {
+    if (sum & HIGH_WORD) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
@@ -247,18 +247,37 @@ void addSS (unsigned short ss) {
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
+
+    *regHL = sum;
 }
 
-void addSPe () {
+void addSPe (char e) {
     // e: 8-bit signed 2's complement displacement
-    unsigned short* regSP = &registers.SP;
+    removeFlag(FLAG_ZERO);
+    removeFlag(FLAG_NEGATIVE);
 
+    unsigned short* ptrSP = &registers.SP;
+    int sum = *ptrSP + e;
+
+    if (sum & HIGH_WORD) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    if (((sum & NIBBLE) + (*ptrSP & NIBBLE)) > NIBBLE) {
+        setFlag(FLAG_HALF_CARRY);
+    } else {
+        removeFlag(FLAG_HALF_CARRY);
+    }
+
+    *ptrSP = sum;
 }
 
-void incRR () {
-
+void incSS (unsigned short *ss) {
+    *ss += 1;
 }
 
-void decRR() {
-
+void decSS(unsigned short* ss) {
+    *ss -= 1;
 }
