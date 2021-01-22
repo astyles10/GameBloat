@@ -33,5 +33,12 @@ int main () {
   decSS(&registers.SP);
   decSS(&registers.SP);
   printf("Stack pointer value: 0x%02x\n", registers.SP);
+
+  *regA = 0xD3;
+  rlcA();
+  printf("Register A value: 0x%02x\n", registers.A);
+  *regA = 0xD3;
+  rlA();
+  printf("Register A value: 0x%02x\n", registers.A);
   return 0;
 }

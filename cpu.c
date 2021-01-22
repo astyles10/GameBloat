@@ -281,3 +281,58 @@ void incSS (unsigned short *ss) {
 void decSS(unsigned short* ss) {
     *ss -= 1;
 }
+
+void rlcA (void) {
+    removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned char* ptrA = &registers.A;
+
+    if (*ptrA & 0x80) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    *ptrA <<= 1;
+    *ptrA += checkFlag(FLAG_CARRY);
+}
+
+void rlA (void) {
+    removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned char* ptrA = &registers.A;
+
+    if (*ptrA & 0x80) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    *ptrA <<= 1;
+}
+
+void rrcA (void) {
+    removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned char* ptrA = &registers.A;
+
+    if (*ptrA * 0x01) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    *ptrA >>= 1;
+    *ptrA += checkFlag(FLAG_CARRY);
+}
+
+void rrA (void) {
+    removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned char* ptrA = &registers.A;
+
+    if (*ptrA * 0x01) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    *ptrA >>= 1;
+}
+

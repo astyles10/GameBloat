@@ -27,3 +27,5 @@ void addSS (unsigned short ss);
 void addSPe (char e);
 void incSS (unsigned short* ss);
 void decSS (unsigned short* ss);
+void rlcA (void);
+void rlA (void);
