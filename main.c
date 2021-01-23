@@ -7,10 +7,10 @@
 int main () {
   // setFlag(FLAG_HALF_CARRY);
 
-  unsigned char *regA = &registers.A;
-  *regA = 0x05;
+  unsigned char *ptrA = &registers.A;
+  *ptrA = 0x05;
   setFlag(FLAG_CARRY);
-  sbcS(0xFF);
+  sbc_s(0xFF);
   // add8bit(0x01);
 
   // Move this to separate tests source
@@ -19,7 +19,7 @@ int main () {
   unsigned char negative = checkFlag(FLAG_NEGATIVE);
   unsigned char zero = checkFlag(FLAG_ZERO);
 
-  decS(regA);
+  dec_s(ptrA);
 
   printf("Register A value: 0x%02x\n", registers.A);
   printf("Flags register: 0x%02x\n", registers.F);
@@ -28,17 +28,42 @@ int main () {
   printf("Negative flag set: %01d\n", negative);
   printf("Zero flag set: %01d\n", zero);
 
-  incSS(&registers.SP);
+  inc_ss(&registers.SP);
   printf("Stack pointer value: 0x%02x\n", registers.SP);
-  decSS(&registers.SP);
-  decSS(&registers.SP);
+  dec_ss(&registers.SP);
+  dec_ss(&registers.SP);
   printf("Stack pointer value: 0x%02x\n", registers.SP);
 
-  *regA = 0xD3;
-  rlcA();
+  *ptrA = 0xD3;
+  rlc_A();
   printf("Register A value: 0x%02x\n", registers.A);
-  *regA = 0xD3;
-  rlA();
+  *ptrA = 0xD3;
+  rl_A();
   printf("Register A value: 0x%02x\n", registers.A);
+
+  unsigned char *ptrB = &registers.B;
+  unsigned short *ptrHL = &registers.HL;
+  *ptrB = 0x45;
+  printf("Before: Register B value: 0x%02x\n", registers.B);
+  rr_s(ptrB);
+  printf("After: Register B value: 0x%02x\n", registers.B);
+
+  *ptrHL = 0x4444;
+  printf("Before: Register HL value: 0x%04x\n", registers.HL);
+  rlc_HL();
+  printf("After: Register HL value: 0x%04x\n", registers.HL);
+
+  *ptrA = 0xFF;
+  sla_s(ptrA);
+  printf("Register A value: 0x%02x\n", registers.A);
+
+  *ptrA = 0xF9;
+
+  set_b_s(7, ptrA);
+  printf("Register A value: 0x%02x\n", registers.A);
+
+  res_b_s(7, ptrA);
+  printf("Register A value: 0x%02x\n", registers.A);
+
   return 0;
 }

@@ -38,3 +38,12 @@ struct registers {
     unsigned short SP;
     unsigned short PC;
 } extern registers;
+
+enum eRegisters {
+    A, F, AF,
+    B, C, BC,
+    D, E, DE,
+    H, L, HL,
+    SP, PC,
+    numRegisters
+};
