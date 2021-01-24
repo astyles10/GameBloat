@@ -65,5 +65,12 @@ int main () {
   res_b_s(7, ptrA);
   printf("Register A value: 0x%02x\n", registers.A);
 
+  swap_s(ptrA);
+  printf("After swap_s: Register A value: 0x%02x\n", registers.A);
+
+  *ptrA = 0x1A;
+  daa();
+  printf("After daa: Register A value: 0x%02x\n", registers.A);
+
   return 0;
 }

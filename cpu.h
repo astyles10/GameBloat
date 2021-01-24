@@ -3,7 +3,8 @@
 #define FLAG_NEGATIVE (1 << 6)
 #define FLAG_ZERO (1 << 7)
 
-#define NIBBLE 0x000F
+#define LOW_NIBBLE 0x000F
+#define HIGH_NIBBLE 0x00F0
 #define LOW_BYTE 0x00FF
 #define HIGH_BYTE 0xFF00
 #define LOW_WORD 0x0000FFFF
@@ -31,10 +32,19 @@ void inc_s (unsigned char* s);
 void dec_s (unsigned char* s);
 
 // 16-Bit ALU opcodes
-void add_ss (unsigned short ss);
-void add_SP_e (char e);
-void inc_ss (unsigned short* ss);
-void dec_ss (unsigned short* ss);
+void add_ss (unsigned short* ptrHL, unsigned short ss);
+void add_SP_e (unsigned short* ptrSP, char e);
+void inc_ss (unsigned short* ptrSS);
+void dec_ss (unsigned short* ptrSS);
+
+// Misc
+void swap_s (unsigned char* ptrS);
+void swap_HL (unsigned short* ptrHL);
+void daa (void);
+void cpl (void);
+void ccf (void);
+void scf (void);
+void nop (void);
 
 // Rotates & shifts
 void rlc_A (void);

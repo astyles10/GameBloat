@@ -140,7 +140,7 @@ void add_s (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if (((*ptrA & NIBBLE) + (s & NIBBLE)) > NIBBLE) {
+    if (((*ptrA & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -168,7 +168,7 @@ void adc_s (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if (((*ptrA & NIBBLE) + (s & NIBBLE)) > NIBBLE) {
+    if (((*ptrA & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -194,7 +194,7 @@ void sub_s (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if ((s & NIBBLE) > (*ptrA & NIBBLE)) {
+    if ((s & LOW_NIBBLE) > (*ptrA & LOW_NIBBLE)) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -220,7 +220,7 @@ void sbc_s (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if ((s & NIBBLE) > (*ptrA & NIBBLE)) {
+    if ((s & LOW_NIBBLE) > (*ptrA & LOW_NIBBLE)) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -285,7 +285,7 @@ void cmp (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if ((s & NIBBLE) > (*ptrA & NIBBLE)) {
+    if ((s & LOW_NIBBLE) > (*ptrA & LOW_NIBBLE)) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -301,7 +301,7 @@ void cmp (unsigned char s) {
 void inc_s (unsigned char* s) {
     removeFlag(FLAG_NEGATIVE);
 
-    if ((*s & NIBBLE) == NIBBLE) {
+    if ((*s & LOW_NIBBLE) == LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -319,7 +319,7 @@ void inc_s (unsigned char* s) {
 void dec_s (unsigned char* s) {
     setFlag(FLAG_NEGATIVE);
 
-    if (*s & NIBBLE) {
+    if (*s & LOW_NIBBLE) {
         removeFlag(FLAG_HALF_CARRY);
     } else {
         setFlag(FLAG_HALF_CARRY);
@@ -336,9 +336,8 @@ void dec_s (unsigned char* s) {
 
 // 16-bit ALU Ops
 
-void add_ss (unsigned short ss) {
+void add_ss (unsigned short* ptrHL, unsigned short ss) {
     removeFlag(FLAG_NEGATIVE);
-    unsigned short* ptrHL = &registers.HL;
     unsigned int sum = *ptrHL + ss;
 
     // Carry
@@ -349,7 +348,7 @@ void add_ss (unsigned short ss) {
     }
 
     // Half-carry
-    if (((*ptrHL & NIBBLE) + (ss & NIBBLE)) > NIBBLE) {
+    if (((*ptrHL & LOW_NIBBLE) + (ss & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -358,11 +357,10 @@ void add_ss (unsigned short ss) {
     *ptrHL = sum;
 }
 
-void add_SP_e (char e) {
+void add_SP_e (unsigned short* ptrSP, char e) {
     // e: 8-bit signed 2's complement displacement
     removeFlag(FLAG_ZERO | FLAG_NEGATIVE);
 
-    unsigned short* ptrSP = &registers.SP;
     int sum = *ptrSP + e;
 
     if (sum & HIGH_WORD) {
@@ -371,7 +369,7 @@ void add_SP_e (char e) {
         removeFlag(FLAG_CARRY);
     }
 
-    if (((sum & NIBBLE) + (*ptrSP & NIBBLE)) > NIBBLE) {
+    if (((sum & LOW_NIBBLE) + (*ptrSP & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
@@ -380,34 +378,93 @@ void add_SP_e (char e) {
     *ptrSP = sum;
 }
 
-void inc_ss (unsigned short *ss) {
-    *ss += 1;
+void inc_ss (unsigned short *ptrSS) {
+    *ptrSS += 1;
 }
 
-void dec_ss (unsigned short* ss) {
-    *ss -= 1;
+void dec_ss (unsigned short* ptrSS) {
+    *ptrSS -= 1;
 }
 
 // Misc
 
-void swap_s () {
-    // TODO
+void swap_s (unsigned char* ptrS) {
+    removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
+
+    *ptrS = ((*ptrS & HIGH_NIBBLE) >> 4) | ((*ptrS & LOW_NIBBLE) << 4);
+
+    if (*ptrS) {
+        removeFlag(FLAG_ZERO);
+    } else {
+        setFlag(FLAG_ZERO);
+    }
 }
 
-void daa () {
-    // TODO
+void swap_HL (unsigned short* ptrHL) {
+    removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
+
+    *ptrHL = ((*ptrHL & HIGH_NIBBLE) >> 4) | ((*ptrHL & LOW_NIBBLE) << 4);
+
+    if (*ptrHL) {
+        removeFlag(FLAG_ZERO);
+    } else {
+        setFlag(FLAG_ZERO);
+    }
 }
 
-void cpl () {
-// TODO
+void daa (void) {
+    unsigned char* ptrA = &registers.A;
+
+    if (checkFlag(FLAG_NEGATIVE)) {
+        if (checkFlag(FLAG_HALF_CARRY)) {
+            *ptrA = (*ptrA - 0x06) & 0xFF;
+        }
+        if (checkFlag(FLAG_CARRY)) {
+            *ptrA -= (*ptrA - 0x60);
+        }
+    } else {
+        if (checkFlag(FLAG_HALF_CARRY) || ((*ptrA & LOW_NIBBLE) > 9)) {
+            *ptrA += 0x06;
+        }
+        if (checkFlag(FLAG_CARRY) || (*ptrA > 0x9F)) {
+            *ptrA += 0x60;
+        }
+    }
+
+    if ((*ptrA & 0x0100) == 0x100) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    if (*ptrA) {
+        removeFlag(FLAG_ZERO);
+    } else {
+        setFlag(FLAG_ZERO);
+    }
+
+    removeFlag(FLAG_HALF_CARRY);
 }
 
-void ccf () {
-// TODO
+void cpl (void) {
+    setFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned char* ptrA = &registers.A;
+    *ptrA = ~(*ptrA);
 }
 
-void scf () {
-// TODO
+void ccf (void) {
+    if (checkFlag(FLAG_CARRY)) {
+        removeFlag(FLAG_CARRY);
+    } else {
+        setFlag(FLAG_CARRY);
+    }
+
+    removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
+}
+
+void scf (void) {
+    setFlag(FLAG_CARRY);
+    removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 }
 
 void nop (void) {
@@ -781,7 +838,6 @@ void set_b_HL (unsigned short bitPosition) {
 }
 
 void res_b_s (unsigned char bitPosition, unsigned char* ptrS) {
-    // *ptrS = *ptrS & ~(1 << bitPosition);
     *ptrS &= ~(1 << bitPosition);
 }
 
@@ -791,8 +847,9 @@ void res_b_HL (unsigned short bitPosition) {
 }
 // Jumps
 
-void jp_nn () {
-// TODO
+void jp_nn (unsigned short* ptrNN) {
+    unsigned short* ptrPC = &registers.PC;
+    *ptrPC = *ptrNN;
 }
 
 void jp_cc_nn () {
