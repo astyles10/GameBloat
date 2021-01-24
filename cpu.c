@@ -48,11 +48,11 @@ unsigned char checkFlag (unsigned char flag) {
 
 // 8-Bit Loads
 
-void ld_r_s (unsigned char s) {
-// TODO
+void ld_r_s (unsigned char* r, unsigned char s) {
+
 }
 
-void ld_d_r (unsigned char r) {
+void ld_d_r (unsigned char* d, unsigned char r) {
 // TODO
 }
 
@@ -852,25 +852,30 @@ void jp_nn (unsigned short* ptrNN) {
     *ptrPC = *ptrNN;
 }
 
-void jp_cc_nn () {
-    // TODO
+void jp_cc_nn (unsigned short* ptrNN, unsigned char condition) {
+    if (condition) {
+        unsigned short* ptrPC = &registers.PC;
+        *ptrPC = *ptrNN;
+    }
 }
 
-void jp_HL () {
-// TODO
+void jp_HL (void) {
+    registers.PC = registers.HL;
 }
 
-void jr_e () {
-// TODO
+void jr_e (char e) {
+    registers.PC += e;
 }
 
-void jr_cc_e () {
-// TODO
+void jr_cc_e (unsigned char condition, char e) {
+    if (condition) {
+        registers.PC += e;
+    }
 }
 
 // Calls
 
-void call_nn () {
+void call_nn (unsigned short nn) {
 
 }
 

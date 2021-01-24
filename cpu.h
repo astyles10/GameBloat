@@ -75,3 +75,11 @@ void set_b_s (unsigned char bitPosition, unsigned char* ptrS);
 void set_b_HL (unsigned short bitPosition);
 void res_b_s (unsigned char bitPosition, unsigned char* ptrS);
 void res_b_HL (unsigned short bitPosition);
+
+// Jumps
+
+void jp_nn (unsigned short* ptrNN);
+void jp_cc_nn (unsigned short* ptrNN, unsigned char condition);
+void jp_HL (void);
+void jr_e (char e);
+void jr_cc_e (unsigned char condition, char e);

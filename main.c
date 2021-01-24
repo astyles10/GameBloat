@@ -71,6 +71,8 @@ int main () {
   *ptrA = 0x1A;
   daa();
   printf("After daa: Register A value: 0x%02x\n", registers.A);
+  removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
+  jp_cc_nn(&registers.HL, !(checkFlag(FLAG_CARRY)));
 
   return 0;
 }
