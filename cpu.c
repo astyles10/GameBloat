@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include "registers.h"
-#include <stdio.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -48,20 +47,24 @@ unsigned char checkFlag (unsigned char flag) {
 
 // 8-Bit Loads
 
-void ld_r_s (unsigned char* r, unsigned char s) {
-
+void ld_r_s (unsigned char* ptrR, unsigned char s) {
+    // Loads a direct value into register r
+    *ptrR = s;
 }
 
-void ld_d_r (unsigned char* d, unsigned char r) {
-// TODO
+void ld_d_r (unsigned char* ptrD, unsigned char* ptrR) {
+    // Loads a register from another register
+    *ptrD = *ptrR;
 }
 
-void ld_d_n (unsigned char n) {
-// TODO
+void ld_d_n (unsigned char* ptrD, unsigned char n) {
+    // Loads a register with a direct value
+    *ptrD = n;
 }
 
-void ld_A_ss () {
-// TODO
+void ld_A_ss (unsigned short* ptrSS) {
+    //  Load register A with value at register pair ss
+    registers.A = (unsigned char)(*ptrSS);
 }
 
 void ld_dd_A () {
