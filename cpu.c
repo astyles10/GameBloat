@@ -30,7 +30,13 @@ Z 	Zero Flag.
 Functions with register name hard coded are Upper case to suit struct naming
 */
 
-// TODO: fix function names to match above terminology symbols
+// TODO: Check opcode functions using (HL) address location
+//       to determine whether they are implemented correctly
+//       Because the memory location and HL register are separate
+
+// TODO: Write function to read and write bytes using a 16-bit memory location
+// Needed for opcodes such as rlc_HL because the value at (HL) itself needs to be modified
+
 
 void setFlag (unsigned char flag) {
     registers.F |= flag;
@@ -47,9 +53,8 @@ unsigned char checkFlag (unsigned char flag) {
 
 // 8-Bit Loads
 
-void ld_r_s (unsigned char* ptrR, unsigned char s) {
-    // Loads a direct value into register r
-    *ptrR = s;
+void ld_r_n (unsigned char* ptrR, unsigned char n) {
+    *ptrR = n;
 }
 
 void ld_d_r (unsigned char* ptrD, unsigned char* ptrR) {
@@ -57,30 +62,40 @@ void ld_d_r (unsigned char* ptrD, unsigned char* ptrR) {
     *ptrD = *ptrR;
 }
 
-void ld_d_n (unsigned char* ptrD, unsigned char n) {
-    // Loads a register with a direct value
-    *ptrD = n;
+void ld_mHL_n(unsigned char n) {
+    unsigned short memLocation = registers.HL;
+    // writeByteToMemory(memLocation, n);
 }
 
-void ld_A_ss (unsigned short* ptrSS) {
-    //  Load register A with value at register pair ss
-    registers.A = (unsigned char)(*ptrSS);
+void ld_mHL_r (unsigned char* ptrR) {
+    unsigned short memLocation = registers.HL;
+    // writeByteToMemory(memLocation, *ptrR);
 }
 
-void ld_dd_A () {
-// TODO
+void ld_A_m_ss (unsigned short memLocation) {
+    // unsigned char value = readByteFromMemory(memLocation);
+    // registers.A = value;
 }
 
-void ld_A_c () {
-// TODO
+void ld_dd_A (unsigned short memLocation) {
+    // writeByteToMemory(memLocation, registers.A);
 }
 
-void ld_c_A () {
-// TODO
+void ld_A_c (void) {
+    unsigned short memLocation = 0xFF00 + checkFlag(FLAG_CARRY);
+    // unsigned char value = readByteFromMemory(memLocation);
+    // registers.A = value;
 }
 
-void ldd_A_HL () {
-// TODO
+void ld_c_A (void) {
+    unsigned short memLocation = 0xFF00 + checkFlag(FLAG_CARRY);
+    // writeByteToMemory(memLocation, registers.A);
+}
+
+void ldd_A_HL (void) {
+    // unsigned char value = readByteFromMemory(registers.HL);
+    // registers.A = value;
+    // dec_ss(&registers.HL);
 }
 
 void ldd_HL_A () {
@@ -567,21 +582,19 @@ void rlc_s (unsigned char* ptrS) {
     }
 }
 
-void rlc_HL (void) {
+void rlc_HL (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 
-    unsigned short* ptrHL = &registers.HL;
-
-    if (*ptrHL & 0x8000) {
+    if (s & 0x80) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *ptrHL <<= 1;
-    *ptrHL += checkFlag(FLAG_CARRY);
+    s <<= 1;
+    s += checkFlag(FLAG_CARRY);
 
-    if (*ptrHL) {
+    if (s) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -606,20 +619,18 @@ void rl_s (unsigned char* ptrS) {
     }
 }
 
-void rl_HL (void) {
+void rl_HL (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 
-    unsigned short* ptrHL = &registers.HL;
-
-    if (*ptrHL & 0x8000) {
+    if (s & 0x80) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *ptrHL <<= 1;
+    s <<= 1;
 
-    if (*ptrHL) {
+    if (s) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -648,24 +659,22 @@ void rrc_s (unsigned char* ptrS) {
     }
 }
 
-void rrc_HL (void) {
+void rrc_HL (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
-
-    unsigned short* ptrHL = &registers.HL;
     
-    if (*ptrHL & 0x01) {
+    if (s & 0x01) {
        setFlag(FLAG_CARRY);
     } else {
        removeFlag(FLAG_CARRY);
     }
 
-    *ptrHL >>= 1;
+    s >>= 1;
     
     if (checkFlag(FLAG_CARRY)) {
-        *ptrHL |= 0x8000;
+        s |= 0x80;
     }
 
-    if (*ptrHL) {
+    if (s) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
