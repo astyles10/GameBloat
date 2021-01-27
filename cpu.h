@@ -23,6 +23,21 @@ void ld_A_m_ss (unsigned short ss);
 void ld_dd_A (unsigned short memLocation);
 void ld_A_c (void);
 void ld_c_A (void);
+void ldd_A_mHL (void);
+void ldd_mHL_A (void);
+void ldi_A_mHL (void);
+void ldi_mHL_A (void);
+void ldh_n_A (unsigned char n);
+void ldh_A_n (unsigned char n);
+
+// 16-Bit Loads
+
+void ld_dd_nn (unsigned short* ptrDD, unsigned short nn);
+void ld_nn_SP (unsigned short nn);
+void ld_SP_HL (void);
+void ld_HL_SP_e (char e);
+void push_ss (unsigned short* ptrSS);
+void pop_dd (unsigned short* ptrDD);
 
 // 8-Bit ALU opcodes
 void add_s (unsigned char s);
@@ -37,14 +52,14 @@ void inc_s (unsigned char* s);
 void dec_s (unsigned char* s);
 
 // 16-Bit ALU opcodes
-void add_ss (unsigned short* ptrHL, unsigned short ss);
-void add_SP_e (unsigned short* ptrSP, char e);
+void add_HL_ss (unsigned short ss);
+void add_SP_e (char e);
 void inc_ss (unsigned short* ptrSS);
 void dec_ss (unsigned short* ptrSS);
 
 // Misc
 void swap_s (unsigned char* ptrS);
-void swap_HL (unsigned short* ptrHL);
+void swap_HL (void);
 void daa (void);
 void cpl (void);
 void ccf (void);

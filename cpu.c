@@ -92,63 +92,97 @@ void ld_c_A (void) {
     // writeByteToMemory(memLocation, registers.A);
 }
 
-void ldd_A_HL (void) {
+void ldd_A_mHL (void) {
     // unsigned char value = readByteFromMemory(registers.HL);
     // registers.A = value;
     // dec_ss(&registers.HL);
 }
 
-void ldd_HL_A () {
-// TODO
+void ldd_mHL_A (void) {
+    unsigned short memLocation = registers.HL;
+    // writeByteToMemory(memLocation, registers.A);
+    dec_ss(&registers.HL);
 }
 
-void ldi_A_HL () {
-// TODO
+void ldi_A_mHL (void) {
+    // unsigned char value = readByteFromMemory(registers.HL);
+    // registers.A = value;
+    inc_ss(&registers.HL);
 }
 
-void ldi_HL_A () {
-// TODO
+void ldi_mHL_A (void) {
+    unsigned short memLocation = registers.HL;
+    // writeByteToMemory(memLocation, registers.A);
+    inc_ss(&registers.HL);
 }
 
-void ldh_n_A () {
-// TODO
+void ldh_n_A (unsigned char n) {
+    unsigned short memLocation = 0xFF00 + n;
+    // writeByteToMemory(memLocation, registers.A);
 }
 
-void ldh_A_n () {
-// TODO
+void ldh_A_n (unsigned char n) {
+    unsigned short memLocation = 0xFF00 + n;
+    // unsigned char value = readByteFromMemory(memLocation);
+    // registers.A = value;
 }
 
 // 16-Bit loads
 
-void ld_dd_nn () {
-// TODO
+void ld_dd_nn (unsigned short* ptrDD, unsigned short nn) {
+    *ptrDD = nn;
 }
 
-void ld_nn_SP () {
-// TODO
+void ld_nn_SP (unsigned short nn) {
+    // writeByteToMemory(nn, registers.SP)
 }
 
-void ld_SP_HL () {
-// TODO
+void ld_SP_HL (void) {
+    registers.SP = registers.HL;
 }
 
-void ld_HL_SP_e () {
-// TODO
+void ld_HL_SP_e (char e) {
+    unsigned short value = registers.SP + e;
+
+    if (((registers.SP & LOW_WORD) + (e & LOW_WORD)) > LOW_WORD) {
+        setFlag(FLAG_CARRY);
+    } else {
+        removeFlag(FLAG_CARRY);
+    }
+
+    if (((registers.SP & LOW_NIBBLE) + (e & LOW_NIBBLE)) > LOW_NIBBLE) {
+        setFlag(FLAG_HALF_CARRY);
+    } else {
+        removeFlag(FLAG_HALF_CARRY);
+    }
+
+    registers.HL = value;
 }
 
-void push_ss () {
-// TODO
+void push_ss (unsigned short* ptrSS) {
+    unsigned char lowSS = (*ptrSS & 0xFF);
+    unsigned char highSS = (unsigned char)((*ptrSS & 0xFF00) >> 4);
+
+    registers.SP -= 1;
+    // writeByteToMemory(registers.SP, lowSS);
+    registers.SP -= 1;
+    // writeByteToMemory(registers.SP, highSS);
 }
 
-void pop_dd () {
-// TODO
+void pop_dd (unsigned short* ptrDD) {
+    unsigned short bytePair;
+    // bytePair = ((readByteFromMemory(registers.SP)) << 4);
+    registers.SP += 1;
+    // bytePair = readByteFromMemory(registers.SP);
+    registers.SP += 1;
+
+    *ptrDD = bytePair;
 }
 
 // 8-bit ALU ops
 
 void add_s (unsigned char s) {
-    unsigned char *ptrA = &registers.A;
-    unsigned int sum = *ptrA + s;
+    unsigned short sum = registers.A + s;
 
     removeFlag(FLAG_NEGATIVE);
 
@@ -158,15 +192,15 @@ void add_s (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if (((*ptrA & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE) {
+    if (((registers.A & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *ptrA = (unsigned char)(sum & LOW_BYTE);
+    registers.A = (unsigned char)(sum & LOW_BYTE);
 
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -174,9 +208,8 @@ void add_s (unsigned char s) {
 }
 
 void adc_s (unsigned char s) {
-    unsigned char *ptrA = &registers.A;
     s += checkFlag(FLAG_CARRY);
-    unsigned int sum = *ptrA + s;
+    unsigned short sum = registers.A + s;
 
     removeFlag(FLAG_NEGATIVE);
 
@@ -186,15 +219,15 @@ void adc_s (unsigned char s) {
         removeFlag(FLAG_CARRY);
     }
 
-    if (((*ptrA & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE) {
+    if (((registers.A & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *ptrA = (unsigned char)(sum & LOW_BYTE);
+    registers.A = (unsigned char)(sum & LOW_BYTE);
 
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -204,22 +237,20 @@ void adc_s (unsigned char s) {
 void sub_s (unsigned char s) {
     setFlag(FLAG_NEGATIVE);
 
-    unsigned char *ptrA = &registers.A;
-
-    if (s > *ptrA) {
+    if (s > registers.A) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    if ((s & LOW_NIBBLE) > (*ptrA & LOW_NIBBLE)) {
+    if ((s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE)) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
-    *ptrA -= s;
+    registers.A -= s;
 
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -228,25 +259,23 @@ void sub_s (unsigned char s) {
 
 void sbc_s (unsigned char s) {
     setFlag(FLAG_NEGATIVE);
-    unsigned char *ptrA = &registers.A;
-
     s += checkFlag(FLAG_CARRY);
 
-    if (s > *ptrA) {
+    if (s > registers.A) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    if ((s & LOW_NIBBLE) > (*ptrA & LOW_NIBBLE)) {
+    if ((s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE)) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *ptrA -= s;
+    registers.A -= s;
 
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -256,11 +285,9 @@ void sbc_s (unsigned char s) {
 void and (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_CARRY);
     setFlag(FLAG_HALF_CARRY);
+    registers.A &= s;
 
-    unsigned char *ptrA = &registers.A;
-    *ptrA &= s;
-
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -269,11 +296,9 @@ void and (unsigned char s) {
 
 void or (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
+    registers.A |= s;
 
-    unsigned char *ptrA = &registers.A;
-    *ptrA |= s;
-
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -282,11 +307,9 @@ void or (unsigned char s) {
 
 void xor (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
+    registers.A ^= s;
 
-    unsigned char *ptrA = &registers.A;
-    *ptrA ^= s;
-
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -295,21 +318,20 @@ void xor (unsigned char s) {
 
 void cmp (unsigned char s) {
     setFlag(FLAG_NEGATIVE);
-    unsigned char *ptrA = &registers.A;
 
-    if (s > *ptrA) {
+    if (s > registers.A) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    if ((s & LOW_NIBBLE) > (*ptrA & LOW_NIBBLE)) {
+    if ((s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE)) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    if (*ptrA == s) {
+    if (registers.A == s) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -354,9 +376,9 @@ void dec_s (unsigned char* s) {
 
 // 16-bit ALU Ops
 
-void add_ss (unsigned short* ptrHL, unsigned short ss) {
+void add_HL_ss (unsigned short ss) {
     removeFlag(FLAG_NEGATIVE);
-    unsigned int sum = *ptrHL + ss;
+    unsigned int sum = registers.HL + ss;
 
     // Carry
     if (sum & HIGH_WORD) {
@@ -366,34 +388,34 @@ void add_ss (unsigned short* ptrHL, unsigned short ss) {
     }
 
     // Half-carry
-    if (((*ptrHL & LOW_NIBBLE) + (ss & LOW_NIBBLE)) > LOW_NIBBLE) {
+    if (((registers.HL & LOW_NIBBLE) + (ss & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *ptrHL = sum;
+    registers.HL = sum;
 }
 
-void add_SP_e (unsigned short* ptrSP, char e) {
+void add_SP_e (char e) {
     // e: 8-bit signed 2's complement displacement
     removeFlag(FLAG_ZERO | FLAG_NEGATIVE);
 
-    int sum = *ptrSP + e;
+    unsigned short sum = registers.SP + e;
 
-    if (sum & HIGH_WORD) {
+    if (((registers.SP & LOW_WORD) + (e & LOW_WORD)) > LOW_WORD) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    if (((sum & LOW_NIBBLE) + (*ptrSP & LOW_NIBBLE)) > LOW_NIBBLE) {
+    if (((sum & LOW_NIBBLE) + (registers.SP & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(FLAG_HALF_CARRY);
     } else {
         removeFlag(FLAG_HALF_CARRY);
     }
 
-    *ptrSP = sum;
+    registers.SP = sum;
 }
 
 void inc_ss (unsigned short *ptrSS) {
@@ -418,44 +440,46 @@ void swap_s (unsigned char* ptrS) {
     }
 }
 
-void swap_HL (unsigned short* ptrHL) {
+void swap_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
 
-    *ptrHL = ((*ptrHL & HIGH_NIBBLE) >> 4) | ((*ptrHL & LOW_NIBBLE) << 4);
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
+    // value = ((registers.HL & HIGH_NIBBLE) >> 4) | ((registers.HL & LOW_NIBBLE) << 4);
+    // writeByteToMemory(memLocation, value)
 
-    if (*ptrHL) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void daa (void) {
-    unsigned char* ptrA = &registers.A;
 
     if (checkFlag(FLAG_NEGATIVE)) {
         if (checkFlag(FLAG_HALF_CARRY)) {
-            *ptrA = (*ptrA - 0x06) & 0xFF;
+            registers.A = (registers.A - 0x06) & 0xFF;
         }
         if (checkFlag(FLAG_CARRY)) {
-            *ptrA -= (*ptrA - 0x60);
+            registers.A -= (registers.A - 0x60);
         }
     } else {
-        if (checkFlag(FLAG_HALF_CARRY) || ((*ptrA & LOW_NIBBLE) > 9)) {
-            *ptrA += 0x06;
+        if (checkFlag(FLAG_HALF_CARRY) || ((registers.A & LOW_NIBBLE) > 9)) {
+            registers.A += 0x06;
         }
-        if (checkFlag(FLAG_CARRY) || (*ptrA > 0x9F)) {
-            *ptrA += 0x60;
+        if (checkFlag(FLAG_CARRY) || (registers.A > 0x9F)) {
+            registers.A += 0x60;
         }
     }
 
-    if ((*ptrA & 0x0100) == 0x100) {
+    if ((registers.A & 0x0100) == 0x100) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    if (*ptrA) {
+    if (registers.A) {
         removeFlag(FLAG_ZERO);
     } else {
         setFlag(FLAG_ZERO);
@@ -466,8 +490,7 @@ void daa (void) {
 
 void cpl (void) {
     setFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
-    unsigned char* ptrA = &registers.A;
-    *ptrA = ~(*ptrA);
+    registers.A = ~(registers.A);
 }
 
 void ccf (void) {
@@ -508,59 +531,55 @@ void ei () {
 
 void rlc_A (void) {
     removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
-    unsigned char* ptrA = &registers.A;
 
-    if (*ptrA & 0x80) {
+    if (registers.A & 0x80) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *ptrA <<= 1;
-    *ptrA += checkFlag(FLAG_CARRY);
+    registers.A <<= 1;
+    registers.A += checkFlag(FLAG_CARRY);
 }
 
 void rl_A (void) {
     removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
-    unsigned char* ptrA = &registers.A;
 
-    if (*ptrA & 0x80) {
+    if (registers.A & 0x80) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *ptrA <<= 1;
+    registers.A <<= 1;
 }
 
 void rrc_A (void) {
     removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
-    unsigned char* ptrA = &registers.A;
 
-    if (*ptrA & 0x01) {
+    if (registers.A & 0x01) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *ptrA >>= 1;
+    registers.A >>= 1;
 
     if (checkFlag(FLAG_CARRY)) { 
-        *ptrA |= 0x80;
+        registers.A |= 0x80;
     }
 }
 
 void rr_A (void) {
     removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY);
-    unsigned char* ptrA = &registers.A;
 
-    if (*ptrA & 0x01) {
+    if (registers.A & 0x01) {
         setFlag(FLAG_CARRY);
     } else {
         removeFlag(FLAG_CARRY);
     }
 
-    *ptrA >>= 1;
+    registers.A >>= 1;
 }
 
 void rlc_s (unsigned char* ptrS) {
@@ -582,23 +601,28 @@ void rlc_s (unsigned char* ptrS) {
     }
 }
 
-void rlc_HL (unsigned char s) {
+void rlc_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
 
-    if (s & 0x80) {
-        setFlag(FLAG_CARRY);
-    } else {
-        removeFlag(FLAG_CARRY);
-    }
+    // if (value & 0x80) {
+    //     setFlag(FLAG_CARRY);
+    // } else {
+    //     removeFlag(FLAG_CARRY);
+    // }
 
-    s <<= 1;
-    s += checkFlag(FLAG_CARRY);
+    // value <<= 1;
+    // value += checkFlag(FLAG_CARRY);
 
-    if (s) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // writeByteToMemory(memLocation, value);
+
+
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void rl_s (unsigned char* ptrS) {
@@ -619,22 +643,27 @@ void rl_s (unsigned char* ptrS) {
     }
 }
 
-void rl_HL (unsigned char s) {
+void rl_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 
-    if (s & 0x80) {
-        setFlag(FLAG_CARRY);
-    } else {
-        removeFlag(FLAG_CARRY);
-    }
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
 
-    s <<= 1;
+    // if (value & 0x80) {
+    //     setFlag(FLAG_CARRY);
+    // } else {
+    //     removeFlag(FLAG_CARRY);
+    // }
 
-    if (s) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // value <<= 1;
+
+    // writeByteToMemory(memLocation, value);
+
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void rrc_s (unsigned char* ptrS) {
@@ -659,26 +688,30 @@ void rrc_s (unsigned char* ptrS) {
     }
 }
 
-void rrc_HL (unsigned char s) {
+void rrc_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
     
-    if (s & 0x01) {
-       setFlag(FLAG_CARRY);
-    } else {
-       removeFlag(FLAG_CARRY);
-    }
+    // if (value & 0x01) {
+    //    setFlag(FLAG_CARRY);
+    // } else {
+    //    removeFlag(FLAG_CARRY);
+    // }
 
-    s >>= 1;
+    // value >>= 1;
+
+    // writeByteToMemory(memLocation, value);
     
-    if (checkFlag(FLAG_CARRY)) {
-        s |= 0x80;
-    }
+    // if (checkFlag(FLAG_CARRY)) {
+    //     value |= 0x80;
+    // }
 
-    if (s) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void rr_s (unsigned char* ptrS) {
@@ -697,6 +730,27 @@ void rr_s (unsigned char* ptrS) {
     } else {
         setFlag(FLAG_ZERO);
     }
+}
+
+void rr_HL (void) {
+    removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
+    // unsigned char value = readByteFromMemory(memLocation);
+    
+    // if (value & 0x01) {
+    //    setFlag(FLAG_CARRY);
+    // } else {
+    //    removeFlag(FLAG_CARRY);
+    // }
+
+    // value >>= 1;
+
+    // writeByteToMemory(memLocation, value);
+
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void sla_s (unsigned char* ptrS) {
@@ -721,21 +775,24 @@ void sla_s (unsigned char* ptrS) {
 void sla_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 
-    unsigned short* ptrHL = &registers.HL;
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
 
-    if (*ptrHL & 8000) {
-        setFlag(FLAG_CARRY);
-    } else {
-        removeFlag(FLAG_CARRY);
-    }
+    // if (value & 0x80) {
+    //     setFlag(FLAG_CARRY);
+    // } else {
+    //     removeFlag(FLAG_CARRY);
+    // }
 
-    *ptrHL <<= 1;
+    // value <<= 1;
 
-    if (*ptrHL) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // writeByteToMemory(memLocation, value);
+
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void sra_s (unsigned char* ptrS) {
@@ -759,21 +816,24 @@ void sra_s (unsigned char* ptrS) {
 void sra_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 
-    unsigned short* ptrHL = &registers.HL;
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
 
-    if (*ptrHL & 0x8000) {
-        setFlag(FLAG_CARRY);
-    } else {
-        removeFlag(FLAG_CARRY);
-    }
+    // if (value & 0x80) {
+    //     setFlag(FLAG_CARRY);
+    // } else {
+    //     removeFlag(FLAG_CARRY);
+    // }
 
-    *ptrHL = (*ptrHL >> 1) | (*ptrHL & 0x01);
+    // value = (value >> 1) | (value & 0x01);
 
-    if (*ptrHL) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // writeByteToMemory(memLocation, value);
+
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void srl_s (unsigned char* ptrS) {
@@ -797,21 +857,23 @@ void srl_s (unsigned char* ptrS) {
 void srl_HL (void) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY);
 
-    unsigned short* ptrHL = &registers.HL;
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
 
-    if (*ptrHL * 0x01) {
-        setFlag(FLAG_CARRY);
-    } else {
-        removeFlag (FLAG_CARRY);
-    }
+    // if (value * 0x01) {
+    //     setFlag(FLAG_CARRY);
+    // } else {
+    //     removeFlag (FLAG_CARRY);
+    // }
 
-    *ptrHL >>= 1;
+    // value >>= 1;
+    // writeByteToMemory(memLocation, value);
 
-    if (*ptrHL) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // if (value) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 // Bit Opcodes
@@ -831,13 +893,14 @@ void bit_b_HL(unsigned short bitPosition) {
     removeFlag(FLAG_NEGATIVE);
     setFlag(FLAG_HALF_CARRY);
 
-    unsigned short *ptrHL = &registers.HL;
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
 
-    if (*ptrHL & (1 << bitPosition)) {
-        removeFlag(FLAG_ZERO);
-    } else {
-        setFlag(FLAG_ZERO);
-    }
+    // if (value & (1 << bitPosition)) {
+    //     removeFlag(FLAG_ZERO);
+    // } else {
+    //     setFlag(FLAG_ZERO);
+    // }
 }
 
 void set_b_s (unsigned char bitPosition, unsigned char* ptrS) {
@@ -845,8 +908,10 @@ void set_b_s (unsigned char bitPosition, unsigned char* ptrS) {
 }
 
 void set_b_HL (unsigned short bitPosition) {
-    unsigned short *ptrHL = &registers.HL;
-    *ptrHL |= (1 << bitPosition);
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
+    // value |= (1 << bitPosition);
+    // writeByteToMemory(memLocation, value);
 }
 
 void res_b_s (unsigned char bitPosition, unsigned char* ptrS) {
@@ -854,20 +919,20 @@ void res_b_s (unsigned char bitPosition, unsigned char* ptrS) {
 }
 
 void res_b_HL (unsigned short bitPosition) {
-    unsigned short *ptrHL = &registers.HL;
-    *ptrHL &= ~(1 << bitPosition);
+    unsigned short memLocation = registers.HL;
+    // unsigned char value = readByteFromMemory(memLocation);
+    // value &= ~(1 << bitPosition);
+    // writeByteToMemory(memLocation, value);
 }
 // Jumps
 
 void jp_nn (unsigned short* ptrNN) {
-    unsigned short* ptrPC = &registers.PC;
-    *ptrPC = *ptrNN;
+    registers.PC = *ptrNN;
 }
 
 void jp_cc_nn (unsigned short* ptrNN, unsigned char condition) {
     if (condition) {
-        unsigned short* ptrPC = &registers.PC;
-        *ptrPC = *ptrNN;
+        registers.PC = *ptrNN;
     }
 }
 
