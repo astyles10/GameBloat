@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "cpu.h"
 #include "registers.h"
+#include "opcodeTable.h"
 
 int main () {
   // setFlag(FLAG_HALF_CARRY);
@@ -73,6 +74,22 @@ int main () {
   printf("After daa: Register A value: 0x%02x\n", registers.A);
   removeFlag(FLAG_ZERO | FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
   jp_cc_nn(&registers.HL, !(checkFlag(FLAG_CARRY)));
+  registers.PC = 0xABCD;
+
+  printf("Before call_nn: Register SP value: 0x%02x\n", registers.SP);
+  printf("Before call_nn: Register PC value: 0x%02x\n", registers.PC);
+
+  call_nn(0x46);
+
+  printf("After call_nn: Register SP value: 0x%02x\n", registers.SP);
+  printf("After call_nn: Register PC value: 0x%02x\n", registers.PC);
+
+  unsigned char opcode = 0x00;
+
+  ((void (*)(void))baseOpcodeTable[opcode].function)();
+
+  opcode += 1;
+  ((void (*)(unsigned short*, unsigned short))baseOpcodeTable[opcode].function)(baseOpcodeTable[opcode].registerPair, 0x55);
 
   return 0;
 }

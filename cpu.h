@@ -44,10 +44,10 @@ void add_s (unsigned char s);
 void adc_s (unsigned char s);
 void sub_s (unsigned char s);
 void sbc_s (unsigned char s);
-void and (unsigned char s);
-void or (unsigned char s);
-void xor (unsigned char s);
-void cmp (unsigned char s);
+void and_s (unsigned char s);
+void or_s (unsigned char s);
+void xor_s (unsigned char s);
+void cmp_s (unsigned char s);
 void inc_s (unsigned char* s);
 void dec_s (unsigned char* s);
 
@@ -103,3 +103,15 @@ void jp_cc_nn (unsigned short* ptrNN, unsigned char condition);
 void jp_HL (void);
 void jr_e (char e);
 void jr_cc_e (unsigned char condition, char e);
+
+// Calls
+
+void call_nn (unsigned short nn);
+void call_cc_nn (unsigned char condition, unsigned short nn);
+
+// Restarts
+
+void rst_f (unsigned char f);
+void ret (void);
+void ret_cc (unsigned char condition);
+void reti (void);

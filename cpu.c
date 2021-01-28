@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "registers.h"
+#include <stdio.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -161,7 +162,7 @@ void ld_HL_SP_e (char e) {
 
 void push_ss (unsigned short* ptrSS) {
     unsigned char lowSS = (*ptrSS & 0xFF);
-    unsigned char highSS = (unsigned char)((*ptrSS & 0xFF00) >> 4);
+    unsigned char highSS = (unsigned char)((*ptrSS & 0xFF00) >> 8);
 
     registers.SP -= 1;
     // writeByteToMemory(registers.SP, lowSS);
@@ -282,7 +283,7 @@ void sbc_s (unsigned char s) {
     }
 }
 
-void and (unsigned char s) {
+void and_s (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_CARRY);
     setFlag(FLAG_HALF_CARRY);
     registers.A &= s;
@@ -294,7 +295,7 @@ void and (unsigned char s) {
     }
 }
 
-void or (unsigned char s) {
+void or_s (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
     registers.A |= s;
 
@@ -305,7 +306,7 @@ void or (unsigned char s) {
     }
 }
 
-void xor (unsigned char s) {
+void xor_s (unsigned char s) {
     removeFlag(FLAG_NEGATIVE | FLAG_HALF_CARRY | FLAG_CARRY);
     registers.A ^= s;
 
@@ -316,7 +317,7 @@ void xor (unsigned char s) {
     }
 }
 
-void cmp (unsigned char s) {
+void cmp_s (unsigned char s) {
     setFlag(FLAG_NEGATIVE);
 
     if (s > registers.A) {
@@ -509,6 +510,7 @@ void scf (void) {
 }
 
 void nop (void) {
+    printf("NOP\n");
 }
 
 void halt () {
@@ -953,29 +955,60 @@ void jr_cc_e (unsigned char condition, char e) {
 // Calls
 
 void call_nn (unsigned short nn) {
+    unsigned short memLocation = registers.SP - 0x01;
+    unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
+    // writeByteToMemory(memLocation, PCh);
+    printf("PCh value: 0x%02x\n", PCh);
 
+    // (SP-2) = PCl
+    memLocation -= 1;
+    unsigned char PCl = (unsigned char)(registers.PC & LOW_BYTE);
+    printf("PCl value: 0x%02x\n", PCl);
+    // writeByteToMemory(memLocation, PCl);
+
+    registers.PC = nn;
+    registers.SP = memLocation;
 }
 
-void call_cc_nn() {
-
+void call_cc_nn (unsigned char condition, unsigned short nn) {
+    if (condition) {
+        call_nn(nn);
+    }
 }
 
 // Restarts
 
-void rst_f () {
+void rst_f (unsigned char f) {
+    // (SP-1) = PCh
+    unsigned short memLocation = registers.SP - 1;
+    unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
+    // writeByteToMemory(memLocation, PCh);
 
+    unsigned char PCl = (registers.PC & LOW_BYTE);
+    memLocation -= 1;
+    // writeByteToMemory(memLocation, PCl);
+
+    registers.PC = (f & LOW_BYTE);
+    registers.SP = memLocation;
 }
 
 // Returns
 
-void ret () {
-    // TODO
+void ret (void) {
+    unsigned short memLocation = registers.SP;
+    // unsigned char valSP = readByteFromMemory(memLocation);
+    // registers.PC = (valSP & LOW_BYTE);
+    memLocation += 1;
+    // valSP = readByteFromMemory((memLocation + 1));
+    // registers.PC |= ((valSP & LOW_BYTE) << 8);
 }
 
-void ret_cc () {
-// TODO
+void ret_cc (unsigned char condition) {
+    if (condition) {
+        ret();
+    }
 }
 
 void reti () {
-    // TODO (return interrupt)
+    // TODO (return then enable interrupt)
 }
