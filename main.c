@@ -25,12 +25,27 @@ enum {
   eTypeShort
 };
 
+unsigned char tempMemory[0xFFFF];
+
+unsigned char readByteFromMemory(unsigned short memAddress) {
+  return tempMemory[memAddress];
+}
+
+unsigned short readShortFromMemory(unsigned short memAddress) {
+  unsigned short value;
+  value = readByteFromMemory(memAddress);
+  return value;
+}
+
+void writeByteToMemory(unsigned short memAddress, unsigned char value) {
+  tempMemory[memAddress] = value;
+}
+
 void noParamFunction (unsigned char opcode) {
   ((void (*) (void))baseOpcodeTable[opcode].function)();
 }
 
 void oneParamFunction (unsigned char paramType, const uPointerType *param, unsigned char opcode) {
-  // Need to add logic to check the opcode for the Operand type (no operand, one byte operand, two byte operand or 1 byte value at memory address)
   switch(paramType) {
     case (eTypeChar):
       ((void (*)(unsigned char*))baseOpcodeTable[opcode].function)(&(*param->sizeChar));
@@ -38,98 +53,47 @@ void oneParamFunction (unsigned char paramType, const uPointerType *param, unsig
     case (eTypeShort):
       ((void (*)(unsigned short*))baseOpcodeTable[opcode].function)(&(*param->sizeShort));
       break;
+    default:
+      printf("oneParamFunction: something has gone terribly wrong\n");
+      break;
   }
 }
 
-void twoParamFunction (unsigned char param1Type, const unsigned char param2Type, const uPointerType *param1, uPointerType *param2, unsigned char opcode) {
+void twoParamFunction (unsigned char param1Type, unsigned char param2Type, const uPointerType *param1, const uPointerType *param2, unsigned char opcode) {
   if (param1Type == eTypeChar && param2Type == eTypeChar) {
-    ((void (*)(unsigned char*, unsigned char*))baseOpcodeTable[opcode].function)((unsigned char*)(param1), (unsigned char*)(param2));
+    ((void (*)(unsigned char*, unsigned char*))baseOpcodeTable[opcode].function)(&(*param1->sizeChar), &(*param2->sizeChar));
   } else if (param1Type == eTypeChar && param2Type == eTypeShort) {
-    ((void (*)(unsigned char*, unsigned short*))baseOpcodeTable[opcode].function)((unsigned char*)(param1), (unsigned short*)(param2));
+    ((void (*)(unsigned char*, unsigned short*))baseOpcodeTable[opcode].function)(&(*param1->sizeChar), &(*param2->sizeShort));
   } else if (param1Type == eTypeShort && param2Type == eTypeChar) {
-    ((void (*)(unsigned short*, unsigned char*))baseOpcodeTable[opcode].function)((unsigned short*)(param1), (unsigned char*)(param2));
+    ((void (*)(unsigned short*, unsigned char*))baseOpcodeTable[opcode].function)(&(*param1->sizeShort), &(*param2->sizeChar));
   } else if (param1Type == eTypeShort && param2Type == eTypeShort) {
-    ((void (*)(unsigned short*, unsigned short*))baseOpcodeTable[opcode].function)((unsigned short*)(param1), (unsigned short*)(param2));
+    ((void (*)(unsigned short*, unsigned short*))baseOpcodeTable[opcode].function)(&(*param1->sizeShort), &(*param2->sizeShort));
+  } else {
+    printf("twoParamFunction: something has gone terribly wrong\n");
   }
 }
 
-void threeParamFunction (void *param1, void *param2, void *param3, void (*fPtr)(void *)) {
+void executeOpcode(unsigned char opcode) {
+  uPointerType value;
 
-}
-
-void checkSrc (unsigned char paramType, unsigned char opcode) {
-  switch(baseOpcodeTable[opcode].defs.srcType) {
-    case (eSrcNone):
-      switch(paramType) {
-        case (eDestNone):
-          noParamFunction(opcode);
-          break;
-        case (eDestChar):
-          oneParamFunction(eTypeChar, &baseOpcodeTable[opcode].defs.destPtr, opcode);
-          break;
-        case (eDestShort):
-          oneParamFunction(eTypeShort, &baseOpcodeTable[opcode].defs.destPtr, opcode);
-          break;
-    }
-    break;
-    case (eSrcChar):
-      switch(paramType) {
-        case (eDestNone):
-        break;
-        case (eDestChar):
-        case (eDestShort):
-        break;
-      }
-    break;
-    case (eSrcShort):
-      switch (paramType) {
-        case (eDestNone):
-        case (eDestChar):
-        case (eDestShort):
-        break;
-      }
-    break;
-  }
-}
-
-void checkDest (unsigned char* opcode) {
-  switch(baseOpcodeTable[*opcode].defs.destType) {
-    
-  }
-}
-
-void executeOpcode() {
-  
 }
 
 int main () {
-  
-  unsigned char opcode = 0x00;
 
-  opcode += 1;
-  unsigned short testValue = 0x3355;
-
-  ((void (*)(unsigned short*, unsigned short*))baseOpcodeTable[opcode].function)(baseOpcodeTable[opcode].defs.destPtr.sizeShort, &testValue);
-  printf("Registers BC Value: 0x%04X\n", registers.BC);
-
-
-  unsigned char testCharValue = 0x22;
-  registers.PC = 0x00;
-  registers.F = 0x00;
-
-  ((void (*)(unsigned char*, unsigned char*, unsigned char))baseOpcodeTable[0x20].function)(&testCharValue, baseOpcodeTable[0x20].defs.srcPtr.sizeChar, baseOpcodeTable[0x20].defs.condition);
-  printf("After instruction 0x20: Registers PC Value: 0x%04X\n", registers.PC);
+  memset(tempMemory, 0x50, sizeof(tempMemory));
 
   uPointerType testVal;
-  testVal.sizeChar = &testCharValue;
 
-  printf("Opcode 0x86: \n\t%s\n\t%s\t\n", testParamFunction(baseOpcodeTable[opcode].defs.destPtr, baseOpcodeTable[opcode].defs.srcPtr));
-  printf("Opcode 0x85: \n\t%s\n\t%s\t\n", testParamFunction(&registers.B, baseOpcodeTable[opcode].defs.srcPtr));
+  unsigned char readValue = readByteFromMemory(0x23);
+  testVal.sizeChar = &readValue;
+
+  printf("Opcode 0x86: \n\t%s\n\t%s\t\n", testParamFunction(baseOpcodeTable[0x86].defs.destPtr, baseOpcodeTable[0x86].defs.srcPtr));
+  printf("Opcode 0x85: \n\t%s\n\t%s\t\n", testParamFunction(&registers.B, baseOpcodeTable[0x85].defs.srcPtr));
 
   // Opcode 0x00
   noParamFunction(0x00);
 
-  // Opcode 0x86
+  // Opcode 0x86 (test with a "value read from memory")
   printf("Before op 0x86 %s: Registers A Value: 0x%02X\n", baseOpcodeTable[0x86].name, registers.A);
   oneParamFunction(eTypeChar, &testVal, 0x86);
   printf("After op 0x86 %s: Registers A Value: 0x%02X\n", baseOpcodeTable[0x86].name, registers.A);
@@ -140,23 +104,10 @@ int main () {
   oneParamFunction(eTypeShort, &baseOpcodeTable[0x23].defs.destPtr, 0x23);
   printf("After op 0x23 %s: Registers HL Value: 0x%04X\n", baseOpcodeTable[0x23].name, registers.HL);
 
-  switch(baseOpcodeTable[opcode].operand) {
-    case (eNoOperands):
-      printf("No operands\n");
-      break;
-    case (eOperandChar):
-      printf("Char Operand\n");
-      // ReadByteFromStack(); ?
-      break;
-    case (eOperandShort):
-      printf("Short Operand\n");
-      // ReadShortFromStack(); ?
-      break;
-    case (eOperandMemAddr):
-      printf("Mem address operand\n");
-      // ReadByteFromMemory(&registers.HL);
-      break;
-  }
+  // Opcode 0x78 (LD_A,B) Test twoParamFunction)
+  printf("Before opcode %s\n\tRegister A: 0x%02X\n\tRegister B: 0x%02X\n", baseOpcodeTable[0x78].name, registers.A, registers.B);
+  twoParamFunction(baseOpcodeTable[0x78].defs.destType, baseOpcodeTable[0x78].defs.srcType, &baseOpcodeTable[0x78].defs.destPtr, &baseOpcodeTable[0x78].defs.srcPtr, 0x78);
+  printf("After opcode %s\n\tRegister A: 0x%02X\n\tRegister B: 0x%02X\n", baseOpcodeTable[0x78].name, registers.A, registers.B);
 
   return 0;
 }

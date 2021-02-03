@@ -27,16 +27,16 @@ struct opcodeDefs {
     uPointerType srcPtr;
 
     enum {
-        flagNotSet,
-        flagSet,
-        noCondition
+        eFlagNotSet,
+        eFlagSet,
+        eNoCondition
     } condition;
 };
 
 struct opcode {
     char* name;
     struct opcodeDefs defs;
-    unsigned char operand;
+    unsigned char operandType;
     void *function;
 } extern const baseOpcodeTable[256], CBOpcodeTable[256];
 
