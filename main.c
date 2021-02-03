@@ -29,7 +29,7 @@ void noParamFunction (unsigned char* opcode) {
   ((void (*) (void))baseOpcodeTable[*opcode].function)();
 }
 
-void oneParamFunction (unsigned char paramType, void *param, unsigned char* opcode) {
+void oneParamFunction (unsigned char paramType, const uPointerType *param, unsigned char* opcode) {
   switch(paramType) {
     case (eTypeChar):
       ((void (*)(unsigned char*))baseOpcodeTable[*opcode].function)((unsigned char*)(param));
@@ -75,6 +75,7 @@ void checkSrc (unsigned char paramType, unsigned char* opcode) {
         break;
         case (eDestChar):
         case (eDestShort):
+        break;
       }
     break;
     case (eSrcShort):
@@ -82,6 +83,7 @@ void checkSrc (unsigned char paramType, unsigned char* opcode) {
         case (eDestNone):
         case (eDestChar):
         case (eDestShort):
+        break;
       }
     break;
   }
