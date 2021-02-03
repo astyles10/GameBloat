@@ -16,16 +16,16 @@
 
 const struct opcode baseOpcodeTable[256] = {
     { "NOP", { eDestNone, eSrcNone, NO_DEST, NO_SOURCE, noCondition }, eNoOperands, nop },                                          // 0x00
-    { "LD BC,nn", { eDestShort, eSrcShort, (uPointerType)&registers.BC, SOURCE_IMMEDIATE, noCondition }, eOperandShort, ld_dd_nn },        // 0x01
-    { "LD (BC),A", { eDestShort, eSrcChar, (uPointerType)&registers.BC, SOURCE_STATIC, noCondition }, eNoOperands, ld_dd_A },           // 0x02
+    { "LD BC,nn", { eDestShort, eSrcShort, (uPointerType)&registers.BC, SOURCE_IMMEDIATE, noCondition }, eOperandShort, ld_dd_nn }, // 0x01
+    { "LD (BC),A", { eDestShort, eSrcChar, (uPointerType)&registers.BC, SOURCE_STATIC, noCondition }, eNoOperands, ld_dd_A },       // 0x02
     { "INC BC", { eDestShort, eSrcNone, (uPointerType)&registers.BC, NO_SOURCE, noCondition }, eNoOperands, inc_ss },               // 0x03
     { "INC B", { eDestChar, eSrcNone, (uPointerType)&registers.B, NO_SOURCE, noCondition}, eNoOperands, inc_s },                    // 0x04
     { "DEC B", { eDestChar, eSrcNone, (uPointerType)&registers.B, NO_SOURCE, noCondition}, eNoOperands, dec_s },                    // 0x05
     { "LD B,n", { eDestChar, eSrcChar, (uPointerType)&registers.B, NO_SOURCE, noCondition}, eOperandChar, ld_d_r },                 // 0x06
     { "RLC A", { eDestNone, eSrcNone, NO_DEST, NO_SOURCE, noCondition}, eNoOperands, rlc_A },                                       // 0x07
-    { "LD (nn),SP", { eDestShort, eSrcNone, NO_DEST, NO_SOURCE, noCondition}, eOperandShort, ld_nn_SP },                            // 0x08
-    { "ADD HL,BC", { eDestNone, eSrcShort, NO_DEST, (uPointerType)&registers.BC, noCondition }, eNoOperands, add_HL_ss },           // 0x09
-    { "LD A,(BC)", { eDestNone, eSrcShort, NO_DEST, (uPointerType)&registers.BC, noCondition }, eNoOperands, ld_A_m_ss },           // 0x0A
+    { "LD (nn),SP", { eDestShort, eSrcNone, DEST_IMMEDIATE, NO_SOURCE, noCondition}, eOperandShort, ld_nn_SP },                            // 0x08
+    { "ADD HL,BC", { eDestNone, eSrcShort, DEST_STATIC, (uPointerType)&registers.BC, noCondition }, eNoOperands, add_HL_ss },           // 0x09
+    { "LD A,(BC)", { eDestNone, eSrcShort, DEST_STATIC, (uPointerType)&registers.BC, noCondition }, eNoOperands, ld_A_m_ss },           // 0x0A
     { "DEC BC", { eDestShort, eSrcNone, (uPointerType)&registers.BC, NO_SOURCE, noCondition }, eNoOperands, dec_ss },               // 0x0B
     { "INC C", { eDestChar, eSrcNone, (uPointerType)&registers.C, NO_SOURCE, noCondition }, eNoOperands, inc_s },                   // 0x0C
     { "DEC C", { eDestChar, eSrcNone, (uPointerType)&registers.C, NO_SOURCE, noCondition }, eNoOperands, dec_s },                   // 0x0D
