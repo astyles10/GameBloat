@@ -10,7 +10,14 @@ extern enum {
     eOperandMemAddr
 } operandType;
 
-struct opcodeDefs {      
+struct opcodeDefs {
+    enum {
+        eNoParams,
+        eOneParam,
+        eTwoParams,
+        eThreeParams
+    } eNumParameters;
+
     enum {
         eDestNone,
         eDestChar,
