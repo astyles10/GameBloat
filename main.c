@@ -73,10 +73,36 @@ void twoParamFunction (unsigned char param1Type, unsigned char param2Type, const
   }
 }
 
-void executeOpcode(unsigned char opcode) {
-  uPointerType value;
-
+void threeParamFunction (unsigned char param1Type, unsigned char param2Type, const uPointerType *param1, const uPointerType *param2, unsigned char condition, unsigned char opcode) {
+  if (param1Type == eTypeChar && param2Type == eTypeChar) {
+    ((void (*)(unsigned char*, unsigned char*, unsigned char))baseOpcodeTable[opcode].function)(&(*param1->sizeChar), &(*param2->sizeChar), condition);
+  } else if (param1Type == eTypeChar && param2Type == eTypeShort) {
+    ((void (*)(unsigned char*, unsigned short*, unsigned char))baseOpcodeTable[opcode].function)(&(*param1->sizeChar), &(*param2->sizeShort), condition);
+  } else if (param1Type == eTypeShort && param2Type == eTypeChar) {
+    ((void (*)(unsigned short*, unsigned char*, unsigned char))baseOpcodeTable[opcode].function)(&(*param1->sizeShort), &(*param2->sizeChar), condition);
+  } else if (param1Type == eTypeShort && param2Type == eTypeShort) {
+    ((void (*)(unsigned short*, unsigned short*, unsigned char))baseOpcodeTable[opcode].function)(&(*param1->sizeShort), &(*param2->sizeShort), condition);
+  } else {
+    printf("threeParamFunction: something has gone terribly wrong\n");
+  }
 }
+
+// void executeOpcode(unsigned char opcode) {
+//   switch (baseOpcodeTable[opcode].defs.eNumParameters) {
+//     case (eNoParams):
+//       noParamFunction(opcode);
+//       break;
+//     case (eOneParam):
+//       switch ()
+//       break;
+//     case (eTwoParams):
+//       break;
+//     case (eThreeParams):
+//       break;
+//     default:
+//       break;
+//   }
+// }
 
 int main () {
 
@@ -106,7 +132,7 @@ int main () {
 
   // Opcode 0x78 (LD_A,B) Test twoParamFunction)
   printf("Before opcode %s\n\tRegister A: 0x%02X\n\tRegister B: 0x%02X\n", baseOpcodeTable[0x78].name, registers.A, registers.B);
-  twoParamFunction(baseOpcodeTable[0x78].defs.destType, baseOpcodeTable[0x78].defs.srcType, &baseOpcodeTable[0x78].defs.destPtr, &baseOpcodeTable[0x78].defs.srcPtr, 0x78);
+  twoParamFunction(baseOpcodeTable[0x78].defs.eDestType, baseOpcodeTable[0x78].defs.eSrcType, &baseOpcodeTable[0x78].defs.destPtr, &baseOpcodeTable[0x78].defs.srcPtr, 0x78);
   printf("After opcode %s\n\tRegister A: 0x%02X\n\tRegister B: 0x%02X\n", baseOpcodeTable[0x78].name, registers.A, registers.B);
 
   return 0;

@@ -21,24 +21,30 @@ struct opcodeDefs {
     enum {
         eDestNone,
         eDestChar,
-        eDestShort
-    } destType;
+        eDestShort,
+        eDestImmediate,
+        eDestMemAddr
+    } eDestType;
 
     enum {
         eSrcNone,
         eSrcChar,
-        eSrcShort
-    } srcType;
+        eSrcShort,
+        eSrcImmediate,
+        eSrcMemAddr
+    } eSrcType;
 
     uPointerType destPtr;
     uPointerType srcPtr;
 
-    enum {
-        eFlagNotSet,
-        eFlagSet,
-        eNoCondition
-    } condition;
+
 };
+
+enum {
+    eFlagNotSet,
+    eFlagSet,
+    eNoCondition
+} eCondition;
 
 struct opcode {
     char* name;

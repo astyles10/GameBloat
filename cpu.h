@@ -52,9 +52,7 @@ void or_s  (unsigned char* s);
 void xor_s (unsigned char* s);
 void cmp_s (unsigned char* s);
 void inc_s (unsigned char* s);
-void inc_mHL (void);
 void dec_s (unsigned char* s);
-void dec_mHL (void);
 
 // 16-Bit ALU opcodes
 void add_HL_ss (unsigned short* ss);

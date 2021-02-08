@@ -3,6 +3,8 @@
 #include "registers.h"
 #include "opcodeTable.h"
 #include "cpu.h"
+#include "memoryManager.h"
+
 #ifndef NULL
     #define NULL ((void*) 0)
 #endif
@@ -23,13 +25,13 @@ const struct opcode baseOpcodeTable[256] = {
     { "DEC B", { eOneParam, eDestChar, eSrcNone, (uPointerType)&registers.B, NO_SOURCE, eNoCondition}, eNoOperands, dec_s },                    // 0x05
     { "LD B,n", { eTwoParams, eDestChar, eSrcChar, (uPointerType)&registers.B, NO_SOURCE, eNoCondition}, eOperandChar, ld_d_r },                 // 0x06
     { "RLC A", { eNoParams, eDestNone, eSrcNone, NO_DEST, NO_SOURCE, eNoCondition}, eNoOperands, rlc_A },                                       // 0x07
-    { "LD (nn),SP", { eOneParam, eDestShort, eSrcNone, DEST_IMMEDIATE, NO_SOURCE, eNoCondition}, eOperandShort, ld_nn_SP },                            // 0x08
+    { "LD (nn),SP", { eOneParam, eDestShort, eSrcNone, DEST_IMMEDIATE, SOURCE_STATIC, eNoCondition}, eOperandShort, ld_nn_SP },                            // 0x08
     { "ADD HL,BC", { eOneParam, eDestNone, eSrcShort, DEST_STATIC, (uPointerType)&registers.BC, eNoCondition }, eNoOperands, add_HL_ss },           // 0x09
     { "LD A,(BC)", { eOneParam, eDestNone, eSrcShort, DEST_STATIC, (uPointerType)&registers.BC, eNoCondition }, eNoOperands, ld_A_m_ss },           // 0x0A
     { "DEC BC", { eOneParam, eDestShort, eSrcNone, (uPointerType)&registers.BC, NO_SOURCE, eNoCondition }, eNoOperands, dec_ss },               // 0x0B
     { "INC C", { eOneParam, eDestChar, eSrcNone, (uPointerType)&registers.C, NO_SOURCE, eNoCondition }, eNoOperands, inc_s },                   // 0x0C
     { "DEC C", { eOneParam, eDestChar, eSrcNone, (uPointerType)&registers.C, NO_SOURCE, eNoCondition }, eNoOperands, dec_s },                   // 0x0D
-    { "LD C,n", { eTwoParams, eDestChar, eSrcChar, (uPointerType)&registers.C, NO_SOURCE, eNoCondition }, eOperandChar, ld_r_n },                // 0x0E
+    { "LD C,n", { eTwoParams, eDestChar, eSrcChar, (uPointerType)&registers.C, SOURCE_IMMEDIATE, eNoCondition }, eOperandChar, ld_r_n },                // 0x0E
     { "RRC A", { eNoParams, eDestNone, eSrcNone, NO_DEST, NO_SOURCE, eNoCondition }, eNoOperands, rrc_A },                                      // 0x0F
 
     { "STOP", { eNoParams, eDestNone, eSrcNone, NO_DEST, NO_SOURCE, eNoCondition }, eNoOperands, stop },                                        // 0x10
@@ -159,3 +161,255 @@ const struct opcode baseOpcodeTable[256] = {
     { "ADD A,L", { eOneParam, eDestNone, eSrcChar, DEST_STATIC, (uPointerType)&registers.B, eNoCondition }, eNoOperands, add_s },              // 0x85
     { "ADD A,(HL)", { eOneParam, eDestNone, eSrcChar, DEST_STATIC, SOURCE_STATIC, eNoCondition }, eOperandMemAddr, add_s },                   // 0x86
 };
+
+void ld_BC_nn (unsigned short immediate) {
+    ld_dd_nn(&registers.BC, &immediate);
+}
+
+void ld_mBC_A (void) {
+    ld_dd_A(&registers.BC);
+}
+
+void inc_BC (void) {
+    inc_ss(&registers.BC);
+}
+
+void inc_B (void) {
+    inc_s(&registers.B);
+}
+
+void dec_B (void) {
+    dec_s(&registers.B);
+}
+
+void ld_B_n (unsigned char immediate) {
+    ld_r_n(&registers.B, &immediate);
+}
+
+void add_HL_BC (void) {
+    add_HL_ss(&registers.BC);
+}
+
+void ld_A_mBC (void) {
+    unsigned char value = readByteFromMemory(registers.BC);
+    ld_r_n(&registers.A, &value);
+}
+
+void dec_BC (void) {
+    dec_ss(&registers.BC);
+}
+
+void inc_C (void) {
+    inc_s(&registers.C);
+}
+
+void dec_C (void) {
+    dec_s(&registers.C);
+}
+
+void ld_C_n (unsigned char immediate) {
+    ld_r_n(&registers.C, &immediate);
+}
+
+void ld_DE_nn (unsigned short immediate) {
+    ld_dd_nn(&registers.DE, &immediate);
+}
+
+void ld_mDE_A (void) {
+    ld_dd_A(&registers.DE);
+}
+
+void inc_DE (void) {
+    inc_ss(&registers.DE);
+}
+
+void inc_D (void) {
+    inc_s(&registers.D);
+}
+
+void dec_D (void) {
+    dec_s(&registers.D);
+}
+
+void ld_D_n (unsigned char immediate) {
+    ld_r_n(&registers.D, &immediate);
+}
+
+void add_HL_DE (void) {
+    add_HL_ss(&registers.DE);
+}
+
+void ld_A_mDE (void) {
+    unsigned char value = readByteFromMemory(&registers.DE);
+    ld_r_n(&registers.A, &value);
+}
+
+void dec_DE (void) {
+    dec_ss(&registers.DE);
+}
+
+void inc_E (void) {
+    inc_s(&registers.E);
+}
+
+void ld_E_n (unsigned char immediate) {
+    ld_r_n(&registers.E, &immediate);
+}
+
+void jr_NZ_n (unsigned char immediate) {
+    jr_cc_e(&immediate, &flagZero, eFlagNotSet);
+}
+
+void ld_HL_nn (unsigned short immediate) {
+    ld_dd_nn(&registers.HL, &immediate);
+}
+
+void inc_HL (void) {
+    inc_ss(&registers.HL);
+}
+
+void inc_H (void) {
+    inc_s (&registers.H);
+}
+
+void dec_H (void) {
+    dec_s(&registers.H);
+}
+
+void ld_H_n (unsigned char immediate) {
+    ld_r_n(&registers.H, &immediate);
+}
+
+void jr_Z_n (unsigned char immediate) {
+    jr_cc_e(&immediate, &flagZero, eFlagSet);
+}
+
+void add_HL_HL (void) {
+    add_HL_ss(&registers.HL);
+}
+
+void dec_HL (void) {
+    dec_ss(&registers.HL);
+}
+
+void inc_L (void) {
+    inc_s(registers.L);
+}
+
+void dec_L (void) {
+    dec_s(&registers.L);
+}
+
+void ld_L_n (unsigned char immediate) {
+    ld_r_n(&registers.L, &immediate);
+}
+
+void jr_NC_n (unsigned char immediate) {
+    jr_cc_e(&immediate, &flagCarry, eFlagNotSet);
+}
+
+void ld_SP_nn (unsigned short immediate) {
+    ld_dd_nn(&registers.SP, &immediate);
+}
+
+void inc_SP (void) {
+    inc_ss(&registers.SP);
+}
+
+void inc_mHL (void) {
+    unsigned char value = readByteFromMemory(registers.HL);
+    inc_s(&value);
+    writeByteToMemory(registers.HL, value);
+}
+
+void dec_mHL (void) {
+    unsigned char* value = &tempMemCart[registers.HL];
+    dec_s(&value);
+    // writeByteToMemory(registers.HL, value);
+}
+
+void jr_C_n (unsigned char immediate) {
+    jr_cc_e(&immediate, &flagCarry, eFlagSet);
+}
+
+void add_HL_SP (void) {
+    add_HL_ss(&registers.SP);
+}
+
+void dec_SP (void) {
+    dec_ss(&registers.SP);
+}
+
+void inc_A (void) {
+    inc_s(&registers.A);
+}
+
+void dec_A (void) {
+    dec_s(&registers.A);
+}
+
+void ld_A_n (unsigned char immediate) {
+    ld_r_n(&registers.A, &immediate);
+}
+
+void ld_B_B (void) {
+    ld_d_r(&registers.B, &registers.B);
+}
+
+void ld_B_C (void) {
+    ld_d_r(&registers.B, &registers.C);
+}
+void ld_B_D (void) {
+    ld_d_r(&registers.B, &registers.D);
+}
+void ld_B_E (void) {
+    ld_d_r(&registers.B, &registers.E);
+}
+
+void ld_B_H (void) {
+    ld_d_r(&registers.B, &registers.H);
+}
+
+void ld_B_L (void) {
+    ld_d_r(&registers.B, &registers.L);
+}
+
+void ld_B_mHL (void) {
+    ld_d_mHL(&registers.B);
+}
+
+void ld_B_A (void) {
+    ld_d_r(&registers.B, &registers.A);
+}
+
+void ld_C_B (void) {
+    ld_d_r(&registers.C, &registers.B);
+}
+
+void ld_C_C (void) {
+    ld_d_r(&registers.C, &registers.C);
+}
+
+void ld_C_D (void) {
+    ld_d_r(&registers.C, &registers.D);
+}
+
+void ld_C_E (void) {
+    ld_d_r(&registers.C, &registers.E);
+}
+
+void ld_C_H (void) {
+    ld_d_r(&registers.C, &registers.H);
+}
+
+void ld_C_L (void) {
+    ld_d_r(&registers.C, &registers.L);
+}
+
+void ld_C_mHL (void) {
+    ld_d_mHL(&registers.C);
+}
+
+void ld_C_A (void) {
+    ld_d_r(&registers.C, &registers.A);
+}
