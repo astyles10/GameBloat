@@ -962,8 +962,9 @@ void jp_cc_nn (unsigned short* ptrNN, unsigned char* flag, unsigned char conditi
     }
 }
 
-void jp_HL (void) {
-    registers.PC = registers.HL;
+void jp_mHL (void) {
+
+    registers.PC = readShortFromMemory(registers.HL);
 }
 
 void jr_e (unsigned char* e) {

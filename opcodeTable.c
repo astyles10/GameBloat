@@ -16,6 +16,13 @@
 #define SOURCE_STATIC NULL
 #define DEST_STATIC NULL
 
+const unsigned char resetCodes[8] = {
+    0x00, 0x08,
+    0x10, 0x18,
+    0x20, 0x28,
+    0x30, 0x38
+};
+
 const struct opcode baseOpcodeTable[256] = {
     { "NOP", { eNoParams, eDestNone, eSrcNone, NO_DEST, NO_SOURCE, eNoCondition }, eNoOperands, nop },                                          // 0x00
     { "LD BC,nn", { eTwoParams, eDestShort, eSrcShort, (uPointerType)&registers.BC, SOURCE_IMMEDIATE, eNoCondition }, eOperandShort, ld_dd_nn }, // 0x01
@@ -412,4 +419,616 @@ void ld_C_mHL (void) {
 
 void ld_C_A (void) {
     ld_d_r(&registers.C, &registers.A);
+}
+
+void ld_D_B (void) {
+    ld_d_r(&registers.D, &registers.B);
+}
+
+void ld_D_C (void) {
+    ld_d_r(&registers.D, &registers.C);
+}
+
+void ld_D_D (void) {
+    ld_d_r(&registers.D, &registers.D);
+}
+
+void ld_D_E (void) {
+    ld_d_r(&registers.D, &registers.E);
+}
+
+void ld_D_H (void) {
+    ld_d_r(&registers.D, &registers.H);
+}
+
+void ld_D_L (void) {
+    ld_d_r(&registers.D, &registers.L);
+}
+
+void ld_D_mHL (void) {
+    ld_d_mHL (&registers.D);
+}
+
+void ld_D_A (void) {
+    ld_d_r(&registers.D, &registers.A);
+}
+
+void ld_E_B (void) {
+    ld_d_r(&registers.E, &registers.B);
+}
+
+void ld_E_C (void) {
+    ld_d_r(&registers.E, &registers.C);
+}
+
+void ld_E_D (void) {
+    ld_d_r(&registers.E, &registers.D);
+}
+
+void ld_E_E (void) {
+    ld_d_r(&registers.E, &registers.E);
+}
+
+void ld_E_H (void) {
+    ld_d_r(&registers.E, &registers.H);
+}
+
+void ld_E_L (void) {
+    ld_d_r(&registers.E, &registers.L);
+}
+
+void ld_E_mHl (void) {
+    ld_d_mHL(&registers.E);
+}
+
+void ld_E_A (void) {
+    ld_d_r(&registers.E, &registers.A);
+}
+
+void ld_H_B (void) {
+    ld_d_r(&registers.H, &registers.B);
+}
+
+void ld_H_C (void) {
+    ld_d_r(&registers.H, &registers.C);
+}
+
+void ld_H_D (void) {
+    ld_d_r(&registers.H, &registers.D);
+}
+
+void ld_H_E (void) {
+    ld_d_r(&registers.H, &registers.E);
+}
+
+void ld_H_H (void) {
+    ld_d_r(&registers.H, &registers.H);
+}
+
+void ld_H_L (void) {
+    ld_d_r(&registers.H, &registers.L);
+}
+
+void ld_H_mHL (void) {
+    ld_d_mHL(&registers.H);
+}
+
+void ld_H_A (void) {
+    ld_d_r(&registers.H, &registers.A);
+}
+
+void ld_L_B (void) {
+    ld_d_r(&registers.L, &registers.B);
+}
+
+void ld_L_C (void) {
+    ld_d_r(&registers.L, &registers.C);
+}
+
+void ld_L_D (void) {
+    ld_d_r(&registers.L, &registers.D);
+}
+
+void ld_L_E (void) {
+    ld_d_r(&registers.L, &registers.E);
+}
+
+void ld_L_H (void) {
+    ld_d_r(&registers.L, &registers.H);
+}
+
+void ld_L_L (void) {
+    ld_d_r(&registers.L, &registers.L);
+}
+
+void ld_L_mHL (void) {
+    ld_d_mHL(&registers.L);
+}
+
+void ld_L_A (void) {
+    ld_d_r(&registers.L, &registers.A);
+}
+
+void ld_mHL_B (void) {
+    ld_mHL_r(&registers.B);
+}
+
+void ld_mHL_C (void) {
+    ld_mHL_r(&registers.C);
+}
+
+void ld_mHL_D (void) {
+    ld_mHL_r(&registers.D);
+}
+
+void ld_mHL_E (void) {
+    ld_mHL_r(&registers.E);
+}
+
+void ld_mHL_H (void) {
+    ld_mHL_r(&registers.H);
+}
+
+void ld_mHL_L (void) {
+    ld_mHL_r(&registers.L);
+}
+
+void ld_mHL_A (void) {
+    ld_mHL_r(&registers.A);
+}
+
+void ld_A_B (void) {
+    ld_d_r(&registers.A, &registers.B);
+}
+
+void ld_A_C (void) {
+    ld_d_r(&registers.A, &registers.C);
+}
+
+void ld_A_D (void) {
+    ld_d_r(&registers.A, &registers.D);
+}
+
+void ld_A_E (void) {
+    ld_d_r(&registers.A, &registers.E);
+}
+
+void ld_A_H (void) {
+    ld_d_r(&registers.A, &registers.H);
+}
+
+void ld_A_L (void) {
+    ld_d_r(&registers.A, &registers.L);
+}
+
+void ld_A_mHL (void) {
+    ld_d_mHL(&registers.A);
+}
+
+void ld_A_A (void) {
+    ld_d_r(&registers.A, &registers.A);
+}
+
+void add_A_B (void) {
+    add_s(&registers.B);
+}
+
+void add_A_C (void) {
+    add_s(&registers.C);
+}
+
+void add_A_D (void) {
+    add_s(&registers.D);
+}
+
+void add_A_E (void) {
+    add_s(&registers.E);
+}
+
+void add_A_H (void) {
+    add_s(&registers.H);
+}
+
+void add_A_L (void) {
+    add_s(&registers.L);
+}
+
+void add_A_mHL (void) {
+    unsigned char value = readByteFromMemory(&registers.HL);
+    add_s(&value);
+}
+
+void add_A_A (void) {
+    add_s(&registers.A);
+}
+
+void adc_A_B (void) {
+    adc_s(&registers.B);
+}
+
+void adc_A_C (void) {
+    adc_s(&registers.C);
+}
+
+void adc_A_D (void) {
+    adc_s(&registers.D);
+}
+
+void adc_A_E (void) {
+    adc_s(&registers.E);
+}
+
+void adc_A_H (void) {
+    adc_s(&registers.H);
+}
+
+void adc_A_L (void) {
+    adc_s(&registers.L);
+}
+
+void adc_A_mHL (void) {
+    unsigned char value = readByteFromMemory(&registers.HL);
+    adc_s(&value);
+}
+
+void adc_A_A (void) {
+    adc_s(&registers.A);
+}
+
+void sub_A_B (void) {
+    sub_s(&registers.B);
+}
+
+void sub_A_C (void) {
+    sub_s(&registers.C);
+}
+
+void sub_A_D (void) {
+    sub_s(&registers.D);
+}
+
+void sub_A_E (void) {
+    sub_s(&registers.E);
+}
+
+void sub_A_H (void) {
+    sub_s(&registers.H);
+}
+
+void sub_A_L (void) {
+    sub_s(&registers.L);
+}
+
+void sub_A_mHL (void) {
+    unsigned char value = readByteFromMemory(&registers.HL);
+    sub_s(&value);
+}
+
+void sub_A_A (void) {
+    sub_s(&registers.A);
+}
+
+void sbc_A_B (void) {
+    sub_s(&registers.B);
+}
+
+void sbc_A_C (void) {
+    sub_s(&registers.C);
+}
+
+void sbc_A_D (void) {
+    sub_s(&registers.D);
+}
+
+void sbc_A_E (void) {
+    sub_s(&registers.E);
+}
+
+void sbc_A_H (void) {
+    sub_s(&registers.H);
+}
+
+void sbc_A_L (void) {
+    sub_s(&registers.L);
+}
+
+void sbc_A_mHL (void) {
+    unsigned char value = readByteFromMemory(&registers.HL);
+    sub_s(&value);
+}
+
+void sbc_A_A (void) {
+    sub_s(&registers.A);
+}
+
+void and_B (void) {
+    and_s(&registers.B);
+}
+
+void and_C (void) {
+    and_s(&registers.C);
+}
+
+void and_D (void) {
+    and_s(&registers.D);
+}
+
+void and_E (void) {
+    and_s(&registers.E);
+}
+
+void and_H (void) {
+    and_s(&registers.H);
+}
+
+void and_L (void) {
+    and_s(&registers.L);
+}
+
+void and_mHL (void) {
+    unsigned char value = readyByteFromMemory(&registers.HL);
+    and_s(&value);
+}
+
+void and_A (void) {
+    and_s(&registers.A);
+}
+
+void xor_B (void) {
+    xor_s(&registers.B);
+}
+
+void xor_C (void) {
+    xor_s(&registers.C);
+}
+
+void xor_D (void) {
+    xor_s(&registers.D);
+}
+
+void xor_E (void) {
+    xor_s(&registers.E);
+}
+
+void xor_H (void) {
+    xor_s(&registers.H);
+}
+
+void xor_L (void) {
+    xor_s(&registers.L);
+}
+
+void xor_mHL (void) {
+    unsigned char value = readyByteFromMemory(&registers.HL);
+    xor_s(&value);
+}
+
+void xor_A (void) {
+    xor_s(&registers.A);
+}
+
+void or_B (void) {
+    or_s(&registers.B);
+}
+
+void or_C (void) {
+    or_s(&registers.C);
+}
+
+void or_D (void) {
+    or_s(&registers.D);
+}
+
+void or_E (void) {
+    or_s(&registers.E);
+}
+
+void or_H (void) {
+    or_s(&registers.H);
+}
+
+void or_L (void) {
+    or_s(&registers.L);
+}
+
+void or_mHL (void) {
+    unsigned char value = readyByteFromMemory(&registers.HL);
+    or_s(&value);
+}
+
+void or_A (void) {
+    or_s(&registers.A);
+}
+
+void cmp_B (void) {
+    cmp_s(&registers.B);
+}
+
+void cmp_C (void) {
+    cmp_s(&registers.C);
+}
+
+void cmp_D (void) {
+    cmp_s(&registers.D);
+}
+
+void cmp_E (void) {
+    cmp_s(&registers.E);
+}
+
+void cmp_H (void) {
+    cmp_s(&registers.H);
+}
+
+void cmp_L (void) {
+    cmp_s(&registers.L);
+}
+
+void cmp_mHL (void) {
+    unsigned char value = readyByteFromMemcmpy(&registers.HL);
+    cmp_s(&value);
+}
+
+void cmp_A (void) {
+    cmp_s(&registers.A);
+}
+
+void ret_NZ (void) {
+    ret_cc(&flagZero, eFlagNotSet);
+}
+
+void pop_BC (void) {
+    pop_dd(&registers.BC);
+}
+
+void jp_NZ_nn (unsigned short immediate) {
+    jp_cc_nn(&immediate, &flagZero, eFlagNotSet);
+}
+
+void call_NZ_nn (unsigned short immediate) {
+    call_cc_nn(&immediate, &flagZero, eFlagNotSet);
+}
+
+void push_BC (void) {
+    push_ss(&registers.BC);
+}
+
+void add_A_n (unsigned char immediate) {
+    add_s(&immediate);
+}
+
+void rst_0 (void) {
+    rst_f(&resetCodes[0]);
+}
+
+void ret_Z (void) {
+    ret_cc(&flagZero, eFlagSet);
+}
+
+void jp_Z_nn (unsigned short immediate) {
+    jp_cc_nn(&immediate, &flagZero, eFlagSet);
+}
+
+void extOps () {
+    // TODO
+}
+
+void call_Z_nn (unsigned short immediate) {
+    call_cc_nn(&immediate, &flagZero, eFlagSet);
+}
+
+void adc_A_n (unsigned char immediate) {
+    adc_s(&immediate);
+}
+
+void rst_08 (void) {
+    rst_f(&resetCodes[1]);
+}
+
+void ret_NC (void) {
+    ret_cc(&flagCarry, eFlagNotSet);
+}
+
+void pop_DE (void) {
+    pop_dd(&registers.DE);
+}
+
+void jp_NC_nn (unsigned short immediate) {
+    jp_cc_nn(&immediate, &flagCarry, eFlagNotSet);
+}
+
+void call_NC_nn (unsigned short immediate) {
+    call_cc_nn(&immediate, &flagCarry, eFlagNotSet);
+}
+
+void push_DE (void) {
+    push_ss(&registers.DE);
+}
+
+void sub_A_n (unsigned char immediate) {
+    sub_s(&immediate);
+}
+
+void rst_10 (void) {
+    rst_f(&resetCodes[2]);
+}
+
+void ret_C (void) {
+    ret_cc(&flagCarry, eFlagSet);
+}
+
+void jp_C_nn (unsigned short immediate) {
+    jp_cc_nn(&immediate, &flagCarry, eFlagSet);
+}
+
+void call_C_nn (unsigned short immediate) {
+    call_cc_nn(&immediate, &flagCarry, eFlagNotSet);
+}
+
+void sbc_A_n (unsigned char immediate) {
+    sbc_s(&immediate);
+}
+
+void rst_18 (void) {
+    rst_f(&resetCodes[3]);
+}
+
+void pop_HL (void) {
+    pop_dd(&registers.HL);
+}
+
+void ldh_mC_A (void) {
+    ldh_n_A(&registers.C);
+}
+
+void push_HL (void) {
+    push_ss(&registers.HL);
+}
+
+void and_n (unsigned char immediate) {
+    and_s(&immediate);
+}
+
+void rst_20 (void) {
+    rst_f(&resetCodes[4]);
+}
+
+void ld_nn_A (unsigned short immediate) {
+    ld_dd_A(&immediate);
+}
+
+void xor_n (unsigned char immediate) {
+    xor_s(&immediate);
+}
+
+void rst_28 (void) {
+    rst_f(&resetCodes[5]);
+}
+
+void pop_AF (void) {
+    pop_dd(&registers.AF);
+}
+
+void push_AF (void) {
+    push_ss(&registers.AF);
+}
+
+void or_n (unsigned char immediate) {
+    or_s(&immediate);
+}
+
+void rst_30 (void) {
+    rst_f(&resetCodes[6]);
+}
+
+void ld_A_m_nn (unsigned short immediate) {
+    ld_A_m_ss(&immediate);
+}
+
+void cp_n (unsigned char immediate) {
+    cmp_s(&immediate);
+}
+
+void rst_38 (void) {
+    rst_f(&resetCodes[7]);
 }

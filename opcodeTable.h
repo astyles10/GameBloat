@@ -46,6 +46,8 @@ enum {
     eNoCondition
 } eCondition;
 
+extern const unsigned char resetCodes[8];
+
 struct opcode {
     char* name;
     struct opcodeDefs defs;
