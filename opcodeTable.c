@@ -478,7 +478,7 @@ void ld_E_L (void) {
     ld_d_r(&registers.E, &registers.L);
 }
 
-void ld_E_mHl (void) {
+void ld_E_mHL (void) {
     ld_d_mHL(&registers.E);
 }
 
