@@ -118,7 +118,7 @@ void call_cc_nn (unsigned short* nn, unsigned char* flag, unsigned char conditio
 
 // Restarts
 
-void rst_f (unsigned char* f);
+void rst_f (unsigned char f);
 void ret (void);
 void ret_cc (unsigned char* flag, unsigned char condition);
 void reti (void);

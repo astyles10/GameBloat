@@ -1003,7 +1003,7 @@ void call_cc_nn (unsigned short* nn, unsigned char* flag, unsigned char conditio
 
 // Restarts
 
-void rst_f (unsigned char* f) {
+void rst_f (unsigned char f) {
     // (SP-1) = PCh
     unsigned short memLocation = registers.SP - 1;
     unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
@@ -1013,7 +1013,7 @@ void rst_f (unsigned char* f) {
     memLocation -= 1;
     writeByteToMemory(memLocation, PCl);
 
-    registers.PC = (*f & LOW_BYTE);
+    registers.PC = (f & LOW_BYTE);
     registers.SP = memLocation;
 }
 

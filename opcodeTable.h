@@ -1,8 +1,3 @@
-typedef union {
-    unsigned char* sizeChar;
-    unsigned short* sizeShort;
-} uPointerType;
-
 extern enum {
     eNoOperands,
     eOperandChar,
@@ -10,48 +5,14 @@ extern enum {
     eOperandMemAddr
 } operandType;
 
-struct opcodeDefs {
-    enum {
-        eNoParams,
-        eOneParam,
-        eTwoParams,
-        eThreeParams
-    } eNumParameters;
-
-    enum {
-        eDestNone,
-        eDestChar,
-        eDestShort,
-        eDestImmediate,
-        eDestMemAddr
-    } eDestType;
-
-    enum {
-        eSrcNone,
-        eSrcChar,
-        eSrcShort,
-        eSrcImmediate,
-        eSrcMemAddr
-    } eSrcType;
-
-    uPointerType destPtr;
-    uPointerType srcPtr;
-
-
-};
-
-enum {
+extern enum {
     eFlagNotSet,
     eFlagSet,
     eNoCondition
 } eCondition;
 
-extern const unsigned char resetCodes[8];
-
 struct opcode {
     char* name;
-    struct opcodeDefs defs;
     unsigned char operandType;
     void *function;
 } extern const baseOpcodeTable[256], CBOpcodeTable[256];
-
