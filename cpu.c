@@ -68,17 +68,15 @@ void ld_d_r (unsigned char* ptrD, unsigned char* ptrR) {
 }
 
 void ld_mHL_n(unsigned char* n) {
-    unsigned short memLocation = registers.HL;
-    writeByteToMemory(memLocation, *n);
+    writeByteToMemory(&registers.HL, n);
 }
 
 void ld_mHL_r (unsigned char* ptrR) {
-    unsigned short memLocation = registers.HL;
-    writeByteToMemory(memLocation, *ptrR);
+    writeByteToMemory(&registers.HL, ptrR);
 }
 
 void ld_d_mHL (unsigned char* ptrR) {
-    *ptrR = readByteFromMemory(registers.HL);
+    *ptrR = readByteFromMemory(&registers.HL);
 }
 
 void ld_A_m_ss (unsigned short* memLocation) {
@@ -87,52 +85,50 @@ void ld_A_m_ss (unsigned short* memLocation) {
 }
 
 void ld_dd_A (unsigned short* memLocation) {
-    writeByteToMemory(memLocation, registers.A);
+    writeByteToMemory(memLocation, &registers.A);
 }
 
 void ld_A_c (void) {
     unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&memLocation);
     registers.A = value;
 }
 
 void ld_c_A (void) {
     unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-    writeByteToMemory(memLocation, registers.A);
+    writeByteToMemory(&memLocation, &registers.A);
 }
 
 void ldd_A_mHL (void) {
-    unsigned char value = readByteFromMemory(registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     registers.A = value;
     dec_ss(&registers.HL);
 }
 
 void ldd_mHL_A (void) {
-    unsigned short memLocation = registers.HL;
-    writeByteToMemory(memLocation, registers.A);
+    writeByteToMemory(&registers.HL, &registers.A);
     dec_ss(&registers.HL);
 }
 
 void ldi_A_mHL (void) {
-    unsigned char value = readByteFromMemory(registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     registers.A = value;
     inc_ss(&registers.HL);
 }
 
 void ldi_mHL_A (void) {
-    unsigned short memLocation = registers.HL;
-    writeByteToMemory(memLocation, registers.A);
+    writeByteToMemory(&registers.HL, &registers.A);
     inc_ss(&registers.HL);
 }
 
 void ldh_n_A (unsigned char* n) {
     unsigned short memLocation = 0xFF00 + *n;
-    writeByteToMemory(memLocation, registers.A);
+    writeByteToMemory(&memLocation, &registers.A);
 }
 
 void ldh_A_n (unsigned char* n) {
     unsigned short memLocation = 0xFF00 + *n;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&memLocation);
     registers.A = value;
 }
 
@@ -143,7 +139,7 @@ void ld_dd_nn (unsigned short* ptrDD, unsigned short* nn) {
 }
 
 void ld_nn_SP (unsigned short* nn) {
-    writeByteToMemory(nn, registers.SP);
+    writeShortToMemory(nn, &registers.SP);
 }
 
 void ld_SP_HL (void) {
@@ -151,7 +147,7 @@ void ld_SP_HL (void) {
 }
 
 void ld_HL_SP_e (unsigned char* e) {
-    char signedE = (char)*e; 
+    char signedE = (char)*e;
     unsigned short value = registers.SP + signedE;
 
     if (((registers.SP & LOW_WORD) + (signedE & LOW_WORD)) > LOW_WORD) {
@@ -174,16 +170,16 @@ void push_ss (unsigned short* ptrSS) {
     unsigned char highSS = (unsigned char)((*ptrSS & 0xFF00) >> 8);
 
     registers.SP -= 1;
-    writeByteToMemory(registers.SP, lowSS);
+    writeByteToMemory(&registers.SP, &lowSS);
     registers.SP -= 1;
-    writeByteToMemory(registers.SP, highSS);
+    writeByteToMemory(&registers.SP, &highSS);
 }
 
 void pop_dd (unsigned short* ptrDD) {
     unsigned short bytePair;
-    bytePair = ((readByteFromMemory(registers.SP)) << 4);
+    bytePair = ((readByteFromMemory(&registers.SP)) << 4);
     registers.SP += 1;
-    bytePair = readByteFromMemory(registers.SP);
+    bytePair = readByteFromMemory(&registers.SP);
     registers.SP += 1;
 
     *ptrDD = bytePair;
@@ -218,7 +214,7 @@ void add_s (unsigned char* s) {
 }
 
 void add_mHL (void) {
-    unsigned char value = readByteFromMemory(registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     add_s(&value);
 }
 
@@ -250,7 +246,7 @@ void adc_s (unsigned char* s) {
 }
 
 void adc_mHL (void) {
-    unsigned char value = readByteFromMemory(registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     adc_s(&value);
 }
 
@@ -278,7 +274,7 @@ void sub_s (unsigned char* s) {
 }
 
 void sub_mHL (void) {
-    unsigned char value = readByteFromMemory(registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     add_s(&value);
 }
 
@@ -468,10 +464,9 @@ void swap_s (unsigned char* ptrS) {
 void swap_HL (void) {
     removeFlag(flagNegative | flagHalfCarry | flagCarry);
 
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
     value = ((registers.HL & HIGH_NIBBLE) >> 4) | ((registers.HL & LOW_NIBBLE) << 4);
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 
     if (value) {
         removeFlag(flagZero);
@@ -591,7 +586,7 @@ void rrc_A (void) {
 
     registers.A >>= 1;
 
-    if (checkFlag(flagCarry)) { 
+    if (checkFlag(flagCarry)) {
         registers.A |= 0x80;
     }
 }
@@ -629,8 +624,7 @@ void rlc_s (unsigned char* ptrS) {
 
 void rlc_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
 
     if (value & 0x80) {
         setFlag(flagCarry);
@@ -641,7 +635,7 @@ void rlc_HL (void) {
     value <<= 1;
     value += checkFlag(flagCarry);
 
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 
 
     if (value) {
@@ -672,8 +666,7 @@ void rl_s (unsigned char* ptrS) {
 void rl_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
 
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
 
     if (value & 0x80) {
         setFlag(flagCarry);
@@ -683,7 +676,7 @@ void rl_HL (void) {
 
     value <<= 1;
 
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 
     if (value) {
         removeFlag(flagZero);
@@ -716,9 +709,8 @@ void rrc_s (unsigned char* ptrS) {
 
 void rrc_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
-    
+    unsigned char value = readByteFromMemory(&registers.HL);
+
     if (value & 0x01) {
        setFlag(flagCarry);
     } else {
@@ -727,8 +719,8 @@ void rrc_HL (void) {
 
     value >>= 1;
 
-    writeByteToMemory(memLocation, value);
-    
+    writeByteToMemory(&registers.HL, &value);
+
     if (checkFlag(flagCarry)) {
         value |= 0x80;
     }
@@ -760,8 +752,8 @@ void rr_s (unsigned char* ptrS) {
 
 void rr_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
-    unsigned char value = readByteFromMemory(registers.HL);
-    
+    unsigned char value = readByteFromMemory(&registers.HL);
+
     if (value & 0x01) {
        setFlag(flagCarry);
     } else {
@@ -770,7 +762,7 @@ void rr_HL (void) {
 
     value >>= 1;
 
-    writeByteToMemory(registers.HL, value);
+    writeByteToMemory(&registers.HL, &value);
 
     if (value) {
         removeFlag(flagZero);
@@ -801,8 +793,7 @@ void sla_s (unsigned char* ptrS) {
 void sla_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
 
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
 
     if (value & 0x80) {
         setFlag(flagCarry);
@@ -812,7 +803,7 @@ void sla_HL (void) {
 
     value <<= 1;
 
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 
     if (value) {
         removeFlag(flagZero);
@@ -842,8 +833,7 @@ void sra_s (unsigned char* ptrS) {
 void sra_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
 
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
 
     if (value & 0x80) {
         setFlag(flagCarry);
@@ -853,7 +843,7 @@ void sra_HL (void) {
 
     value = (value >> 1) | (value & 0x01);
 
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 
     if (value) {
         removeFlag(flagZero);
@@ -883,8 +873,7 @@ void srl_s (unsigned char* ptrS) {
 void srl_HL (void) {
     removeFlag(flagNegative | flagHalfCarry);
 
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
 
     if (value * 0x01) {
         setFlag(flagCarry);
@@ -893,7 +882,7 @@ void srl_HL (void) {
     }
 
     value >>= 1;
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 
     if (value) {
         removeFlag(flagZero);
@@ -919,8 +908,7 @@ void bit_b_HL(unsigned short* bitPosition) {
     removeFlag(flagNegative);
     setFlag(flagHalfCarry);
 
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
 
     if (value & (1 << *bitPosition)) {
         removeFlag(flagZero);
@@ -934,10 +922,9 @@ void set_b_s (unsigned char* bitPosition, unsigned char* ptrS) {
 }
 
 void set_b_HL (unsigned short* bitPosition) {
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
     value |= (1 << *bitPosition);
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 }
 
 void res_b_s (unsigned char* bitPosition, unsigned char* ptrS) {
@@ -945,10 +932,9 @@ void res_b_s (unsigned char* bitPosition, unsigned char* ptrS) {
 }
 
 void res_b_HL (unsigned short* bitPosition) {
-    unsigned short memLocation = registers.HL;
-    unsigned char value = readByteFromMemory(memLocation);
+    unsigned char value = readByteFromMemory(&registers.HL);
     value &= ~(1 << *bitPosition);
-    writeByteToMemory(memLocation, value);
+    writeByteToMemory(&registers.HL, &value);
 }
 // Jumps
 
@@ -963,8 +949,7 @@ void jp_cc_nn (unsigned short* ptrNN, unsigned char* flag, unsigned char conditi
 }
 
 void jp_mHL (void) {
-
-    registers.PC = readShortFromMemory(registers.HL);
+    registers.PC = readShortFromMemory(&registers.HL);
 }
 
 void jr_e (unsigned char* e) {
@@ -982,14 +967,14 @@ void jr_cc_e (unsigned char* e, unsigned char* flag, unsigned char condition) {
 void call_nn (unsigned short* nn) {
     unsigned short memLocation = registers.SP - 0x01;
     unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
-    writeByteToMemory(memLocation, PCh);
+    writeByteToMemory(&memLocation, &PCh);
     printf("PCh value: 0x%02x\n", PCh);
 
     // (SP-2) = PCl
     memLocation -= 1;
     unsigned char PCl = (unsigned char)(registers.PC & LOW_BYTE);
     printf("PCl value: 0x%02x\n", PCl);
-    writeByteToMemory(memLocation, PCl);
+    writeByteToMemory(&memLocation, &PCl);
 
     registers.PC = *nn;
     registers.SP = memLocation;
@@ -1007,11 +992,11 @@ void rst_f (unsigned char f) {
     // (SP-1) = PCh
     unsigned short memLocation = registers.SP - 1;
     unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
-    writeByteToMemory(memLocation, PCh);
+    writeByteToMemory(&memLocation, &PCh);
 
     unsigned char PCl = (registers.PC & LOW_BYTE);
     memLocation -= 1;
-    writeByteToMemory(memLocation, PCl);
+    writeByteToMemory(&memLocation, &PCl);
 
     registers.PC = (f & LOW_BYTE);
     registers.SP = memLocation;
@@ -1021,11 +1006,16 @@ void rst_f (unsigned char f) {
 
 void ret (void) {
     unsigned short memLocation = registers.SP;
-    unsigned char valSP = readByteFromMemory(memLocation);
+
+    unsigned char valSP = readByteFromMemory(&memLocation);
     registers.PC = (valSP & LOW_BYTE);
+
     memLocation += 1;
-    valSP = readByteFromMemory((memLocation + 1));
+
+    valSP = readByteFromMemory(&memLocation);
     registers.PC |= ((valSP & LOW_BYTE) << 8);
+
+    registers.SP = (memLocation + 1);
 }
 
 void ret_cc (unsigned char* flag, unsigned char condition) {

@@ -20,154 +20,8 @@ const enum {
     eResetCode38 = 0x38
 } resetCodes;
 
-const struct opcode baseOpcodeTable[256] = {
-    { "NOP", eNoOperands, nop },                // 0x00
-    { "LD BC,nn", eOperandShort, ld_BC_nn },    // 0x01
-    { "LD (BC),A", eNoOperands, ld_mBC_A },     // 0x02
-    { "INC BC", eNoOperands, inc_BC },          // 0x03
-    { "INC B", eNoOperands, inc_B },            // 0x04
-    { "DEC B", eNoOperands, dec_B },            // 0x05
-    { "LD B,n", eOperandChar, ld_B_n },         // 0x06
-    { "RLC A", eNoOperands, rlc_A },            // 0x07
-    { "LD (nn),SP", eOperandShort, ld_nn_SP },  // 0x08
-    { "ADD HL,BC", eNoOperands, add_HL_BC },    // 0x09
-    { "LD A,(BC)", eNoOperands, ld_A_mBC },     // 0x0A
-    { "DEC BC", eNoOperands, dec_BC },          // 0x0B
-    { "INC C", eNoOperands, inc_C },            // 0x0C
-    { "DEC C", eNoOperands, dec_C },            // 0x0D
-    { "LD C,n", eOperandChar, ld_C_n },         // 0x0E
-    { "RRC A", eNoOperands, rrc_A },            // 0x0F
-
-    { "STOP", eNoOperands, stop },              // 0x10
-    { "LD DE,nn", eOperandShort, ld_DE_nn },    // 0x11
-    { "LD (DE),A", eNoOperands, ld_mDE_A },     // 0x12
-    { "INC DE", eNoOperands, inc_DE },          // 0x13
-    { "INC D",  eNoOperands, inc_D },           // 0x14
-    { "DEC D", eNoOperands, dec_D },            // 0x15
-    { "LD D,n", eOperandChar, ld_D_n },         // 0x16
-    { "RL A", eNoOperands, rl_A },              // 0x17
-    { "JR n", eNoOperands, jr_e },              // 0x18
-    { "ADD HL,DE", eNoOperands, add_HL_DE },    // 0x19
-    { "LD A,(DE)", eNoOperands, ld_A_mDE },     // 0x1A
-    { "DEC DE",  eNoOperands, dec_DE },         // 0x1B
-    { "INC E",  eNoOperands, inc_E },           // 0x1C
-    { "DEC E",  eNoOperands, dec_E },           // 0x1D
-    { "LD E,n", eOperandChar, ld_E_n },         // 0x1E
-    { "RR A", eNoOperands, rr_A },              // 0x1F
-
-    { "JR NZ,n", eOperandChar, jr_NZ_n },       // 0x20
-    { "LD HL,nn", eOperandShort, ld_HL_nn },    // 0x21
-    { "LDI (HL),A", eNoOperands, ldi_mHL_A },   // 0x22
-    { "INC HL", eNoOperands, inc_HL },          // 0x23
-    { "INC H", eNoOperands, inc_H },            // 0x24
-    { "DEC H", eNoOperands, dec_H },            // 0x25
-    { "LD H,n", eOperandChar, ld_H_n },         // 0x26
-    { "DAA", eNoOperands, daa },                // 0x27
-    { "JR Z,n", eOperandChar, jr_Z_n },         // 0x28
-    { "ADD HL,HL", eNoOperands, add_HL_HL },    // 0x29
-    { "LDI A,(HL)", eNoOperands, ldi_A_mHL },   // 0x2A
-    { "DEC HL", eNoOperands, dec_HL },          // 0x2B
-    { "INC L", eNoOperands, inc_L },            // 0x2C
-    { "DEC L", eNoOperands, dec_L },            // 0x2D
-    { "LD L,n", eOperandChar, ld_L_n },         // 0x2E
-    { "CPL", eNoOperands, cpl },                // 0x2F
-
-    { "JR NC,n", eOperandChar, jr_NC_n },       // 0x30
-    { "LD SP,nn", eOperandShort, ld_SP_nn },    // 0x31
-    { "LDD (HL),A", eNoOperands, ldd_mHL_A },   // 0x32
-    { "INC SP", eNoOperands, inc_SP },          // 0x33
-    { "INC (HL)", eOperandMemAddr, inc_mHL },   // 0x34
-    { "DEC (HL)", eOperandMemAddr, dec_mHL },   // 0x35
-    { "LD (HL),n", eOperandShort, ld_mHL_n },   // 0x36
-    { "SCF", eNoOperands, scf },                // 0x37
-    { "JR C,n", eOperandChar, jr_C_n },         // 0x38
-    { "ADD HL,SP", eNoOperands, add_HL_SP },    // 0x39
-    { "LDD A,(HL)", eNoOperands, ldd_A_mHL },   // 0x3A
-    { "DEC SP", eNoOperands, dec_SP },          // 0x3B
-    { "INC A", eNoOperands, inc_A },            // 0x3C
-    { "DEC A", eNoOperands, dec_A },            // 0x3D
-    { "LD A,n", eOperandChar, ld_A_n },         // 0x3E
-    { "CCF", eNoOperands, ccf},                 // 0x3F
-
-    { "LD B,B", eNoOperands, ld_B_B },          // 0x40
-    { "LD B,C", eNoOperands, ld_B_C },          // 0x41
-    { "LD B,D", eNoOperands, ld_B_D },          // 0x42
-    { "LD B,E", eNoOperands, ld_B_E },          // 0x43
-    { "LD B,H", eNoOperands, ld_B_H },          // 0x44
-    { "LD B,L", eNoOperands, ld_B_L },          // 0x45
-    { "LD B,(HL)", eNoOperands, ld_B_mHL },     // 0x46
-    { "LD B,A", eNoOperands, ld_B_A },          // 0x47
-    { "LD C,B", eNoOperands, ld_C_B },          // 0x48
-    { "LD C,C", eNoOperands, ld_C_C },          // 0x49
-    { "LD C,D", eNoOperands, ld_C_D },          // 0x4A
-    { "LD C,E", eNoOperands, ld_C_E },          // 0x4B
-    { "LD C,H", eNoOperands, ld_C_H },          // 0x4C
-    { "LD C,L", eNoOperands, ld_C_L },          // 0x4D
-    { "LD C,(HL)", eNoOperands, ld_C_mHL },     // 0x4E
-    { "LD C,A", eNoOperands, ld_C_A },          // 0x4F
-
-    { "LD D,B", eNoOperands, ld_D_B },          // 0x50
-    { "LD D,C", eNoOperands, ld_D_C },          // 0x51
-    { "LD D,D", eNoOperands, ld_D_D },          // 0x52
-    { "LD D,E", eNoOperands, ld_D_E },          // 0x53
-    { "LD D,H", eNoOperands, ld_D_H },          // 0x54
-    { "LD D,L", eNoOperands, ld_D_L },          // 0x55
-    { "LD D,(HL)", eNoOperands, ld_D_mHL },     // 0x56
-    { "LD D,A", eNoOperands, ld_D_A },          // 0x57
-    { "LD E,B", eNoOperands, ld_E_B },          // 0x58
-    { "LD E,C", eNoOperands, ld_E_C },          // 0x59
-    { "LD E,D", eNoOperands, ld_E_D },          // 0x5A
-    { "LD E,E", eNoOperands, ld_E_E },          // 0x5B
-    { "LD E,H", eNoOperands, ld_E_H },          // 0x5C
-    { "LD E,L", eNoOperands, ld_E_L },          // 0x5D
-    { "LD E,(HL)", eNoOperands, ld_E_mHL },     // 0x5E
-    { "LD E,A", eNoOperands, ld_E_A },          // 0x5F
-
-    { "LD H,B", eNoOperands, ld_H_B },          // 0x60
-    { "LD H,C", eNoOperands, ld_H_C },          // 0x61
-    { "LD H,D", eNoOperands, ld_H_D },          // 0x62
-    { "LD H,E", eNoOperands, ld_H_E },          // 0x63
-    { "LD H,H", eNoOperands, ld_H_H },          // 0x64
-    { "LD H,L", eNoOperands, ld_H_L },          // 0x65
-    { "LD H,(HL)", eNoOperands, ld_H_mHL },     // 0x66
-    { "LD H,A", eNoOperands, ld_H_A },          // 0x67
-    { "LD L,B", eNoOperands, ld_L_B },          // 0x68
-    { "LD L,C", eNoOperands, ld_L_C },          // 0x69
-    { "LD L,D", eNoOperands, ld_L_D },          // 0x6A
-    { "LD L,E", eNoOperands, ld_L_E },          // 0x6B
-    { "LD L,H", eNoOperands, ld_L_H },          // 0x6C
-    { "LD L,L", eNoOperands, ld_L_L },          // 0x6D
-    { "LD L,(HL)", eNoOperands, ld_L_mHL },     // 0x6E
-    { "LD L,A", eNoOperands, ld_L_A },          // 0x6F
-
-    { "LD (HL),B", eNoOperands, ld_mHL_B },         // 0x70
-    { "LD (HL),C", eNoOperands, ld_mHL_C },         // 0x71
-    { "LD (HL),D", eNoOperands, ld_mHL_D },         // 0x72
-    { "LD (HL),E", eNoOperands, ld_mHL_E },         // 0x73
-    { "LD (HL),H", eNoOperands, ld_mHL_H },         // 0x74
-    { "LD (HL),L", eNoOperands, ld_mHL_L },         // 0x75
-    { "HALT", eNoOperands, halt },                  // 0x76
-    { "LD (HL),A", eNoOperands, ld_mHL_A },         // 0x77
-    { "LD A,B", eNoOperands, ld_A_B },              // 0x78
-    { "LD A,C", eNoOperands, ld_A_C },              // 0x79
-    { "LD A,D", eNoOperands, ld_A_D },              // 0x7A
-    { "LD A,E", eNoOperands, ld_A_E },              // 0x7B
-    { "LD A,H", eNoOperands, ld_A_H },              // 0x7C
-    { "LD A,L", eNoOperands, ld_A_L },              // 0x7D
-    { "LD A,(HL)", eNoOperands, ld_A_mHL },         // 0x7E
-    { "LD A,A", eNoOperands, ld_A_A },              // 0x7F
-
-    { "ADD A,B", eNoOperands, add_A_B },            // 0x80
-    { "ADD A,C", eNoOperands, add_A_C },            // 0x81
-    { "ADD A,D", eNoOperands, add_A_D },            // 0x82
-    { "ADD A,E", eNoOperands, add_A_E },            // 0x83
-    { "ADD A,H", eNoOperands, add_A_H },            // 0x84
-    { "ADD A,L", eNoOperands, add_A_L },            // 0x85
-    { "ADD A,(HL)", eOperandMemAddr, add_A_mHL },   // 0x86
-};
-
-void ld_BC_nn (unsigned short immediate) {
-    ld_dd_nn(&registers.BC, &immediate);
+void ld_BC_nn (unsigned short* immediate) {
+    ld_dd_nn(&registers.BC, immediate);
 }
 
 void ld_mBC_A (void) {
@@ -195,7 +49,7 @@ void add_HL_BC (void) {
 }
 
 void ld_A_mBC (void) {
-    unsigned char value = readByteFromMemory(registers.BC);
+    unsigned char value = readByteFromMemory(&registers.BC);
     ld_r_n(&registers.A, &value);
 }
 
@@ -301,7 +155,7 @@ void dec_HL (void) {
 }
 
 void inc_L (void) {
-    inc_s(registers.L);
+    inc_s(&registers.L);
 }
 
 void dec_L (void) {
@@ -325,15 +179,14 @@ void inc_SP (void) {
 }
 
 void inc_mHL (void) {
-    unsigned char value = readByteFromMemory(registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     inc_s(&value);
-    writeByteToMemory(registers.HL, value);
+    writeByteToMemory(&registers.HL, &value);
 }
 
 void dec_mHL (void) {
     unsigned char* value = &tempMemCart[registers.HL];
-    dec_s(&value);
-    // writeByteToMemory(registers.HL, value);
+    dec_s(value);
 }
 
 void jr_C_n (unsigned char immediate) {
@@ -767,7 +620,7 @@ void and_L (void) {
 }
 
 void and_mHL (void) {
-    unsigned char value = readyByteFromMemory(&registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     and_s(&value);
 }
 
@@ -800,7 +653,7 @@ void xor_L (void) {
 }
 
 void xor_mHL (void) {
-    unsigned char value = readyByteFromMemory(&registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     xor_s(&value);
 }
 
@@ -833,7 +686,7 @@ void or_L (void) {
 }
 
 void or_mHL (void) {
-    unsigned char value = readyByteFromMemory(&registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     or_s(&value);
 }
 
@@ -866,7 +719,7 @@ void cmp_L (void) {
 }
 
 void cmp_mHL (void) {
-    unsigned char value = readyByteFromMemcmpy(&registers.HL);
+    unsigned char value = readByteFromMemory(&registers.HL);
     cmp_s(&value);
 }
 
@@ -1033,3 +886,149 @@ void cp_n (unsigned char immediate) {
 void rst_38 (void) {
     rst_f(eResetCode38);
 }
+
+const struct opcode baseOpcodeTable[256] = {
+    { "NOP", eNoOperands, nop },                // 0x00
+    { "LD BC,nn", eOperandShort, ld_BC_nn },    // 0x01
+    { "LD (BC),A", eNoOperands, ld_mBC_A },     // 0x02
+    { "INC BC", eNoOperands, inc_BC },          // 0x03
+    { "INC B", eNoOperands, inc_B },            // 0x04
+    { "DEC B", eNoOperands, dec_B },            // 0x05
+    { "LD B,n", eOperandChar, ld_B_n },         // 0x06
+    { "RLC A", eNoOperands, rlc_A },            // 0x07
+    { "LD (nn),SP", eOperandShort, ld_nn_SP },  // 0x08
+    { "ADD HL,BC", eNoOperands, add_HL_BC },    // 0x09
+    { "LD A,(BC)", eNoOperands, ld_A_mBC },     // 0x0A
+    { "DEC BC", eNoOperands, dec_BC },          // 0x0B
+    { "INC C", eNoOperands, inc_C },            // 0x0C
+    { "DEC C", eNoOperands, dec_C },            // 0x0D
+    { "LD C,n", eOperandChar, ld_C_n },         // 0x0E
+    { "RRC A", eNoOperands, rrc_A },            // 0x0F
+
+    { "STOP", eNoOperands, stop },              // 0x10
+    { "LD DE,nn", eOperandShort, ld_DE_nn },    // 0x11
+    { "LD (DE),A", eNoOperands, ld_mDE_A },     // 0x12
+    { "INC DE", eNoOperands, inc_DE },          // 0x13
+    { "INC D",  eNoOperands, inc_D },           // 0x14
+    { "DEC D", eNoOperands, dec_D },            // 0x15
+    { "LD D,n", eOperandChar, ld_D_n },         // 0x16
+    { "RL A", eNoOperands, rl_A },              // 0x17
+    { "JR n", eNoOperands, jr_e },              // 0x18
+    { "ADD HL,DE", eNoOperands, add_HL_DE },    // 0x19
+    { "LD A,(DE)", eNoOperands, ld_A_mDE },     // 0x1A
+    { "DEC DE",  eNoOperands, dec_DE },         // 0x1B
+    { "INC E",  eNoOperands, inc_E },           // 0x1C
+    { "DEC E",  eNoOperands, dec_E },           // 0x1D
+    { "LD E,n", eOperandChar, ld_E_n },         // 0x1E
+    { "RR A", eNoOperands, rr_A },              // 0x1F
+
+    { "JR NZ,n", eOperandChar, jr_NZ_n },       // 0x20
+    { "LD HL,nn", eOperandShort, ld_HL_nn },    // 0x21
+    { "LDI (HL),A", eNoOperands, ldi_mHL_A },   // 0x22
+    { "INC HL", eNoOperands, inc_HL },          // 0x23
+    { "INC H", eNoOperands, inc_H },            // 0x24
+    { "DEC H", eNoOperands, dec_H },            // 0x25
+    { "LD H,n", eOperandChar, ld_H_n },         // 0x26
+    { "DAA", eNoOperands, daa },                // 0x27
+    { "JR Z,n", eOperandChar, jr_Z_n },         // 0x28
+    { "ADD HL,HL", eNoOperands, add_HL_HL },    // 0x29
+    { "LDI A,(HL)", eNoOperands, ldi_A_mHL },   // 0x2A
+    { "DEC HL", eNoOperands, dec_HL },          // 0x2B
+    { "INC L", eNoOperands, inc_L },            // 0x2C
+    { "DEC L", eNoOperands, dec_L },            // 0x2D
+    { "LD L,n", eOperandChar, ld_L_n },         // 0x2E
+    { "CPL", eNoOperands, cpl },                // 0x2F
+
+    { "JR NC,n", eOperandChar, jr_NC_n },       // 0x30
+    { "LD SP,nn", eOperandShort, ld_SP_nn },    // 0x31
+    { "LDD (HL),A", eNoOperands, ldd_mHL_A },   // 0x32
+    { "INC SP", eNoOperands, inc_SP },          // 0x33
+    { "INC (HL)", eOperandMemAddr, inc_mHL },   // 0x34
+    { "DEC (HL)", eOperandMemAddr, dec_mHL },   // 0x35
+    { "LD (HL),n", eOperandShort, ld_mHL_n },   // 0x36
+    { "SCF", eNoOperands, scf },                // 0x37
+    { "JR C,n", eOperandChar, jr_C_n },         // 0x38
+    { "ADD HL,SP", eNoOperands, add_HL_SP },    // 0x39
+    { "LDD A,(HL)", eNoOperands, ldd_A_mHL },   // 0x3A
+    { "DEC SP", eNoOperands, dec_SP },          // 0x3B
+    { "INC A", eNoOperands, inc_A },            // 0x3C
+    { "DEC A", eNoOperands, dec_A },            // 0x3D
+    { "LD A,n", eOperandChar, ld_A_n },         // 0x3E
+    { "CCF", eNoOperands, ccf},                 // 0x3F
+
+    { "LD B,B", eNoOperands, ld_B_B },          // 0x40
+    { "LD B,C", eNoOperands, ld_B_C },          // 0x41
+    { "LD B,D", eNoOperands, ld_B_D },          // 0x42
+    { "LD B,E", eNoOperands, ld_B_E },          // 0x43
+    { "LD B,H", eNoOperands, ld_B_H },          // 0x44
+    { "LD B,L", eNoOperands, ld_B_L },          // 0x45
+    { "LD B,(HL)", eNoOperands, ld_B_mHL },     // 0x46
+    { "LD B,A", eNoOperands, ld_B_A },          // 0x47
+    { "LD C,B", eNoOperands, ld_C_B },          // 0x48
+    { "LD C,C", eNoOperands, ld_C_C },          // 0x49
+    { "LD C,D", eNoOperands, ld_C_D },          // 0x4A
+    { "LD C,E", eNoOperands, ld_C_E },          // 0x4B
+    { "LD C,H", eNoOperands, ld_C_H },          // 0x4C
+    { "LD C,L", eNoOperands, ld_C_L },          // 0x4D
+    { "LD C,(HL)", eNoOperands, ld_C_mHL },     // 0x4E
+    { "LD C,A", eNoOperands, ld_C_A },          // 0x4F
+
+    { "LD D,B", eNoOperands, ld_D_B },          // 0x50
+    { "LD D,C", eNoOperands, ld_D_C },          // 0x51
+    { "LD D,D", eNoOperands, ld_D_D },          // 0x52
+    { "LD D,E", eNoOperands, ld_D_E },          // 0x53
+    { "LD D,H", eNoOperands, ld_D_H },          // 0x54
+    { "LD D,L", eNoOperands, ld_D_L },          // 0x55
+    { "LD D,(HL)", eNoOperands, ld_D_mHL },     // 0x56
+    { "LD D,A", eNoOperands, ld_D_A },          // 0x57
+    { "LD E,B", eNoOperands, ld_E_B },          // 0x58
+    { "LD E,C", eNoOperands, ld_E_C },          // 0x59
+    { "LD E,D", eNoOperands, ld_E_D },          // 0x5A
+    { "LD E,E", eNoOperands, ld_E_E },          // 0x5B
+    { "LD E,H", eNoOperands, ld_E_H },          // 0x5C
+    { "LD E,L", eNoOperands, ld_E_L },          // 0x5D
+    { "LD E,(HL)", eNoOperands, ld_E_mHL },     // 0x5E
+    { "LD E,A", eNoOperands, ld_E_A },          // 0x5F
+
+    { "LD H,B", eNoOperands, ld_H_B },          // 0x60
+    { "LD H,C", eNoOperands, ld_H_C },          // 0x61
+    { "LD H,D", eNoOperands, ld_H_D },          // 0x62
+    { "LD H,E", eNoOperands, ld_H_E },          // 0x63
+    { "LD H,H", eNoOperands, ld_H_H },          // 0x64
+    { "LD H,L", eNoOperands, ld_H_L },          // 0x65
+    { "LD H,(HL)", eNoOperands, ld_H_mHL },     // 0x66
+    { "LD H,A", eNoOperands, ld_H_A },          // 0x67
+    { "LD L,B", eNoOperands, ld_L_B },          // 0x68
+    { "LD L,C", eNoOperands, ld_L_C },          // 0x69
+    { "LD L,D", eNoOperands, ld_L_D },          // 0x6A
+    { "LD L,E", eNoOperands, ld_L_E },          // 0x6B
+    { "LD L,H", eNoOperands, ld_L_H },          // 0x6C
+    { "LD L,L", eNoOperands, ld_L_L },          // 0x6D
+    { "LD L,(HL)", eNoOperands, ld_L_mHL },     // 0x6E
+    { "LD L,A", eNoOperands, ld_L_A },          // 0x6F
+
+    { "LD (HL),B", eNoOperands, ld_mHL_B },         // 0x70
+    { "LD (HL),C", eNoOperands, ld_mHL_C },         // 0x71
+    { "LD (HL),D", eNoOperands, ld_mHL_D },         // 0x72
+    { "LD (HL),E", eNoOperands, ld_mHL_E },         // 0x73
+    { "LD (HL),H", eNoOperands, ld_mHL_H },         // 0x74
+    { "LD (HL),L", eNoOperands, ld_mHL_L },         // 0x75
+    { "HALT", eNoOperands, halt },                  // 0x76
+    { "LD (HL),A", eNoOperands, ld_mHL_A },         // 0x77
+    { "LD A,B", eNoOperands, ld_A_B },              // 0x78
+    { "LD A,C", eNoOperands, ld_A_C },              // 0x79
+    { "LD A,D", eNoOperands, ld_A_D },              // 0x7A
+    { "LD A,E", eNoOperands, ld_A_E },              // 0x7B
+    { "LD A,H", eNoOperands, ld_A_H },              // 0x7C
+    { "LD A,L", eNoOperands, ld_A_L },              // 0x7D
+    { "LD A,(HL)", eNoOperands, ld_A_mHL },         // 0x7E
+    { "LD A,A", eNoOperands, ld_A_A },              // 0x7F
+
+    { "ADD A,B", eNoOperands, add_A_B },            // 0x80
+    { "ADD A,C", eNoOperands, add_A_C },            // 0x81
+    { "ADD A,D", eNoOperands, add_A_D },            // 0x82
+    { "ADD A,E", eNoOperands, add_A_E },            // 0x83
+    { "ADD A,H", eNoOperands, add_A_H },            // 0x84
+    { "ADD A,L", eNoOperands, add_A_L },            // 0x85
+    { "ADD A,(HL)", eOperandMemAddr, add_A_mHL },   // 0x86
+};

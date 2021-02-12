@@ -1,16 +1,22 @@
+#include "cpu.h"
+
 unsigned char tempMemCart[0xFFFF];
 
-unsigned char readByteFromMemory (unsigned short memAddr) {
-    return tempMemCart[memAddr];
+unsigned char readByteFromMemory (unsigned short* memAddr) {
+    return tempMemCart[*memAddr];
 }
 
-unsigned short readShortFromMemory (unsigned short memAddr) {
-    unsigned char lowByte, highByte;
-    lowByte = readByteFromMemory(memAddr);
-    highByte = readByteFromMemory(++memAddr);
-    return lowByte | (highByte << 8);
+unsigned short readShortFromMemory (unsigned short* memAddr) {
+    unsigned short memValue = tempMemCart[*memAddr];
+    memValue |= (tempMemCart[++(*memAddr)] << 8);
+    return memValue;
 }
 
-void writeByteToMemory (unsigned short memAddr, unsigned char value) {
-    tempMemCart[memAddr] = value;
+void writeByteToMemory (unsigned short* memAddr, unsigned char* value) {
+    tempMemCart[*memAddr] = *value;
+}
+
+void writeShortToMemory (unsigned short* memAddr, unsigned short* value) {
+    tempMemCart[*memAddr] = (unsigned char)(*value & LOW_BYTE);
+    tempMemCart[++(*memAddr)] = (unsigned char)((*value & HIGH_BYTE) >> 8);
 }
