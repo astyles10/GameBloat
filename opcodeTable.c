@@ -40,8 +40,8 @@ void dec_B (void) {
     dec_s(&registers.B);
 }
 
-void ld_B_n (unsigned char immediate) {
-    ld_r_n(&registers.B, &immediate);
+void ld_B_n (unsigned char* immediate) {
+    ld_r_n(&registers.B, immediate);
 }
 
 void add_HL_BC (void) {
@@ -65,12 +65,12 @@ void dec_C (void) {
     dec_s(&registers.C);
 }
 
-void ld_C_n (unsigned char immediate) {
-    ld_r_n(&registers.C, &immediate);
+void ld_C_n (unsigned char* immediate) {
+    ld_r_n(&registers.C, immediate);
 }
 
-void ld_DE_nn (unsigned short immediate) {
-    ld_dd_nn(&registers.DE, &immediate);
+void ld_DE_nn (unsigned short* immediate) {
+    ld_dd_nn(&registers.DE, immediate);
 }
 
 void ld_mDE_A (void) {
@@ -89,8 +89,8 @@ void dec_D (void) {
     dec_s(&registers.D);
 }
 
-void ld_D_n (unsigned char immediate) {
-    ld_r_n(&registers.D, &immediate);
+void ld_D_n (unsigned char* immediate) {
+    ld_r_n(&registers.D, immediate);
 }
 
 void add_HL_DE (void) {
@@ -114,16 +114,16 @@ void dec_E (void) {
     inc_s(&registers.E);
 }
 
-void ld_E_n (unsigned char immediate) {
-    ld_r_n(&registers.E, &immediate);
+void ld_E_n (unsigned char* immediate) {
+    ld_r_n(&registers.E, immediate);
 }
 
-void jr_NZ_n (unsigned char immediate) {
-    jr_cc_e(&immediate, &flagZero, eFlagNotSet);
+void jr_NZ_n (unsigned char* immediate) {
+    jr_cc_e(immediate, &flagZero, eFlagNotSet);
 }
 
-void ld_HL_nn (unsigned short immediate) {
-    ld_dd_nn(&registers.HL, &immediate);
+void ld_HL_nn (unsigned short* immediate) {
+    ld_dd_nn(&registers.HL, immediate);
 }
 
 void inc_HL (void) {
@@ -138,12 +138,12 @@ void dec_H (void) {
     dec_s(&registers.H);
 }
 
-void ld_H_n (unsigned char immediate) {
-    ld_r_n(&registers.H, &immediate);
+void ld_H_n (unsigned char* immediate) {
+    ld_r_n(&registers.H, immediate);
 }
 
-void jr_Z_n (unsigned char immediate) {
-    jr_cc_e(&immediate, &flagZero, eFlagSet);
+void jr_Z_n (unsigned char* immediate) {
+    jr_cc_e(immediate, &flagZero, eFlagSet);
 }
 
 void add_HL_HL (void) {
@@ -162,16 +162,16 @@ void dec_L (void) {
     dec_s(&registers.L);
 }
 
-void ld_L_n (unsigned char immediate) {
-    ld_r_n(&registers.L, &immediate);
+void ld_L_n (unsigned char* immediate) {
+    ld_r_n(&registers.L, immediate);
 }
 
-void jr_NC_n (unsigned char immediate) {
-    jr_cc_e(&immediate, &flagCarry, eFlagNotSet);
+void jr_NC_n (unsigned char* immediate) {
+    jr_cc_e(immediate, &flagCarry, eFlagNotSet);
 }
 
-void ld_SP_nn (unsigned short immediate) {
-    ld_dd_nn(&registers.SP, &immediate);
+void ld_SP_nn (unsigned short* immediate) {
+    ld_dd_nn(&registers.SP, immediate);
 }
 
 void inc_SP (void) {
@@ -189,8 +189,8 @@ void dec_mHL (void) {
     dec_s(value);
 }
 
-void jr_C_n (unsigned char immediate) {
-    jr_cc_e(&immediate, &flagCarry, eFlagSet);
+void jr_C_n (unsigned char *immediate) {
+    jr_cc_e(immediate, &flagCarry, eFlagSet);
 }
 
 void add_HL_SP (void) {
@@ -209,8 +209,8 @@ void dec_A (void) {
     dec_s(&registers.A);
 }
 
-void ld_A_n (unsigned char immediate) {
-    ld_r_n(&registers.A, &immediate);
+void ld_A_n (unsigned char* immediate) {
+    ld_r_n(&registers.A, immediate);
 }
 
 void ld_B_B (void) {
@@ -735,20 +735,20 @@ void pop_BC (void) {
     pop_dd(&registers.BC);
 }
 
-void jp_NZ_nn (unsigned short immediate) {
-    jp_cc_nn(&immediate, &flagZero, eFlagNotSet);
+void jp_NZ_nn (unsigned short* immediate) {
+    jp_cc_nn(immediate, &flagZero, eFlagNotSet);
 }
 
-void call_NZ_nn (unsigned short immediate) {
-    call_cc_nn(&immediate, &flagZero, eFlagNotSet);
+void call_NZ_nn (unsigned short* immediate) {
+    call_cc_nn(immediate, &flagZero, eFlagNotSet);
 }
 
 void push_BC (void) {
     push_ss(&registers.BC);
 }
 
-void add_A_n (unsigned char immediate) {
-    add_s(&immediate);
+void add_A_n (unsigned char* immediate) {
+    add_s(immediate);
 }
 
 void rst_0 (void) {
@@ -759,20 +759,20 @@ void ret_Z (void) {
     ret_cc(&flagZero, eFlagSet);
 }
 
-void jp_Z_nn (unsigned short immediate) {
-    jp_cc_nn(&immediate, &flagZero, eFlagSet);
+void jp_Z_nn (unsigned short* immediate) {
+    jp_cc_nn(immediate, &flagZero, eFlagSet);
 }
 
 void extOps () {
     // TODO
 }
 
-void call_Z_nn (unsigned short immediate) {
-    call_cc_nn(&immediate, &flagZero, eFlagSet);
+void call_Z_nn (unsigned short* immediate) {
+    call_cc_nn(immediate, &flagZero, eFlagSet);
 }
 
-void adc_A_n (unsigned char immediate) {
-    adc_s(&immediate);
+void adc_A_n (unsigned char* immediate) {
+    adc_s(immediate);
 }
 
 void rst_08 (void) {
@@ -787,20 +787,20 @@ void pop_DE (void) {
     pop_dd(&registers.DE);
 }
 
-void jp_NC_nn (unsigned short immediate) {
-    jp_cc_nn(&immediate, &flagCarry, eFlagNotSet);
+void jp_NC_nn (unsigned short* immediate) {
+    jp_cc_nn(immediate, &flagCarry, eFlagNotSet);
 }
 
-void call_NC_nn (unsigned short immediate) {
-    call_cc_nn(&immediate, &flagCarry, eFlagNotSet);
+void call_NC_nn (unsigned short* immediate) {
+    call_cc_nn(immediate, &flagCarry, eFlagNotSet);
 }
 
 void push_DE (void) {
     push_ss(&registers.DE);
 }
 
-void sub_A_n (unsigned char immediate) {
-    sub_s(&immediate);
+void sub_A_n (unsigned char* immediate) {
+    sub_s(immediate);
 }
 
 void rst_10 (void) {
@@ -811,16 +811,16 @@ void ret_C (void) {
     ret_cc(&flagCarry, eFlagSet);
 }
 
-void jp_C_nn (unsigned short immediate) {
-    jp_cc_nn(&immediate, &flagCarry, eFlagSet);
+void jp_C_nn (unsigned short* immediate) {
+    jp_cc_nn(immediate, &flagCarry, eFlagSet);
 }
 
-void call_C_nn (unsigned short immediate) {
-    call_cc_nn(&immediate, &flagCarry, eFlagNotSet);
+void call_C_nn (unsigned short* immediate) {
+    call_cc_nn(immediate, &flagCarry, eFlagNotSet);
 }
 
-void sbc_A_n (unsigned char immediate) {
-    sbc_s(&immediate);
+void sbc_A_n (unsigned char* immediate) {
+    sbc_s(immediate);
 }
 
 void rst_18 (void) {
@@ -839,20 +839,20 @@ void push_HL (void) {
     push_ss(&registers.HL);
 }
 
-void and_n (unsigned char immediate) {
-    and_s(&immediate);
+void and_n (unsigned char* immediate) {
+    and_s(immediate);
 }
 
 void rst_20 (void) {
     rst_f(eResetCode20);
 }
 
-void ld_nn_A (unsigned short immediate) {
-    ld_dd_A(&immediate);
+void ld_nn_A (unsigned short* immediate) {
+    ld_dd_A(immediate);
 }
 
-void xor_n (unsigned char immediate) {
-    xor_s(&immediate);
+void xor_n (unsigned char* immediate) {
+    xor_s(immediate);
 }
 
 void rst_28 (void) {
@@ -867,20 +867,20 @@ void push_AF (void) {
     push_ss(&registers.AF);
 }
 
-void or_n (unsigned char immediate) {
-    or_s(&immediate);
+void or_n (unsigned char* immediate) {
+    or_s(immediate);
 }
 
 void rst_30 (void) {
     rst_f(eResetCode30);
 }
 
-void ld_A_m_nn (unsigned short immediate) {
-    ld_A_m_ss(&immediate);
+void ld_A_m_nn (unsigned short* immediate) {
+    ld_A_m_ss(immediate);
 }
 
-void cp_n (unsigned char immediate) {
-    cmp_s(&immediate);
+void cp_n (unsigned char* immediate) {
+    cmp_s(immediate);
 }
 
 void rst_38 (void) {
@@ -1031,4 +1031,100 @@ const struct opcode baseOpcodeTable[256] = {
     { "ADD A,H", eNoOperands, add_A_H },            // 0x84
     { "ADD A,L", eNoOperands, add_A_L },            // 0x85
     { "ADD A,(HL)", eOperandMemAddr, add_A_mHL },   // 0x86
+    { "ADD A,A", eNoOperands, add_A_A },            // 0x87
+    { "ADC A,B", eNoOperands, adc_A_B },            // 0x88
+    { "ADC A,C", eNoOperands, adc_A_C },            // 0x89
+    { "ADC A,D", eNoOperands, adc_A_D },            // 0x8A
+    { "ADC A,E", eNoOperands, adc_A_E },            // 0x8B
+    { "ADC A,H", eNoOperands, adc_A_H },            // 0x8C
+    { "ADC A,L", eNoOperands, adc_A_L },            // 0x8D
+    { "ADC A,(HL)", eNoOperands, adc_A_mHL },       // 0x8E
+    { "ADC A,A", eNoOperands, adc_A_A },            // 0x8F
+
+    { "SUB A,B", eNoOperands, sub_A_B },            // 0x90
+    { "SUB A,C", eNoOperands, sub_A_C },            // 0x91
+    { "SUB A,D", eNoOperands, sub_A_D },            // 0x92
+    { "SUB A,E", eNoOperands, sub_A_E },            // 0x93
+    { "SUB A,H", eNoOperands, sub_A_H },            // 0x94
+    { "SUB A,L", eNoOperands, sub_A_L },            // 0x95
+    { "SUB A,(HL)", eNoOperands, sub_A_mHL },       // 0x96
+    { "SUB A,A", eNoOperands, sub_A_A },            // 0x97
+    { "SBC A,B", eNoOperands, sbc_A_B },            // 0x98
+    { "SBC A,C", eNoOperands, sbc_A_C },            // 0x99
+    { "SBC A,D", eNoOperands, sbc_A_D},             // 0x9A
+    { "SBC A,E", eNoOperands, sbc_A_E },            // 0x9B
+    { "SBC A,H", eNoOperands, sbc_A_H },            // 0x9C
+    { "SBC A,L", eNoOperands, sbc_A_L },            // 0x9D
+    { "SBC A,(HL)", eNoOperands, sbc_A_mHL },       // 0x9E
+    { "SBC A,A", eNoOperands, sbc_A_A },            // 0x9F
+
+    { "AND B", eNoOperands, and_B },                // 0xA0
+    { "AND C", eNoOperands, and_C },                // 0xA1
+    { "AND D", eNoOperands, and_D },                // 0xA2
+    { "AND E", eNoOperands, and_E },                // 0xA3
+    { "AND H", eNoOperands, and_H },                // 0xA4
+    { "AND L", eNoOperands, and_L },                // 0xA5
+    { "AND (HL)", eNoOperands, and_mHL },           // 0xA6
+    { "AND A", eNoOperands, and_A },                // 0xA7
+    { "XOR B", eNoOperands, xor_B },                // 0xA8
+    { "XOR C", eNoOperands, xor_C },                // 0xA9
+    { "XOR D", eNoOperands, xor_D },                // 0xAA
+    { "XOR E", eNoOperands, xor_E },                // 0xAB
+    { "XOR H", eNoOperands, xor_H },                // 0xAC
+    { "XOR L", eNoOperands, xor_L},                 // 0xAD
+    { "XOR (HL)", eNoOperands, xor_mHL },           // 0xAE
+    { "XOR A", eNoOperands, xor_A },                // 0xAF
+
+    { "OR B", eNoOperands, or_B },                  // 0xB0
+    { "OR C", eNoOperands, or_C },                  // 0xB1
+    { "OR D", eNoOperands, or_D },                  // 0xB2
+    { "OR E", eNoOperands, or_E },                  // 0xB3
+    { "OR H", eNoOperands, or_H },                  // 0xB4
+    { "OR L", eNoOperands, or_L },                  // 0xB5
+    { "OR (HL)", eNoOperands, or_mHL },             // 0xB6
+    { "OR A", eNoOperands, or_A },                  // 0xB7
+    { "CP B", eNoOperands, cmp_B },                 // 0xB8
+    { "CP C", eNoOperands, cmp_C },                 // 0xB9
+    { "CP D", eNoOperands, cmp_D },                 // 0xBA
+    { "CP E", eNoOperands, cmp_E },                 // 0xBB
+    { "CP H", eNoOperands, cmp_H },                 // 0xBC
+    { "CP L", eNoOperands, cmp_L },                 // 0xBD
+    { "CP (HL)", eNoOperands, cmp_mHL },            // 0xBE
+    { "CP A", eNoOperands, cmp_A },                 // 0xBF
+
+    { "RET NZ", eNoOperands, ret_NZ },              // 0xC0
+    { "POP BC", eNoOperands, pop_BC },              // 0xC1
+    { "JP NZ,nn", eOperandShort, jp_NZ_nn },        // 0xC2
+    { "JP nn", eOperandShort, jp_nn },              // 0xC3
+    { "CALL NZ,nn", eOperandShort, call_NZ_nn },    // 0xC4
+    { "PUSH BC", eNoOperands, push_BC },            // 0xC5
+    { "ADD A,n", eOperandChar, add_A_n },           // 0xC6
+    { "RST 0", eNoOperands, rst_0 },                // 0xC7
+    { "RET Z", eNoOperands, ret_Z },                // 0xC8
+    { "RET", eNoOperands, ret },                    // 0xC9
+    { "JP Z,nn", eOperandShort, jp_Z_nn },          // 0xCA
+    { "Ext ops", eOperandShort, extOps },           // 0xCB
+    { "CALL Z,nn", eOperandShort, call_Z_nn }       // 0xCC
+    { "CALL nn", eOperandShort, call_nn },          // 0xCD
+    { "ADC A,n", eOperandChar, adc_A_n },           // 0xCE
+    { "RST 8", eNoOperands, rst_8 },                // 0xCF
+
+    { "RET NC", eNoOperands, ret_NC },              // 0xD0
+    { "POP DE", eNoOperands, pop_DE },              // 0xD1
+    { "JP NC,nn", eOperandShort, jp_NC_nn },        // 0xD2
+    { "PUSH DE", eNoOperands, push_DE },            // 0xD5
+    { "RST 10", eNoOperands, rst_10 },              // 0xD7
+    { "RST 18", eNoOperands, rst_18 },              // 0xDF
+
+    { "LDH (n),A", eOperandChar, ldh_n_A },         // 0xE0
+    { "POP HL", eNoOperands, pop_HL },              // 0xE1
+    { "PUSH HL", eNoOperands, push_HL },            // 0xE5
+    { "RST 20", eNoOperands, rst_20 },              // 0xE7
+    { "RST 28", eNoOperands, rst_28 },              // 0xEF
+
+    { "LDH A,(n)", eOperandChar, ldh_A_n },         // 0xF0
+    { "POP AF", eNoOperands, pop_AF },              // 0xF1
+    { "PUSH AF", eNoOperands, push_AF },            // 0xF5
+    { "RST 30", eNoOperands, rst_30 },              // 0xF7
+    { "RST 38", eNoOperands, rst_38 },              // 0xFF
 };

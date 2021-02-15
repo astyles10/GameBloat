@@ -1,6 +1,11 @@
+#include <string.h>
 #include "cpu.h"
 
 unsigned char tempMemCart[0xFFFF];
+
+void initializeMemory(void) {
+    memset(tempMemCart, 0x50, sizeof(tempMemCart));
+}
 
 unsigned char readByteFromMemory (unsigned short* memAddr) {
     return tempMemCart[*memAddr];
