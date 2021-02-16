@@ -847,6 +847,11 @@ void rst_20 (void) {
     rst_f(eResetCode20);
 }
 
+void jp_mHL (void) {
+    unsigned short value = readShortFromMemory(&registers.HL);
+    jp_nn(&value);
+}
+
 void ld_nn_A (unsigned short* immediate) {
     ld_dd_A(immediate);
 }
@@ -1104,27 +1109,59 @@ const struct opcode baseOpcodeTable[256] = {
     { "RET", eNoOperands, ret },                    // 0xC9
     { "JP Z,nn", eOperandShort, jp_Z_nn },          // 0xCA
     { "Ext ops", eOperandShort, extOps },           // 0xCB
-    { "CALL Z,nn", eOperandShort, call_Z_nn }       // 0xCC
+    { "CALL Z,nn", eOperandShort, call_Z_nn },      // 0xCC
     { "CALL nn", eOperandShort, call_nn },          // 0xCD
     { "ADC A,n", eOperandChar, adc_A_n },           // 0xCE
-    { "RST 8", eNoOperands, rst_8 },                // 0xCF
+    { "RST 8", eNoOperands, rst_08 },                // 0xCF
 
     { "RET NC", eNoOperands, ret_NC },              // 0xD0
     { "POP DE", eNoOperands, pop_DE },              // 0xD1
     { "JP NC,nn", eOperandShort, jp_NC_nn },        // 0xD2
+    { "undefined", eNoOperands, undefined },        // 0xD3
+    { "CALL NC,nn", eOperandShort, call_NC_nn },    // 0xD4
     { "PUSH DE", eNoOperands, push_DE },            // 0xD5
+    { "SUB A,n", eOperandChar, sub_A_n },           // 0xD6
     { "RST 10", eNoOperands, rst_10 },              // 0xD7
+    { "RET C", eNoOperands, ret_C },                // 0xD8
+    { "RETI", eNoOperands, reti },                  // 0xD9
+    { "JP C,nn", eOperandShort, jp_C_nn },          // 0xDA
+    { "undefined", eNoOperands, undefined },        // 0xDB
+    { "CALL C,nn", eOperandShort, call_C_nn },      // 0xDC
+    { "undefined", eNoOperands, undefined },        // 0xDD
+    { "SBC A,n", eOperandChar, sbc_A_n },           // 0xDE
     { "RST 18", eNoOperands, rst_18 },              // 0xDF
 
     { "LDH (n),A", eOperandChar, ldh_n_A },         // 0xE0
     { "POP HL", eNoOperands, pop_HL },              // 0xE1
+    { "LDH (C),A", eNoOperands, ldh_mC_A },         // 0xE2
+    { "undefined", eNoOperands, undefined },        // 0xE3
+    { "undefined", eNoOperands, undefined },        // 0xE4
     { "PUSH HL", eNoOperands, push_HL },            // 0xE5
+    { "AND n", eOperandChar, and_n },               // 0xE6
     { "RST 20", eNoOperands, rst_20 },              // 0xE7
+    { "ADD SP,d", eOperandChar, add_SP_e },         // 0xE8
+    { "JP (HL)", eNoOperands, jp_mHL },             // 0xE9
+    { "LD (nn),A", eOperandShort, ld_nn_A },        // 0xEA
+    { "undefined", eNoOperands, undefined },        // 0xEB
+    { "undefined", eNoOperands, undefined },        // 0xEC
+    { "undefined", eNoOperands, undefined },        // 0xED
+    { "XOR n", eNoOperands, xor_n },                // 0xEE
     { "RST 28", eNoOperands, rst_28 },              // 0xEF
 
     { "LDH A,(n)", eOperandChar, ldh_A_n },         // 0xF0
     { "POP AF", eNoOperands, pop_AF },              // 0xF1
+    { "undefined", eNoOperands, undefined },        // 0xF2
+    { "DI", eNoOperands, di },                      // 0xF3
+    { "undefined", eNoOperands, undefined },        // 0xF4
     { "PUSH AF", eNoOperands, push_AF },            // 0xF5
+    { "OR n", eOperandChar, or_n },                 // 0xF6
     { "RST 30", eNoOperands, rst_30 },              // 0xF7
+    { "LDHL SP,d", eOperandChar, ld_HL_SP_e },      // 0xF8
+    { "LD SP,HL", eNoOperands, ld_SP_HL },          // 0xF9
+    { "LD A,(nn)", eOperandShort, ld_A_m_nn },      // 0xFA
+    { "EI", eNoOperands, ei },                      // 0xFB
+    { "undefined", eNoOperands, undefined },        // 0xFC
+    { "undefined", eNoOperands, undefined },        // 0xFD
+    { "CP n", eOperandChar, cp_n },                 // 0xFE
     { "RST 38", eNoOperands, rst_38 },              // 0xFF
 };

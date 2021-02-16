@@ -68,6 +68,7 @@ void cpl (void);
 void ccf (void);
 void scf (void);
 void nop (void);
+void undefined (void);
 void halt (void);
 void stop (void);
 void di (void);

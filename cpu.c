@@ -32,13 +32,6 @@ Z 	Zero Flag.
 Functions with register name hard coded are Upper case to suit struct naming
 */
 
-// TODO: Check opcode functions using (HL) address location
-//       to determine whether they are implemented correctly
-//       Because the memory location and HL register are separate
-
-// TODO: Write function to read and write bytes using a 16-bit memory location
-// Needed for opcodes such as rlc_HL because the value at (HL) itself needs to be modified
-
 unsigned char flagZero = (1 << 7);
 unsigned char flagNegative = (1 << 6);
 unsigned char flagHalfCarry = (1 << 5);
@@ -532,6 +525,9 @@ void nop (void) {
     printf("NOP\n");
 }
 
+void undefined (void) {
+}
+
 void halt (void) {
 // TODO
 }
@@ -946,10 +942,6 @@ void jp_cc_nn (unsigned short* ptrNN, unsigned char* flag, unsigned char conditi
     if (checkFlag(*flag) == condition) {
         registers.PC = *ptrNN;
     }
-}
-
-void jp_mHL (void) {
-    registers.PC = readShortFromMemory(&registers.HL);
 }
 
 void jr_e (unsigned char* e) {
