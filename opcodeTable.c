@@ -41,7 +41,7 @@ void dec_B (void) {
 }
 
 void ld_B_n (unsigned char* immediate) {
-    ld_r_n(&registers.B, immediate);
+    ld_r_s(&registers.B, immediate);
 }
 
 void add_HL_BC (void) {
@@ -49,8 +49,7 @@ void add_HL_BC (void) {
 }
 
 void ld_A_mBC (void) {
-    unsigned char value = readByteFromMemory(&registers.BC);
-    ld_r_n(&registers.A, &value);
+    ld_A_ss(&registers.BC);
 }
 
 void dec_BC (void) {
@@ -66,7 +65,7 @@ void dec_C (void) {
 }
 
 void ld_C_n (unsigned char* immediate) {
-    ld_r_n(&registers.C, immediate);
+    ld_r_s(&registers.C, immediate);
 }
 
 void ld_DE_nn (unsigned short* immediate) {
@@ -90,7 +89,7 @@ void dec_D (void) {
 }
 
 void ld_D_n (unsigned char* immediate) {
-    ld_r_n(&registers.D, immediate);
+    ld_r_s(&registers.D, immediate);
 }
 
 void add_HL_DE (void) {
@@ -98,8 +97,7 @@ void add_HL_DE (void) {
 }
 
 void ld_A_mDE (void) {
-    unsigned char value = readByteFromMemory(&registers.DE);
-    ld_r_n(&registers.A, &value);
+    ld_r_s(&registers.A, getPointerToMemory(&registers.HL));
 }
 
 void dec_DE (void) {
@@ -115,7 +113,7 @@ void dec_E (void) {
 }
 
 void ld_E_n (unsigned char* immediate) {
-    ld_r_n(&registers.E, immediate);
+    ld_r_s(&registers.E, immediate);
 }
 
 void jr_NZ_n (unsigned char* immediate) {
@@ -139,7 +137,7 @@ void dec_H (void) {
 }
 
 void ld_H_n (unsigned char* immediate) {
-    ld_r_n(&registers.H, immediate);
+    ld_r_s(&registers.H, immediate);
 }
 
 void jr_Z_n (unsigned char* immediate) {
@@ -163,7 +161,7 @@ void dec_L (void) {
 }
 
 void ld_L_n (unsigned char* immediate) {
-    ld_r_n(&registers.L, immediate);
+    ld_r_s(&registers.L, immediate);
 }
 
 void jr_NC_n (unsigned char* immediate) {
@@ -179,14 +177,11 @@ void inc_SP (void) {
 }
 
 void inc_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    inc_s(&value);
-    writeByteToMemory(&registers.HL, &value);
+    inc_s(getPointerToMemory(&registers.HL));
 }
 
 void dec_mHL (void) {
-    unsigned char* value = &tempMemCart[registers.HL];
-    dec_s(value);
+    dec_s(getPointerToMemory(&registers.HL));
 }
 
 void jr_C_n (unsigned char *immediate) {
@@ -210,257 +205,257 @@ void dec_A (void) {
 }
 
 void ld_A_n (unsigned char* immediate) {
-    ld_r_n(&registers.A, immediate);
+    ld_r_s(&registers.A, immediate);
 }
 
 void ld_B_B (void) {
-    ld_d_r(&registers.B, &registers.B);
+    ld_r_s(&registers.B, &registers.B);
 }
 
 void ld_B_C (void) {
-    ld_d_r(&registers.B, &registers.C);
+    ld_r_s(&registers.B, &registers.C);
 }
 void ld_B_D (void) {
-    ld_d_r(&registers.B, &registers.D);
+    ld_r_s(&registers.B, &registers.D);
 }
 void ld_B_E (void) {
-    ld_d_r(&registers.B, &registers.E);
+    ld_r_s(&registers.B, &registers.E);
 }
 
 void ld_B_H (void) {
-    ld_d_r(&registers.B, &registers.H);
+    ld_r_s(&registers.B, &registers.H);
 }
 
 void ld_B_L (void) {
-    ld_d_r(&registers.B, &registers.L);
+    ld_r_s(&registers.B, &registers.L);
 }
 
 void ld_B_mHL (void) {
-    ld_d_mHL(&registers.B);
+    ld_r_s(&registers.B, getPointerToMemory(&registers.HL));
 }
 
 void ld_B_A (void) {
-    ld_d_r(&registers.B, &registers.A);
+    ld_r_s(&registers.B, &registers.A);
 }
 
 void ld_C_B (void) {
-    ld_d_r(&registers.C, &registers.B);
+    ld_r_s(&registers.C, &registers.B);
 }
 
 void ld_C_C (void) {
-    ld_d_r(&registers.C, &registers.C);
+    ld_r_s(&registers.C, &registers.C);
 }
 
 void ld_C_D (void) {
-    ld_d_r(&registers.C, &registers.D);
+    ld_r_s(&registers.C, &registers.D);
 }
 
 void ld_C_E (void) {
-    ld_d_r(&registers.C, &registers.E);
+    ld_r_s(&registers.C, &registers.E);
 }
 
 void ld_C_H (void) {
-    ld_d_r(&registers.C, &registers.H);
+    ld_r_s(&registers.C, &registers.H);
 }
 
 void ld_C_L (void) {
-    ld_d_r(&registers.C, &registers.L);
+    ld_r_s(&registers.C, &registers.L);
 }
 
 void ld_C_mHL (void) {
-    ld_d_mHL(&registers.C);
+    ld_r_s(&registers.C, getPointerToMemory(&registers.HL));
 }
 
 void ld_C_A (void) {
-    ld_d_r(&registers.C, &registers.A);
+    ld_r_s(&registers.C, &registers.A);
 }
 
 void ld_D_B (void) {
-    ld_d_r(&registers.D, &registers.B);
+    ld_r_s(&registers.D, &registers.B);
 }
 
 void ld_D_C (void) {
-    ld_d_r(&registers.D, &registers.C);
+    ld_r_s(&registers.D, &registers.C);
 }
 
 void ld_D_D (void) {
-    ld_d_r(&registers.D, &registers.D);
+    ld_r_s(&registers.D, &registers.D);
 }
 
 void ld_D_E (void) {
-    ld_d_r(&registers.D, &registers.E);
+    ld_r_s(&registers.D, &registers.E);
 }
 
 void ld_D_H (void) {
-    ld_d_r(&registers.D, &registers.H);
+    ld_r_s(&registers.D, &registers.H);
 }
 
 void ld_D_L (void) {
-    ld_d_r(&registers.D, &registers.L);
+    ld_r_s(&registers.D, &registers.L);
 }
 
 void ld_D_mHL (void) {
-    ld_d_mHL (&registers.D);
+    ld_r_s (&registers.D, getPointerToMemory(&registers.HL));
 }
 
 void ld_D_A (void) {
-    ld_d_r(&registers.D, &registers.A);
+    ld_r_s(&registers.D, &registers.A);
 }
 
 void ld_E_B (void) {
-    ld_d_r(&registers.E, &registers.B);
+    ld_r_s(&registers.E, &registers.B);
 }
 
 void ld_E_C (void) {
-    ld_d_r(&registers.E, &registers.C);
+    ld_r_s(&registers.E, &registers.C);
 }
 
 void ld_E_D (void) {
-    ld_d_r(&registers.E, &registers.D);
+    ld_r_s(&registers.E, &registers.D);
 }
 
 void ld_E_E (void) {
-    ld_d_r(&registers.E, &registers.E);
+    ld_r_s(&registers.E, &registers.E);
 }
 
 void ld_E_H (void) {
-    ld_d_r(&registers.E, &registers.H);
+    ld_r_s(&registers.E, &registers.H);
 }
 
 void ld_E_L (void) {
-    ld_d_r(&registers.E, &registers.L);
+    ld_r_s(&registers.E, &registers.L);
 }
 
 void ld_E_mHL (void) {
-    ld_d_mHL(&registers.E);
+    ld_r_s(&registers.E, getPointerToMemory(&registers.HL));
 }
 
 void ld_E_A (void) {
-    ld_d_r(&registers.E, &registers.A);
+    ld_r_s(&registers.E, &registers.A);
 }
 
 void ld_H_B (void) {
-    ld_d_r(&registers.H, &registers.B);
+    ld_r_s(&registers.H, &registers.B);
 }
 
 void ld_H_C (void) {
-    ld_d_r(&registers.H, &registers.C);
+    ld_r_s(&registers.H, &registers.C);
 }
 
 void ld_H_D (void) {
-    ld_d_r(&registers.H, &registers.D);
+    ld_r_s(&registers.H, &registers.D);
 }
 
 void ld_H_E (void) {
-    ld_d_r(&registers.H, &registers.E);
+    ld_r_s(&registers.H, &registers.E);
 }
 
 void ld_H_H (void) {
-    ld_d_r(&registers.H, &registers.H);
+    ld_r_s(&registers.H, &registers.H);
 }
 
 void ld_H_L (void) {
-    ld_d_r(&registers.H, &registers.L);
+    ld_r_s(&registers.H, &registers.L);
 }
 
 void ld_H_mHL (void) {
-    ld_d_mHL(&registers.H);
+    ld_r_s(&registers.H, getPointerToMemory(&registers.HL));
 }
 
 void ld_H_A (void) {
-    ld_d_r(&registers.H, &registers.A);
+    ld_r_s(&registers.H, &registers.A);
 }
 
 void ld_L_B (void) {
-    ld_d_r(&registers.L, &registers.B);
+    ld_r_s(&registers.L, &registers.B);
 }
 
 void ld_L_C (void) {
-    ld_d_r(&registers.L, &registers.C);
+    ld_r_s(&registers.L, &registers.C);
 }
 
 void ld_L_D (void) {
-    ld_d_r(&registers.L, &registers.D);
+    ld_r_s(&registers.L, &registers.D);
 }
 
 void ld_L_E (void) {
-    ld_d_r(&registers.L, &registers.E);
+    ld_r_s(&registers.L, &registers.E);
 }
 
 void ld_L_H (void) {
-    ld_d_r(&registers.L, &registers.H);
+    ld_r_s(&registers.L, &registers.H);
 }
 
 void ld_L_L (void) {
-    ld_d_r(&registers.L, &registers.L);
+    ld_r_s(&registers.L, &registers.L);
 }
 
 void ld_L_mHL (void) {
-    ld_d_mHL(&registers.L);
+    ld_r_s(&registers.L, getPointerToMemory(&registers.HL));
 }
 
 void ld_L_A (void) {
-    ld_d_r(&registers.L, &registers.A);
+    ld_r_s(&registers.L, &registers.A);
 }
 
 void ld_mHL_B (void) {
-    ld_mHL_r(&registers.B);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.B);
 }
 
 void ld_mHL_C (void) {
-    ld_mHL_r(&registers.C);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.C);
 }
 
 void ld_mHL_D (void) {
-    ld_mHL_r(&registers.D);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.D);
 }
 
 void ld_mHL_E (void) {
-    ld_mHL_r(&registers.E);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.E);
 }
 
 void ld_mHL_H (void) {
-    ld_mHL_r(&registers.H);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.H);
 }
 
 void ld_mHL_L (void) {
-    ld_mHL_r(&registers.L);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.L);
 }
 
 void ld_mHL_A (void) {
-    ld_mHL_r(&registers.A);
+    ld_d_r(getPointerToMemory(&registers.HL), &registers.A);
 }
 
 void ld_A_B (void) {
-    ld_d_r(&registers.A, &registers.B);
+    ld_r_s(&registers.A, &registers.B);
 }
 
 void ld_A_C (void) {
-    ld_d_r(&registers.A, &registers.C);
+    ld_r_s(&registers.A, &registers.C);
 }
 
 void ld_A_D (void) {
-    ld_d_r(&registers.A, &registers.D);
+    ld_r_s(&registers.A, &registers.D);
 }
 
 void ld_A_E (void) {
-    ld_d_r(&registers.A, &registers.E);
+    ld_r_s(&registers.A, &registers.E);
 }
 
 void ld_A_H (void) {
-    ld_d_r(&registers.A, &registers.H);
+    ld_r_s(&registers.A, &registers.H);
 }
 
 void ld_A_L (void) {
-    ld_d_r(&registers.A, &registers.L);
+    ld_r_s(&registers.A, &registers.L);
 }
 
 void ld_A_mHL (void) {
-    ld_d_mHL(&registers.A);
+    ld_r_s(&registers.A, getPointerToMemory(&registers.HL));
 }
 
 void ld_A_A (void) {
-    ld_d_r(&registers.A, &registers.A);
+    ld_r_s(&registers.A, &registers.A);
 }
 
 void add_A_B (void) {
@@ -488,8 +483,7 @@ void add_A_L (void) {
 }
 
 void add_A_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    add_s(&value);
+    add_s(getPointerToMemory(&registers.HL));
 }
 
 void add_A_A (void) {
@@ -521,8 +515,7 @@ void adc_A_L (void) {
 }
 
 void adc_A_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    adc_s(&value);
+    adc_s(getPointerToMemory(&registers.HL));
 }
 
 void adc_A_A (void) {
@@ -554,8 +547,7 @@ void sub_A_L (void) {
 }
 
 void sub_A_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    sub_s(&value);
+    sub_s(getPointerToMemory(&registers.HL));
 }
 
 void sub_A_A (void) {
@@ -587,8 +579,7 @@ void sbc_A_L (void) {
 }
 
 void sbc_A_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    sub_s(&value);
+    sub_s(getPointerToMemory(&registers.HL));
 }
 
 void sbc_A_A (void) {
@@ -620,8 +611,7 @@ void and_L (void) {
 }
 
 void and_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    and_s(&value);
+    and_s(getPointerToMemory(&registers.HL));
 }
 
 void and_A (void) {
@@ -653,8 +643,7 @@ void xor_L (void) {
 }
 
 void xor_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    xor_s(&value);
+    xor_s(getPointerToMemory(&registers.HL));
 }
 
 void xor_A (void) {
@@ -686,8 +675,7 @@ void or_L (void) {
 }
 
 void or_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    or_s(&value);
+    or_s(getPointerToMemory(&registers.HL));
 }
 
 void or_A (void) {
@@ -719,8 +707,7 @@ void cmp_L (void) {
 }
 
 void cmp_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    cmp_s(&value);
+    cmp_s(getPointerToMemory(&registers.HL));
 }
 
 void cmp_A (void) {
@@ -881,7 +868,7 @@ void rst_30 (void) {
 }
 
 void ld_A_m_nn (unsigned short* immediate) {
-    ld_A_m_ss(immediate);
+    ld_A_ss(immediate);
 }
 
 void cp_n (unsigned char* immediate) {
@@ -948,9 +935,9 @@ const struct opcode baseOpcodeTable[256] = {
     { "LD SP,nn", eOperandShort, ld_SP_nn },    // 0x31
     { "LDD (HL),A", eNoOperands, ldd_mHL_A },   // 0x32
     { "INC SP", eNoOperands, inc_SP },          // 0x33
-    { "INC (HL)", eOperandMemAddr, inc_mHL },   // 0x34
-    { "DEC (HL)", eOperandMemAddr, dec_mHL },   // 0x35
-    { "LD (HL),n", eOperandShort, ld_mHL_n },   // 0x36
+    { "INC (HL)", eNoOperands, inc_mHL },   // 0x34
+    { "DEC (HL)", eNoOperands, dec_mHL },   // 0x35
+    { "LD (HL),n", eOperandShort, ld_d_n },   // 0x36
     { "SCF", eNoOperands, scf },                // 0x37
     { "JR C,n", eOperandChar, jr_C_n },         // 0x38
     { "ADD HL,SP", eNoOperands, add_HL_SP },    // 0x39
@@ -1035,7 +1022,7 @@ const struct opcode baseOpcodeTable[256] = {
     { "ADD A,E", eNoOperands, add_A_E },            // 0x83
     { "ADD A,H", eNoOperands, add_A_H },            // 0x84
     { "ADD A,L", eNoOperands, add_A_L },            // 0x85
-    { "ADD A,(HL)", eOperandMemAddr, add_A_mHL },   // 0x86
+    { "ADD A,(HL)", eNoOperands, add_A_mHL },       // 0x86
     { "ADD A,A", eNoOperands, add_A_A },            // 0x87
     { "ADC A,B", eNoOperands, adc_A_B },            // 0x88
     { "ADC A,C", eNoOperands, adc_A_C },            // 0x89

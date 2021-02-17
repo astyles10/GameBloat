@@ -9,8 +9,11 @@
 
 int main () {
   initializeMemory();
-  unsigned short memValue = 0xFFFF;
+  unsigned short memValue = 0x0;
   printf("Value at mem address: 0x%04X\n", readByteFromMemory(&memValue));
-  printf("Size of temp mem cart: %d\n", sizeof(tempMemCart));
+  // In driver code, if operand exists, increment ticks by 4 per char
+  // Memory module will increment ticks on read/write/getPointer functions
+  // Each time an opcode is called, increment by 4 ticks by default
+
   return 0;
 }

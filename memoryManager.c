@@ -8,20 +8,29 @@ void initializeMemory(void) {
 }
 
 unsigned char readByteFromMemory (unsigned short* memAddr) {
+    tickCounter += 4;
     return tempMemCart[*memAddr];
 }
 
 unsigned short readShortFromMemory (unsigned short* memAddr) {
+    tickCounter += 8;
     unsigned short memValue = tempMemCart[*memAddr];
     memValue |= (tempMemCart[++(*memAddr)] << 8);
     return memValue;
 }
 
 void writeByteToMemory (unsigned short* memAddr, unsigned char* value) {
+    tickCounter += 4;
     tempMemCart[*memAddr] = *value;
 }
 
 void writeShortToMemory (unsigned short* memAddr, unsigned short* value) {
+    tickCounter += 8;
     tempMemCart[*memAddr] = (unsigned char)(*value & LOW_BYTE);
     tempMemCart[++(*memAddr)] = (unsigned char)((*value & HIGH_BYTE) >> 8);
+}
+
+unsigned char* getPointerToMemory (unsigned short* memAddr) {
+    tickCounter += 4;
+    return &tempMemCart[*memAddr];
 }

@@ -37,6 +37,8 @@ unsigned char flagNegative = (1 << 6);
 unsigned char flagHalfCarry = (1 << 5);
 unsigned char flagCarry = (1 << 4);
 
+unsigned long tickCounter = 0;
+
 void setFlag (unsigned char flag) {
     registers.F |= flag;
 }
@@ -52,7 +54,7 @@ unsigned char checkFlag (unsigned char flag) {
 
 // 8-Bit Loads
 
-void ld_r_n (unsigned char* ptrR, unsigned char* n) {
+void ld_r_s (unsigned char* ptrR, unsigned char* n) {
     *ptrR = *n;
 }
 
@@ -60,21 +62,12 @@ void ld_d_r (unsigned char* ptrD, unsigned char* ptrR) {
     *ptrD = *ptrR;
 }
 
-void ld_mHL_n(unsigned char* n) {
-    writeByteToMemory(&registers.HL, n);
+void ld_d_n (unsigned char* ptrD, unsigned char* n) {
+    *ptrD = *n;
 }
 
-void ld_mHL_r (unsigned char* ptrR) {
-    writeByteToMemory(&registers.HL, ptrR);
-}
-
-void ld_d_mHL (unsigned char* ptrR) {
-    *ptrR = readByteFromMemory(&registers.HL);
-}
-
-void ld_A_m_ss (unsigned short* memLocation) {
-    unsigned char value = readByteFromMemory(memLocation);
-    registers.A = value;
+void ld_A_ss (unsigned short* memLocation) {
+    registers.A = readByteFromMemory(memLocation);
 }
 
 void ld_dd_A (unsigned short* memLocation) {
@@ -83,8 +76,7 @@ void ld_dd_A (unsigned short* memLocation) {
 
 void ld_A_c (void) {
     unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-    unsigned char value = readByteFromMemory(&memLocation);
-    registers.A = value;
+    registers.A = readByteFromMemory(&memLocation);
 }
 
 void ld_c_A (void) {
@@ -93,8 +85,7 @@ void ld_c_A (void) {
 }
 
 void ldd_A_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    registers.A = value;
+    registers.A = readByteFromMemory(&registers.HL);
     dec_ss(&registers.HL);
 }
 
@@ -104,8 +95,7 @@ void ldd_mHL_A (void) {
 }
 
 void ldi_A_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    registers.A = value;
+    registers.A = readByteFromMemory(&registers.HL);
     inc_ss(&registers.HL);
 }
 
@@ -121,8 +111,7 @@ void ldh_n_A (unsigned char* n) {
 
 void ldh_A_n (unsigned char* n) {
     unsigned short memLocation = 0xFF00 + *n;
-    unsigned char value = readByteFromMemory(&memLocation);
-    registers.A = value;
+    registers.A = readByteFromMemory(&memLocation);
 }
 
 // 16-Bit loads
@@ -166,11 +155,13 @@ void push_ss (unsigned short* ptrSS) {
     writeByteToMemory(&registers.SP, &lowSS);
     registers.SP -= 1;
     writeByteToMemory(&registers.SP, &highSS);
+
+    tickCounter += 4;
 }
 
 void pop_dd (unsigned short* ptrDD) {
     unsigned short bytePair;
-    bytePair = ((readByteFromMemory(&registers.SP)) << 4);
+    bytePair = ((readByteFromMemory(&registers.SP)) << 8);
     registers.SP += 1;
     bytePair = readByteFromMemory(&registers.SP);
     registers.SP += 1;
@@ -206,11 +197,6 @@ void add_s (unsigned char* s) {
     }
 }
 
-void add_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    add_s(&value);
-}
-
 void adc_s (unsigned char* s) {
     *s += checkFlag(flagCarry);
     unsigned short sum = registers.A + *s;
@@ -238,11 +224,6 @@ void adc_s (unsigned char* s) {
     }
 }
 
-void adc_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    adc_s(&value);
-}
-
 void sub_s (unsigned char* s) {
     setFlag(flagNegative);
 
@@ -264,11 +245,6 @@ void sub_s (unsigned char* s) {
     } else {
         setFlag(flagZero);
     }
-}
-
-void sub_mHL (void) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    add_s(&value);
 }
 
 void sbc_s (unsigned char* s) {
@@ -394,14 +370,12 @@ void add_HL_ss (unsigned short* ss) {
     removeFlag(flagNegative);
     unsigned int sum = registers.HL + *ss;
 
-    // Carry
     if (sum & HIGH_WORD) {
         setFlag(flagCarry);
     } else {
         removeFlag(flagCarry);
     }
 
-    // Half-carry
     if (((registers.HL & LOW_NIBBLE) + (*ss & LOW_NIBBLE)) > LOW_NIBBLE) {
         setFlag(flagHalfCarry);
     } else {
@@ -430,6 +404,7 @@ void add_SP_e (unsigned char* e) {
     }
 
     registers.SP = sum;
+    tickCounter += 12;
 }
 
 void inc_ss (unsigned short *ptrSS) {

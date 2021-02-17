@@ -11,18 +11,17 @@ extern unsigned char flagCarry;
 extern unsigned char flagHalfCarry;
 extern unsigned char flagNegative;
 extern unsigned char flagZero;
+extern unsigned long tickCounter;
 
 void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
 
 // 8-Bit loads
-void ld_r_n (unsigned char* ptrR, unsigned char* n);
+void ld_r_s (unsigned char* ptrR, unsigned char* n);
 void ld_d_r (unsigned char* ptrD, unsigned char* ptrR);
-void ld_mHL_n (unsigned char* n);
-void ld_mHL_r (unsigned char* ptrR);
-void ld_d_mHL (unsigned char* ptrR);
-void ld_A_m_ss (unsigned short* ss);
+void ld_d_n (unsigned char* ptrD, unsigned char* n);
+void ld_A_ss (unsigned short* ss);
 void ld_dd_A (unsigned short* memLocation);
 void ld_A_c (void);
 void ld_c_A (void);

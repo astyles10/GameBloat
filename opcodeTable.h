@@ -1,8 +1,7 @@
 extern enum {
     eNoOperands,
     eOperandChar,
-    eOperandShort,
-    eOperandMemAddr
+    eOperandShort
 } operandType;
 
 extern enum {
@@ -12,7 +11,7 @@ extern enum {
 } eCondition;
 
 struct opcode {
-    char* name;
+    char* asmName;
     unsigned char operandType;
     void *function;
 } extern const baseOpcodeTable[256], CBOpcodeTable[256];
