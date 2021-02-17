@@ -61,7 +61,6 @@ void dec_ss (unsigned short* ptrSS);
 
 // Misc
 void swap_s (unsigned char* ptrS);
-void swap_HL (void);
 void daa (void);
 void cpl (void);
 void ccf (void);

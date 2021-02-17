@@ -86,22 +86,22 @@ void ld_c_A (void) {
 
 void ldd_A_mHL (void) {
     registers.A = readByteFromMemory(&registers.HL);
-    dec_ss(&registers.HL);
+    registers.HL -= 1;
 }
 
 void ldd_mHL_A (void) {
     writeByteToMemory(&registers.HL, &registers.A);
-    dec_ss(&registers.HL);
+    registers.HL -= 1;
 }
 
 void ldi_A_mHL (void) {
     registers.A = readByteFromMemory(&registers.HL);
-    inc_ss(&registers.HL);
+    registers.HL += 1;
 }
 
 void ldi_mHL_A (void) {
     writeByteToMemory(&registers.HL, &registers.A);
-    inc_ss(&registers.HL);
+    registers.HL += 1;
 }
 
 void ldh_n_A (unsigned char* n) {
@@ -126,6 +126,7 @@ void ld_nn_SP (unsigned short* nn) {
 
 void ld_SP_HL (void) {
     registers.SP = registers.HL;
+    tickCounter += 4;
 }
 
 void ld_HL_SP_e (unsigned char* e) {
@@ -144,7 +145,10 @@ void ld_HL_SP_e (unsigned char* e) {
         removeFlag(flagHalfCarry);
     }
 
+    removeFlag(flagZero | flagNegative);
+
     registers.HL = value;
+    tickCounter += 4;
 }
 
 void push_ss (unsigned short* ptrSS) {
@@ -383,6 +387,7 @@ void add_HL_ss (unsigned short* ss) {
     }
 
     registers.HL = sum;
+    tickCounter += 4;
 }
 
 void add_SP_e (unsigned char* e) {
@@ -404,15 +409,17 @@ void add_SP_e (unsigned char* e) {
     }
 
     registers.SP = sum;
-    tickCounter += 12;
+    tickCounter += 8;
 }
 
 void inc_ss (unsigned short *ptrSS) {
     *ptrSS += 1;
+    tickCounter += 4;
 }
 
 void dec_ss (unsigned short* ptrSS) {
     *ptrSS -= 1;
+    tickCounter += 4;
 }
 
 // Misc
@@ -427,20 +434,7 @@ void swap_s (unsigned char* ptrS) {
     } else {
         setFlag(flagZero);
     }
-}
-
-void swap_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry | flagCarry);
-
-    unsigned char value = readByteFromMemory(&registers.HL);
-    value = ((registers.HL & HIGH_NIBBLE) >> 4) | ((registers.HL & LOW_NIBBLE) << 4);
-    writeByteToMemory(&registers.HL, &value);
-
-    if (value) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
+    tickCounter += 4;
 }
 
 void daa (void) {
