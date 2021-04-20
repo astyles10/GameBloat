@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "registers.h"
-#include "opcodeTable.h"
+#include "opcode.h"
 #include "cpu.h"
 #include "memoryManager.h"
-
-#ifndef NULL
-    #define NULL ((void*) 0)
-#endif
 
 const enum {
     eResetCode0 = 0x00,
@@ -879,7 +875,7 @@ void rst_38 (void) {
     rst_f(eResetCode38);
 }
 
-const struct opcode baseOpcodeTable[256] = {
+const opcode baseOpcodeTable[256] = {
     { "NOP", eNoOperands, nop },                // 0x00
     { "LD BC,nn", eOperandShort, ld_BC_nn },    // 0x01
     { "LD (BC),A", eNoOperands, ld_mBC_A },     // 0x02

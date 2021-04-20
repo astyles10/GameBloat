@@ -587,29 +587,6 @@ void rlc_s (unsigned char* ptrS) {
     }
 }
 
-void rlc_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & 0x80) {
-        setFlag(flagCarry);
-    } else {
-        removeFlag(flagCarry);
-    }
-
-    value <<= 1;
-    value += checkFlag(flagCarry);
-
-    writeByteToMemory(&registers.HL, &value);
-
-
-    if (value) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
 void rl_s (unsigned char* ptrS) {
     removeFlag(flagNegative | flagHalfCarry);
 
@@ -622,28 +599,6 @@ void rl_s (unsigned char* ptrS) {
     *ptrS <<= 1;
 
     if (*ptrS) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
-void rl_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & 0x80) {
-        setFlag(flagCarry);
-    } else {
-        removeFlag(flagCarry);
-    }
-
-    value <<= 1;
-
-    writeByteToMemory(&registers.HL, &value);
-
-    if (value) {
         removeFlag(flagZero);
     } else {
         setFlag(flagZero);
@@ -672,31 +627,6 @@ void rrc_s (unsigned char* ptrS) {
     }
 }
 
-void rrc_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & 0x01) {
-       setFlag(flagCarry);
-    } else {
-       removeFlag(flagCarry);
-    }
-
-    value >>= 1;
-
-    writeByteToMemory(&registers.HL, &value);
-
-    if (checkFlag(flagCarry)) {
-        value |= 0x80;
-    }
-
-    if (value) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
 void rr_s (unsigned char* ptrS) {
     removeFlag(flagNegative | flagHalfCarry);
 
@@ -709,27 +639,6 @@ void rr_s (unsigned char* ptrS) {
     *ptrS >>= 1;
 
     if (*ptrS) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
-void rr_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & 0x01) {
-       setFlag(flagCarry);
-    } else {
-       removeFlag(flagCarry);
-    }
-
-    value >>= 1;
-
-    writeByteToMemory(&registers.HL, &value);
-
-    if (value) {
         removeFlag(flagZero);
     } else {
         setFlag(flagZero);
@@ -755,28 +664,6 @@ void sla_s (unsigned char* ptrS) {
     }
 }
 
-void sla_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & 0x80) {
-        setFlag(flagCarry);
-    } else {
-        removeFlag(flagCarry);
-    }
-
-    value <<= 1;
-
-    writeByteToMemory(&registers.HL, &value);
-
-    if (value) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
 void sra_s (unsigned char* ptrS) {
     removeFlag(flagNegative | flagHalfCarry);
 
@@ -789,28 +676,6 @@ void sra_s (unsigned char* ptrS) {
     *ptrS = (*ptrS >> 1) | (*ptrS & 0x80);
 
     if (*ptrS) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
-void sra_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & 0x80) {
-        setFlag(flagCarry);
-    } else {
-        removeFlag(flagCarry);
-    }
-
-    value = (value >> 1) | (value & 0x01);
-
-    writeByteToMemory(&registers.HL, &value);
-
-    if (value) {
         removeFlag(flagZero);
     } else {
         setFlag(flagZero);
@@ -835,72 +700,27 @@ void srl_s (unsigned char* ptrS) {
     }
 }
 
-void srl_HL (void) {
-    removeFlag(flagNegative | flagHalfCarry);
-
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value * 0x01) {
-        setFlag(flagCarry);
-    } else {
-        removeFlag (flagCarry);
-    }
-
-    value >>= 1;
-    writeByteToMemory(&registers.HL, &value);
-
-    if (value) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
-}
-
 // Bit Opcodes
 
-void bit_b_s (unsigned char* bitPosition, unsigned char* ptrS) {
+void bit_b_s (unsigned char bitPosition, unsigned char* ptrS) {
     removeFlag(flagNegative);
     setFlag(flagHalfCarry);
 
-    if (*ptrS & (1 << *bitPosition)) {
+    if (*ptrS & (1 << bitPosition)) {
         removeFlag(flagZero);
     } else {
         setFlag(flagZero);
     }
 }
 
-void bit_b_HL(unsigned short* bitPosition) {
-    removeFlag(flagNegative);
-    setFlag(flagHalfCarry);
-
-    unsigned char value = readByteFromMemory(&registers.HL);
-
-    if (value & (1 << *bitPosition)) {
-        removeFlag(flagZero);
-    } else {
-        setFlag(flagZero);
-    }
+void set_b_s (unsigned char bitPosition, unsigned char* ptrS) {
+    *ptrS |= (1 << bitPosition);
 }
 
-void set_b_s (unsigned char* bitPosition, unsigned char* ptrS) {
-    *ptrS |= (1 << *bitPosition);
+void res_b_s (unsigned char bitPosition, unsigned char* ptrS) {
+    *ptrS &= ~(1 << bitPosition);
 }
 
-void set_b_HL (unsigned short* bitPosition) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    value |= (1 << *bitPosition);
-    writeByteToMemory(&registers.HL, &value);
-}
-
-void res_b_s (unsigned char* bitPosition, unsigned char* ptrS) {
-    *ptrS &= ~(1 << *bitPosition);
-}
-
-void res_b_HL (unsigned short* bitPosition) {
-    unsigned char value = readByteFromMemory(&registers.HL);
-    value &= ~(1 << *bitPosition);
-    writeByteToMemory(&registers.HL, &value);
-}
 // Jumps
 
 void jp_nn (unsigned short* ptrNN) {

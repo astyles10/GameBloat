@@ -79,28 +79,18 @@ void rrc_A (void);
 void rr_A (void);
 
 void rlc_s (unsigned char* ptrS);
-void rlc_HL (void);
 void rl_s (unsigned char* ptrS);
-void rl_HL (void);
 void rrc_s (unsigned char* ptrS);
-void rrc_HL (void);
 void rr_s (unsigned char* ptrS);
-void rr_HL (void);
 
 void sla_s (unsigned char* ptrS);
-void sla_HL (void);
 void sra_s (unsigned char* ptrS);
-void sra_HL (void);
 void srl_s (unsigned char* ptrS);
-void srl_HL (void);
 
 // Bit Opcodes
-void bit_b_s (unsigned char* bitPosition, unsigned char* ptrS);
-void bit_b_HL (unsigned short* bitPosition);
-void set_b_s (unsigned char* bitPosition, unsigned char* ptrS);
-void set_b_HL (unsigned short* bitPosition);
-void res_b_s (unsigned char* bitPosition, unsigned char* ptrS);
-void res_b_HL (unsigned short* bitPosition);
+void bit_b_s (unsigned char bitPosition, unsigned char* ptrS);
+void set_b_s (unsigned char bitPosition, unsigned char* ptrS);
+void res_b_s (unsigned char bitPosition, unsigned char* ptrS);
 
 // Jumps
 
