@@ -5,17 +5,6 @@
 #include "cpu.h"
 #include "memory.h"
 
-const enum {
-    eResetCode0 = 0x00,
-    eResetCode8 = 0x08,
-    eResetCode10 = 0x10,
-    eResetCode18 = 0x18,
-    eResetCode20 = 0x20,
-    eResetCode28 = 0x28,
-    eResetCode30 = 0x30,
-    eResetCode38 = 0x38
-} resetCodes;
-
 void ld_BC_nn (unsigned short* immediate) {
     ld_dd_nn(&registers.BC, immediate);
 }
@@ -735,7 +724,7 @@ void add_A_n (unsigned char* immediate) {
 }
 
 void rst_0 (void) {
-    rst_f(eResetCode0);
+    rst_f(RST_0x00);
 }
 
 void ret_Z (void) {
@@ -759,7 +748,7 @@ void adc_A_n (unsigned char* immediate) {
 }
 
 void rst_08 (void) {
-    rst_f(eResetCode8);
+    rst_f(RST_0x08);
 }
 
 void ret_NC (void) {
@@ -787,7 +776,7 @@ void sub_A_n (unsigned char* immediate) {
 }
 
 void rst_10 (void) {
-    rst_f(eResetCode10);
+    rst_f(RST_0x10);
 }
 
 void ret_C (void) {
@@ -807,7 +796,7 @@ void sbc_A_n (unsigned char* immediate) {
 }
 
 void rst_18 (void) {
-    rst_f(eResetCode18);
+    rst_f(RST_0x18);
 }
 
 void pop_HL (void) {
@@ -827,7 +816,7 @@ void and_n (unsigned char* immediate) {
 }
 
 void rst_20 (void) {
-    rst_f(eResetCode20);
+    rst_f(RST_0x20);
 }
 
 void jp_mHL (void) {
@@ -844,7 +833,7 @@ void xor_n (unsigned char* immediate) {
 }
 
 void rst_28 (void) {
-    rst_f(eResetCode28);
+    rst_f(RST_0x28);
 }
 
 void pop_AF (void) {
@@ -860,7 +849,7 @@ void or_n (unsigned char* immediate) {
 }
 
 void rst_30 (void) {
-    rst_f(eResetCode30);
+    rst_f(RST_0x30);
 }
 
 void ld_A_m_nn (unsigned short* immediate) {
@@ -872,7 +861,7 @@ void cp_n (unsigned char* immediate) {
 }
 
 void rst_38 (void) {
-    rst_f(eResetCode38);
+    rst_f(RST_0x38);
 }
 
 const opcode baseOpcodeTable[256] = {

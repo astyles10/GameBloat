@@ -15,7 +15,8 @@
 			"libc-header-start.h": "c",
 			"stubs.h": "c",
 			"registers.h": "c",
-			"endian.h": "c"
+			"endian.h": "c",
+			"memory.h": "c"
 		},
 		"C_Cpp.default.cppStandard": "c++17",
 		"C_Cpp.default.cStandard": "c17",
