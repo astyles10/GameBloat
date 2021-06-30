@@ -4,7 +4,7 @@
 
 #include "cpu.h"
 #include "registers.h"
-#include "memoryManager.h"
+#include "memory.h"
 #include "opcode.h"
 
 int main () {

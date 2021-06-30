@@ -1,6 +1,6 @@
 #include "cpu.h"
 #include "registers.h"
-#include "memoryManager.h"
+#include "memory.h"
 #include <stdio.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html

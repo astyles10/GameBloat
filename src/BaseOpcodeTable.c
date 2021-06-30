@@ -3,7 +3,7 @@
 #include "registers.h"
 #include "opcode.h"
 #include "cpu.h"
-#include "memoryManager.h"
+#include "memory.h"
 
 const enum {
     eResetCode0 = 0x00,

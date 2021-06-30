@@ -1,7 +1,7 @@
 #include <string.h>
 #include "registers.h"
 #include "cpu.h"
-#include "memoryManager.h"
+#include "memory.h"
 #include "opcode.h"
 
 void rlc_B (void) {
