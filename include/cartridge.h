@@ -1,17 +1,30 @@
 struct header {
-  unsigned char entryPoint[0x04];
-  unsigned char nintendoLogo[0x30];
-  union
-  {
-    unsigned char title[0x10];
+  unsigned char entryPoint[0x04];             // 0x0100 - 0x0103
+  unsigned char nintendoLogo[0x30];           // 0x0104 - 0x0133
+  union {
+    unsigned char title[0x10];                // 0x0134 - 0x0143
     struct
     {
-      unsigned char shortTitle[0x0B];
-      unsigned char manufacturerCode[0x04];
-      unsigned char cgbFlag;
+      unsigned char shortTitle[0x0B];         // 0x0134 - 0x013E
+      unsigned char manufacturerCode[0x04];   // 0x013F - 0x0142
+      unsigned char cgbFlag;                  // 0x0143
     };
   };
+  unsigned char newLicenseeCode[0x02];        // 0x0144 - 0x0145
+  unsigned char sgbFlag;                      // 0x0146
+  unsigned char cartridgeType;                // 0x0147
+  unsigned char romSize;                      // 0x0148
+  unsigned char ramSize;                      // 0x0149
+  unsigned char destinationCode;              // 0x014A
+  unsigned char oldLicenseeCode;              // 0x014B
+  unsigned char maskROMVersionNumber;         // 0x014C
+  unsigned char headerChecksum;               // 0x014D
+  unsigned char globalChecksum[0x02];         // 0x014E - 0x014F
 
 } extern header;
 
-unsigned char nintendoLogo;
+unsigned char nintendoLogoBitmap[0x30] = {
+  0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+  0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+  0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
+};

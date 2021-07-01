@@ -1,7 +1,8 @@
 #include "cartridge.h"
+#include <stdio.h>
 
 struct header header;
 
-void kekw (void) {
-
+void readCartridge (void) {
+    
 }
