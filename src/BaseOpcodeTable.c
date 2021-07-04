@@ -920,9 +920,9 @@ const opcode baseOpcodeTable[256] = {
     { "LD SP,nn", eOperandShort, ld_SP_nn },    // 0x31
     { "LDD (HL),A", eNoOperands, ldd_mHL_A },   // 0x32
     { "INC SP", eNoOperands, inc_SP },          // 0x33
-    { "INC (HL)", eNoOperands, inc_mHL },   // 0x34
-    { "DEC (HL)", eNoOperands, dec_mHL },   // 0x35
-    { "LD (HL),n", eOperandShort, ld_d_n },   // 0x36
+    { "INC (HL)", eNoOperands, inc_mHL },       // 0x34
+    { "DEC (HL)", eNoOperands, dec_mHL },       // 0x35
+    { "LD (HL),n", eOperandShort, ld_d_n },     // 0x36
     { "SCF", eNoOperands, scf },                // 0x37
     { "JR C,n", eOperandChar, jr_C_n },         // 0x38
     { "ADD HL,SP", eNoOperands, add_HL_SP },    // 0x39
