@@ -17,6 +17,8 @@ void setFlag (unsigned char flag);
 void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
 
+void reset(void);
+
 // 8-Bit loads
 void ld_r_s (unsigned char* ptrR, unsigned char* n);
 void ld_d_r (unsigned char* ptrD, unsigned char* ptrR);

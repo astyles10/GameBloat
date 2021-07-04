@@ -1,7 +1,6 @@
 #include "cpu.h"
 #include "registers.h"
 #include "memory.h"
-#include <stdio.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -50,6 +49,42 @@ void removeFlag (unsigned char flag) {
 unsigned char checkFlag (unsigned char flag) {
     if (registers.F & flag) { return 1; }
     else { return 0; }
+}
+
+const unsigned short resetAddresses[] = {
+    0xFF05, 0xFF06, 0xFF07, 0xFF10,
+    0xFF11, 0xFF12, 0xFF14, 0xFF16,
+    0xFF17, 0xFF19, 0xFF1A, 0xFF1B,
+    0xFF1C, 0xFF1E, 0xFF20, 0xFF21,
+    0xFF22, 0xFF23, 0xFF24, 0xFF25,
+    0xFF26, 0xFF40, 0xFF42, 0xFF43,
+    0xFF45, 0xFF47, 0xFF48, 0xFF49,
+    0xFF4A, 0xFF4B, 0xFFFF
+};
+
+const unsigned char resetValues[] = {
+    0x00, 0x00, 0x00, 0x80,
+    0xBF, 0xF3, 0xBF, 0x3F,
+    0x00, 0xBF, 0x7F, 0xFF,
+    0x9F, 0xBF, 0xFF, 0x00,
+    0x00, 0xBF, 0x77, 0xF3,
+    0xF1, 0x91, 0x00, 0x00,
+    0x00, 0xFC, 0xFF, 0xFF,
+    0x00, 0x00, 0x00
+};
+
+void reset(void) {
+    registers.AF = 0x01B0;
+    registers.BC = 0x0013;
+    registers.DE = 0x00D8;
+    registers.HL = 0x014D;
+    registers.SP = 0xFFFE;
+    registers.PC = 0x0100;
+    
+    int i;
+    for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
+        writeByteToMemory(&resetAddresses[i], &resetValues[i]);
+    }
 }
 
 // 8-Bit Loads
@@ -491,7 +526,6 @@ void scf (void) {
 }
 
 void nop (void) {
-    printf("NOP\n");
 }
 
 void undefined (void) {
@@ -749,12 +783,10 @@ void call_nn (unsigned short* nn) {
     unsigned short memLocation = registers.SP - 0x01;
     unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
     writeByteToMemory(&memLocation, &PCh);
-    printf("PCh value: 0x%02x\n", PCh);
 
     // (SP-2) = PCl
     memLocation -= 1;
     unsigned char PCl = (unsigned char)(registers.PC & LOW_BYTE);
-    printf("PCl value: 0x%02x\n", PCl);
     writeByteToMemory(&memLocation, &PCl);
 
     registers.PC = *nn;
