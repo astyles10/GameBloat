@@ -14,6 +14,21 @@
 #define RAM_INTERNAL            0xFF80
 #define INTERRUPT_ENR           0xFFFF
 
+struct MemoryMap {
+    unsigned char ROMBankZero[ROM_BANK_SWITCHABLE - ROM_BANK_ZERO];
+    unsigned char ROMBankSwitchable[RAM_VIDEO - ROM_BANK_SWITCHABLE];
+    unsigned char RAMVideo[RAM_SWITCHABLE - RAM_VIDEO];
+    unsigned char RAMSwitchable[RAM_INTERNAL_8KB - RAM_SWITCHABLE];
+    unsigned char RAMInternal8KB[RAM_INTERNAL_8KB_ECHO - RAM_INTERNAL_8KB];
+    unsigned char RAMInternal8KBEcho[SPRITE_ATTR_MEM - RAM_INTERNAL_8KB_ECHO];
+    unsigned char spriteAttributeMemory[EMPTY_REGION_1 - SPRITE_ATTR_MEM];
+    unsigned char emptyRegion1[IO_PORTS - EMPTY_REGION_1];
+    unsigned char ioPorts[EMPTY_REGION_2 - IO_PORTS];
+    unsigned char emptyRegion2[IO_PORTS - EMPTY_REGION_1];
+    unsigned char RAMInternal[INTERRUPT_ENR - RAM_INTERNAL];
+    unsigned char interruptEnable;
+} extern memoryMap;
+
 // Begin Reserved Memory Locations
 
 /* 

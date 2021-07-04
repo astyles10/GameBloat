@@ -41,7 +41,8 @@ struct header {
 extern const unsigned char nintendoLogoBitmap[0x30];
 
 /* 
-    Functions
+    Public Functions
  */
 
 int validateCart(char*);
+int loadCartROM(char*);

@@ -1,6 +1,8 @@
 #include "cartridge.h"
 #include <stdio.h>
 
+// Cart variables
+
 struct header header;
 
 const unsigned char nintendoLogoBitmap[0x30] = {
@@ -9,8 +11,11 @@ const unsigned char nintendoLogoBitmap[0x30] = {
   0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
 };
 
+// Private Function Declarations
+
 int checkLogo(FILE*);
 int checkHeaderValues(FILE*);
+int parseHeader(FILE*);
 
 int validateCart(char* fileName) {
 
@@ -88,6 +93,20 @@ int checkHeaderValues(FILE* fp) {
     return isValid;
 }
 
-int parseHeader() {
+int loadCartROM(char* cartName) {
+    FILE* fp = fopen(cartName, "rb");
+    if (fp == NULL) {
+        perror("Cartridge error: ");
+    } else {
+        if (parseHeader(fp)) {
+
+        }
+    }
+    return 0;
+}
+
+int parseHeader(FILE* fp) {
+    fseek(fp, HEADER_VALUES_START, SEEK_SET);
+    
     return 0;
 }

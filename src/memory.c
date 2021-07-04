@@ -1,7 +1,9 @@
 #include <string.h>
 #include "cpu.h"
+#include "memory.h"
 
 unsigned char tempMemCart[0xFFFF];
+struct MemoryMap memoryMap;
 
 void initializeMemory(void) {
     memset(tempMemCart, 0x50, sizeof(tempMemCart));
