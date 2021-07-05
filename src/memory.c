@@ -21,7 +21,7 @@ unsigned short readShortFromMemory (unsigned short* memAddr) {
     return memValue;
 }
 
-void writeByteToMemory (unsigned short* memAddr, unsigned char* value) {
+void writeByteToMemory (const unsigned short* memAddr, const unsigned char* value) {
     tickCounter += 4;
     tempMemCart[*memAddr] = *value;
 }

@@ -1,5 +1,6 @@
 #include "cartridge.h"
 #include <stdio.h>
+#include <string.h>
 
 // Cart variables
 
@@ -16,6 +17,8 @@ const unsigned char nintendoLogoBitmap[0x30] = {
 int checkLogo(FILE*);
 int checkHeaderValues(FILE*);
 int parseHeader(FILE*);
+void setHeaderValues(FILE*);
+void printHeaderValue(char*, const char*, long);
 
 int validateCart(char* fileName) {
 
@@ -35,12 +38,20 @@ int validateCart(char* fileName) {
         perror("Cartridge error: ");
         cartValid = 0;
     } else {
-        if (!(checkLogo(fp) && checkHeaderValues(fp))) {
-            printf("Error: Cartridge invalid. Exiting...\n");
+        fseek(fp, 0, SEEK_END);
+        long cartSize = ftell(fp);
+        if (cartSize < 0x14F) {
+            printf("Error: Cartridge is too small. Exiting...\n");
             cartValid = 0;
+        } else {
+            rewind(fp);
+            if(!(checkLogo(fp) && checkHeaderValues(fp))) {
+                printf("Error: Cartridge invalid. Exiting...\n");
+                cartValid = 0;
+            }
         }
-        fclose(fp);
     }
+    fclose(fp);
     return cartValid;
 }
 
@@ -98,15 +109,50 @@ int loadCartROM(char* cartName) {
     if (fp == NULL) {
         perror("Cartridge error: ");
     } else {
+        setHeaderValues(fp);
         if (parseHeader(fp)) {
 
         }
     }
+    fclose(fp);
     return 0;
 }
 
+void setHeaderValues(FILE* fp) {
+    fseek(fp, HEADER_START, SEEK_SET);
+    fread(&header.entryPoint, 1, sizeof(header.entryPoint), fp);
+    fread(&header.nintendoLogo, 1, sizeof(header.nintendoLogo), fp);
+    fread(&header.title, 1, sizeof(header.title), fp);
+    fread(&header.newLicenseeCode, 1, sizeof(header.newLicenseeCode), fp);
+    fread(&header.sgbFlag, 1, sizeof(header.sgbFlag), fp);
+    fread(&header.cartridgeType, 1, sizeof(header.cartridgeType), fp);
+    fread(&header.romSize, 1, sizeof(header.romSize), fp);
+    fread(&header.ramSize, 1, sizeof(header.ramSize), fp);
+    fread(&header.destinationCode, 1, sizeof(header.destinationCode), fp);
+    fread(&header.oldLicenseeCode, 1, sizeof(header.oldLicenseeCode), fp);
+    fread(&header.maskROMVersionNumber, 1, sizeof(header.maskROMVersionNumber), fp);
+    fread(&header.headerChecksum, 1, sizeof(header.headerChecksum), fp);
+    fread(&header.globalChecksum, 1, sizeof(header.globalChecksum), fp);
+}
+
 int parseHeader(FILE* fp) {
-    fseek(fp, HEADER_VALUES_START, SEEK_SET);
-    
+    // Parse title - check the CGB flag
+    if (header.cgbFlag == CGB_ONLY) {
+        printf("Cartridge supports Gameboy Color only.\n");
+    } else if (header.cgbFlag == GB_OR_CGB) {
+        printf("Cartridge supports Gameboy & Gameboy Color.\n");
+    } else {
+        printf("Cartridge predates the Gameboy Color.\n");
+    }
+    printHeaderValue("New Licensee Code: ", (const char*)header.newLicenseeCode, sizeof(header.newLicenseeCode));
     return 0;
+}
+
+void printHeaderValue(char* headerValueName, const char* toPrint, long size) {
+    int i;
+    printf(headerValueName);
+    for (i = 0; i < size; i++) {
+        printf("%02X", (unsigned char)toPrint[i]);
+    }
+    printf("\n");
 }

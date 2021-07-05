@@ -6,23 +6,18 @@
 #define HEADER_VALUES_START   0x134
 #define HEADER_VALUES_END     0x14D
 
+#define GB_OR_CGB   0x80
+#define CGB_ONLY    0xC0
+
 struct header {
   unsigned char entryPoint[0x04];             // 0x0100 - 0x0103
   unsigned char nintendoLogo[0x30];           // 0x0104 - 0x0133
   union {
     unsigned char title[0x10];                // 0x0134 - 0x0143
-    struct
-    {
-      #ifdef LITTLE_ENDIAN
-      unsigned char cgbFlag;                  // 0x0143
-      unsigned char manufacturerCode[0x04];   // 0x013F - 0x0142
-      unsigned char shortTitle[0x0B];         // 0x0134 - 0x013E
-      #else
+    struct {
       unsigned char shortTitle[0x0B];         // 0x0134 - 0x013E
       unsigned char manufacturerCode[0x04];   // 0x013F - 0x0142
       unsigned char cgbFlag;                  // 0x0143
-      #endif
-
     };
   };
   unsigned char newLicenseeCode[0x02];        // 0x0144 - 0x0145
@@ -35,7 +30,6 @@ struct header {
   unsigned char maskROMVersionNumber;         // 0x014C
   unsigned char headerChecksum;               // 0x014D
   unsigned char globalChecksum[0x02];         // 0x014E - 0x014F
-
 } extern header;
 
 extern const unsigned char nintendoLogoBitmap[0x30];
