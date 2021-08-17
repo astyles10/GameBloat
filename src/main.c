@@ -6,16 +6,25 @@
 #include "registers.h"
 #include "memory.h"
 #include "opcode.h"
+#include "cartridge.h"
 
 int main () {
-  initializeMemory();
-  unsigned short memValue = 0x00;
-  printf("Value at mem address: 0x%04X\n", readByteFromMemory(&memValue));
   // In driver code, if operand exists, increment ticks by 4 per char
   // Memory module will increment ticks on read/write/getPointer functions
   // Each time an opcode is called, increment by 4 ticks by default
 
-  printf("Opcode 0x00 disassembly: %s\n", baseOpcodeTable[0x00].asmName);
-  printf("Extended Opcode 0x00 disassembly: %s\n", CBOpcodeTable[0x00].asmName);
+  if(validateCart("./GB_Games/PokemonRed.gb")) {
+    reset();
+    loadCartROM("./GB_Games/PokemonRed.gb");
+    
+    printf("Cart title: %s\n", header.title);
+    printf("Cart name: %s\n", header.shortTitle);
+    printf("Cart CGB flag: %d\n", header.cgbFlag);
+    printf("Cart manufacturer code: ");
+    for(int i = 0; i < (sizeof(header.manufacturerCode) / sizeof(char)); i++) {
+      printf("%d", header.manufacturerCode[i]);
+    }
+    printf("\n");
+  }
   return 0;
 }

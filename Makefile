@@ -1,7 +1,7 @@
 CC		:=	gcc
 SDIR	:=	src
 IDIR	:=	-Iinclude
-CFLAGS	:=	$(IDIR) -g -Wall -DLIN
+CFLAGS	:=	$(IDIR) -g -Wall -DLIN -DLITTLE_ENDIAN
 LFLAGS	:=	-lm
 ODIR	:=	debug
 CFILES	:=	$(wildcard $(SDIR)/*.c)
