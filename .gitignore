@@ -50,4 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Make outputs
 emulator
+
+# Other
+GB_Games/

@@ -32,19 +32,6 @@ struct MemoryMap {
 // Begin Reserved Memory Locations
 
 /* 
-    Restart Addresses
- */
-
-#define RST_0x00 0x00
-#define RST_0x08 0x08
-#define RST_0x10 0x10
-#define RST_0x18 0x18
-#define RST_0x20 0x20
-#define RST_0x28 0x28
-#define RST_0x30 0x30
-#define RST_0x38 0x38
-
-/* 
     Interrupt Addresses
  */
 

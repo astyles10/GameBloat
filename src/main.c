@@ -13,18 +13,22 @@ int main () {
   // Memory module will increment ticks on read/write/getPointer functions
   // Each time an opcode is called, increment by 4 ticks by default
 
-  if(validateCart("./GB_Games/PokemonRed.gb")) {
+  if ( validateCart("./GB_Games/PokemonRed.gb") ) {
     reset();
     loadCartROM("./GB_Games/PokemonRed.gb");
-    
-    printf("Cart title: %s\n", header.title);
-    printf("Cart name: %s\n", header.shortTitle);
-    printf("Cart CGB flag: %d\n", header.cgbFlag);
+
+    printf("Cart title: %s\n", cartridge.header.title);
+    printf("Cart name: %s\n", cartridge.header.shortTitle);
+    printf("Cart CGB flag: %d\n", cartridge.header.cgbFlag);
     printf("Cart manufacturer code: ");
-    for(int i = 0; i < (sizeof(header.manufacturerCode) / sizeof(char)); i++) {
-      printf("%d", header.manufacturerCode[i]);
+    for (int i = 0; i < (sizeof(cartridge.header.manufacturerCode) / sizeof(char)); i++) {
+      printf("%d", cartridge.header.manufacturerCode[i]);
     }
     printf("\n");
+    printf("Cart MBC type: %02X\n", cartridge.header.cartridgeType);
+    printf("Cart ROM Size: %02X\n", cartridge.header.romSize);
+    printf("Cart RAM Size: %02X\n", cartridge.header.ramSize);
+    printf("Header checksum: %02X\n", cartridge.header.headerChecksum);
   }
   return 0;
 }

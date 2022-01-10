@@ -1,4 +1,5 @@
 #pragma once
+#include <stdio.h>
 
 #define HEADER_START          0x100
 #define CART_LOGO_START_LOC   0x104
@@ -30,13 +31,15 @@ struct header {
   unsigned char maskROMVersionNumber;         // 0x014C
   unsigned char headerChecksum;               // 0x014D
   unsigned char globalChecksum[0x02];         // 0x014E - 0x014F
-} extern header;
+};
 
-extern const unsigned char nintendoLogoBitmap[0x30];
+struct cartridge {
+  struct header header;
+} extern cartridge;
 
 /* 
     Public Functions
  */
 
 int validateCart(char*);
-int loadCartROM(char*);
+void setHeaderValues(FILE*);

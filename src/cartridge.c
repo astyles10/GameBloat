@@ -1,10 +1,9 @@
 #include "cartridge.h"
-#include <stdio.h>
 #include <string.h>
 
 // Cart variables
 
-struct header header;
+struct cartridge cartridge;
 
 const unsigned char nintendoLogoBitmap[0x30] = {
   0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
@@ -12,28 +11,58 @@ const unsigned char nintendoLogoBitmap[0x30] = {
   0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E
 };
 
+enum cartridgeTypes {
+    ROM_ONLY = 0x00,
+    MBC1 = 0x01,
+    MBC1_RAM = 0x02,
+    MBC1_RAM_BATTERY = 0x03,
+    MBC2 = 0x05,
+    MBC2_BATTERY = 0x06,
+    ROM_RAM = 0x08,
+    ROM_RAM_BATTERY = 0x09,
+    MMM01 = 0x0B,
+    MMM01_RAM = 0x0C,
+    MMM01_RAM_BATTERY = 0x0D,
+    MBC3_TIMER_BATTERY = 0x0F,
+    MBC3_TIMER_RAM_BATTERY = 0x10,
+    MBC3 = 0x11,
+    MBC3_RAM= 0x12,
+    MBC3_RAM_BATTERY = 0x13,
+    MBC4 = 0x15,
+    MBC4_RAM = 0x16,
+    MBC4_RAM_BATTERY = 0x17,
+    MBC5 = 0x19,
+    MBC5_RAM = 0x1A,
+    MBC5_RAM_BATTERY = 0x1B,
+    MBC5_RUMBLE = 0x1C,
+    MBC5_RUMBLE_RAM = 0x1D,
+    MBC5_RUMBLE_RAM_BATTERY = 0x1E,
+    POCKET_CAMERA = 0xFC,
+    BANDAI_TAMA5 = 0xFD,
+    HUC3 = 0xFE,
+    HUC1_RAM_BATTERY = 0xFF
+};
+
 // Private Function Declarations
 
 int checkLogo(FILE*);
 int checkHeaderValues(FILE*);
 int parseHeader(FILE*);
-void setHeaderValues(FILE*);
 void printHeaderValue(char*, const char*, long);
 
+/* 
+    Powerup Sequence:
+    1. Check that cart header contains the correct Nintendo Logo bytes.
+    2. If step 1 valid, check that the sum of header values + decimal 25 has a LSB of 0
+    3. If step 2 valid, begin cartridge program execution from address 0x100. Load specific set of values into registers.
+    If at any step the checks fail, the Gameboy halts operations (i.e. freezes)
+ */
+
 int validateCart(char* fileName) {
-
-    /* 
-        Powerup Sequence:
-        1. Check that cart header contains the correct Nintendo Logo bytes.
-        2. If step 1 valid, check that the sum of header values + decimal 25 has a LSB of 0
-        3. If step 2 valid, begin cartridge program execution from address 0x100. Load specific set of values into registers.
-
-        If at any step the checks fail, the Gameboy halts operations (i.e. freezes)
-     */
-
     int cartValid = 1;
     FILE* fp;
     fp = fopen(fileName, "rb");
+
     if (fp == NULL) {
         perror("Cartridge error: ");
         cartValid = 0;
@@ -45,7 +74,7 @@ int validateCart(char* fileName) {
             cartValid = 0;
         } else {
             rewind(fp);
-            if(!(checkLogo(fp) && checkHeaderValues(fp))) {
+            if ( !(checkLogo(fp) && checkHeaderValues(fp) ) ) {
                 printf("Error: Cartridge invalid. Exiting...\n");
                 cartValid = 0;
             }
@@ -57,13 +86,13 @@ int validateCart(char* fileName) {
 
 int checkLogo(FILE* fp) {
     fseek(fp, CART_LOGO_START_LOC, SEEK_SET);
-    fread(&header.nintendoLogo, 1, sizeof(header.nintendoLogo), fp);
+    fread(&cartridge.header.nintendoLogo, 1, sizeof(cartridge.header.nintendoLogo), fp);
     int i;
-    int logoEnd = sizeof(header.nintendoLogo);
+    int logoEnd = sizeof(cartridge.header.nintendoLogo);
     int isMatch = 1;
     for (i = 0; i < logoEnd; i++) {
-        if (nintendoLogoBitmap[i] != header.nintendoLogo[i]) {
-            printf("Powerup error: logo byte %d does not match. Expected 0x%02X, got 0x%02X.\n", i, nintendoLogoBitmap[i], header.nintendoLogo[i]);
+        if (nintendoLogoBitmap[i] != cartridge.header.nintendoLogo[i]) {
+            printf("Powerup error: logo byte %d does not match. Expected 0x%02X, got 0x%02X.\n", i, nintendoLogoBitmap[i], cartridge.header.nintendoLogo[i]);
             isMatch = 0;
         } else {
             #ifdef DEBUG
@@ -98,53 +127,39 @@ int checkHeaderValues(FILE* fp) {
         printf("Powerup error: Sum of header values invalid: 0x%02X\n", valueSum);
         isValid = 0;
     } else {
-        printf("Powerup: Sum of header values passed: 0x%02X\n", valueSum);
+        printf("Powerup: Sum of header values passed with: 0x%02X\n", valueSum);
     }
 
     return isValid;
 }
 
-int loadCartROM(char* cartName) {
-    FILE* fp = fopen(cartName, "rb");
-    if (fp == NULL) {
-        perror("Cartridge error: ");
-    } else {
-        setHeaderValues(fp);
-        if (parseHeader(fp)) {
-
-        }
-    }
-    fclose(fp);
-    return 0;
-}
-
 void setHeaderValues(FILE* fp) {
     fseek(fp, HEADER_START, SEEK_SET);
-    fread(&header.entryPoint, 1, sizeof(header.entryPoint), fp);
-    fread(&header.nintendoLogo, 1, sizeof(header.nintendoLogo), fp);
-    fread(&header.title, 1, sizeof(header.title), fp);
-    fread(&header.newLicenseeCode, 1, sizeof(header.newLicenseeCode), fp);
-    fread(&header.sgbFlag, 1, sizeof(header.sgbFlag), fp);
-    fread(&header.cartridgeType, 1, sizeof(header.cartridgeType), fp);
-    fread(&header.romSize, 1, sizeof(header.romSize), fp);
-    fread(&header.ramSize, 1, sizeof(header.ramSize), fp);
-    fread(&header.destinationCode, 1, sizeof(header.destinationCode), fp);
-    fread(&header.oldLicenseeCode, 1, sizeof(header.oldLicenseeCode), fp);
-    fread(&header.maskROMVersionNumber, 1, sizeof(header.maskROMVersionNumber), fp);
-    fread(&header.headerChecksum, 1, sizeof(header.headerChecksum), fp);
-    fread(&header.globalChecksum, 1, sizeof(header.globalChecksum), fp);
+    fread(&cartridge.header.entryPoint, 1, sizeof(cartridge.header.entryPoint), fp);
+    fread(&cartridge.header.nintendoLogo, 1, sizeof(cartridge.header.nintendoLogo), fp);
+    fread(&cartridge.header.title, 1, sizeof(cartridge.header.title), fp);
+    fread(&cartridge.header.newLicenseeCode, 1, sizeof(cartridge.header.newLicenseeCode), fp);
+    fread(&cartridge.header.sgbFlag, 1, sizeof(cartridge.header.sgbFlag), fp);
+    fread(&cartridge.header.cartridgeType, 1, sizeof(cartridge.header.cartridgeType), fp);
+    fread(&cartridge.header.romSize, 1, sizeof(cartridge.header.romSize), fp);
+    fread(&cartridge.header.ramSize, 1, sizeof(cartridge.header.ramSize), fp);
+    fread(&cartridge.header.destinationCode, 1, sizeof(cartridge.header.destinationCode), fp);
+    fread(&cartridge.header.oldLicenseeCode, 1, sizeof(cartridge.header.oldLicenseeCode), fp);
+    fread(&cartridge.header.maskROMVersionNumber, 1, sizeof(cartridge.header.maskROMVersionNumber), fp);
+    fread(&cartridge.header.headerChecksum, 1, sizeof(cartridge.header.headerChecksum), fp);
+    fread(&cartridge.header.globalChecksum, 1, sizeof(cartridge.header.globalChecksum), fp);
 }
 
 int parseHeader(FILE* fp) {
     // Parse title - check the CGB flag
-    if (header.cgbFlag == CGB_ONLY) {
+    if (cartridge.header.cgbFlag == CGB_ONLY) {
         printf("Cartridge supports Gameboy Color only.\n");
-    } else if (header.cgbFlag == GB_OR_CGB) {
+    } else if (cartridge.header.cgbFlag == GB_OR_CGB) {
         printf("Cartridge supports Gameboy & Gameboy Color.\n");
     } else {
         printf("Cartridge predates the Gameboy Color.\n");
     }
-    printHeaderValue("New Licensee Code: ", (const char*)header.newLicenseeCode, sizeof(header.newLicenseeCode));
+    printHeaderValue("New Licensee Code: ", (const char*)cartridge.header.newLicenseeCode, sizeof(cartridge.header.newLicenseeCode));
     return 0;
 }
 

@@ -6,7 +6,7 @@ unsigned char tempMemCart[0xFFFF];
 struct MemoryMap memoryMap;
 
 void initializeMemory(void) {
-    memset(tempMemCart, 0x50, sizeof(tempMemCart));
+    memset(tempMemCart, 0x00, sizeof(tempMemCart));
 }
 
 unsigned char readByteFromMemory (unsigned short* memAddr) {

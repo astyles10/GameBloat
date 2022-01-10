@@ -1,4 +1,5 @@
 #pragma once
+#include <stdio.h>
 
 #define LOW_NIBBLE 0x000F
 #define HIGH_NIBBLE 0x00F0
@@ -18,6 +19,7 @@ void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
 
 void reset(void);
+int loadCartROM(char*);
 
 // 8-Bit loads
 void ld_r_s (unsigned char* ptrR, unsigned char* n);

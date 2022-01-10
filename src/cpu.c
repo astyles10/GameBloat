@@ -1,6 +1,7 @@
 #include "cpu.h"
 #include "registers.h"
 #include "memory.h"
+#include "cartridge.h"
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -80,11 +81,34 @@ void reset(void) {
     registers.HL = 0x014D;
     registers.SP = 0xFFFE;
     registers.PC = 0x0100;
-    
+
     int i;
     for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
         writeByteToMemory(&resetAddresses[i], &resetValues[i]);
     }
+}
+
+int loadCartROM(char* cartName) {
+    FILE* fp = fopen(cartName, "rb");
+    if (fp == NULL) {
+        perror("Cartridge error: ");
+    } else {
+        setHeaderValues(fp);
+        fseek(fp, 0L, SEEK_END);
+        long filesize = ftell(fp);
+        printf("File size = %ld\n", filesize);
+        rewind(fp);
+        // Determine RAM Size
+
+        // Determine ROM Size
+        // Map MBC setting from cartridge to MBC object
+        switch (cartridge.header.cartridgeType) {
+            case 1:
+            break;
+        }
+    }
+    fclose(fp);
+    return 0;
 }
 
 // 8-Bit Loads

@@ -724,7 +724,7 @@ void add_A_n (unsigned char* immediate) {
 }
 
 void rst_0 (void) {
-    rst_f(RST_0x00);
+    rst_f(0x00);
 }
 
 void ret_Z (void) {
@@ -748,7 +748,7 @@ void adc_A_n (unsigned char* immediate) {
 }
 
 void rst_08 (void) {
-    rst_f(RST_0x08);
+    rst_f(0x08);
 }
 
 void ret_NC (void) {
@@ -776,7 +776,7 @@ void sub_A_n (unsigned char* immediate) {
 }
 
 void rst_10 (void) {
-    rst_f(RST_0x10);
+    rst_f(0x10);
 }
 
 void ret_C (void) {
@@ -796,7 +796,7 @@ void sbc_A_n (unsigned char* immediate) {
 }
 
 void rst_18 (void) {
-    rst_f(RST_0x18);
+    rst_f(0x18);
 }
 
 void pop_HL (void) {
@@ -816,7 +816,7 @@ void and_n (unsigned char* immediate) {
 }
 
 void rst_20 (void) {
-    rst_f(RST_0x20);
+    rst_f(0x20);
 }
 
 void jp_mHL (void) {
@@ -833,7 +833,7 @@ void xor_n (unsigned char* immediate) {
 }
 
 void rst_28 (void) {
-    rst_f(RST_0x28);
+    rst_f(0x28);
 }
 
 void pop_AF (void) {
@@ -849,7 +849,7 @@ void or_n (unsigned char* immediate) {
 }
 
 void rst_30 (void) {
-    rst_f(RST_0x30);
+    rst_f(0x30);
 }
 
 void ld_A_m_nn (unsigned short* immediate) {
@@ -861,7 +861,7 @@ void cp_n (unsigned char* immediate) {
 }
 
 void rst_38 (void) {
-    rst_f(RST_0x38);
+    rst_f(0x38);
 }
 
 const opcode baseOpcodeTable[256] = {
