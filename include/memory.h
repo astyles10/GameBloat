@@ -14,20 +14,20 @@
 #define RAM_INTERNAL            0xFF80
 #define INTERRUPT_ENR           0xFFFF
 
-struct MemoryMap {
-    unsigned char ROMBankZero[ROM_BANK_SWITCHABLE - ROM_BANK_ZERO];
-    unsigned char ROMBankSwitchable[RAM_VIDEO - ROM_BANK_SWITCHABLE];
-    unsigned char RAMVideo[RAM_SWITCHABLE - RAM_VIDEO];
-    unsigned char RAMSwitchable[RAM_INTERNAL_8KB - RAM_SWITCHABLE];
-    unsigned char RAMInternal8KB[RAM_INTERNAL_8KB_ECHO - RAM_INTERNAL_8KB];
-    unsigned char RAMInternal8KBEcho[SPRITE_ATTR_MEM - RAM_INTERNAL_8KB_ECHO];
-    unsigned char spriteAttributeMemory[EMPTY_REGION_1 - SPRITE_ATTR_MEM];
-    unsigned char emptyRegion1[IO_PORTS - EMPTY_REGION_1];
-    unsigned char ioPorts[EMPTY_REGION_2 - IO_PORTS];
-    unsigned char emptyRegion2[IO_PORTS - EMPTY_REGION_1];
-    unsigned char RAMInternal[INTERRUPT_ENR - RAM_INTERNAL];
-    unsigned char interruptEnable;
-} extern memoryMap;
+// struct MemoryMap {
+//     unsigned char ROMBankZero[ROM_BANK_SWITCHABLE - ROM_BANK_ZERO];
+//     unsigned char ROMBankSwitchable[RAM_VIDEO - ROM_BANK_SWITCHABLE];
+//     unsigned char RAMVideo[RAM_SWITCHABLE - RAM_VIDEO];
+//     unsigned char RAMSwitchable[RAM_INTERNAL_8KB - RAM_SWITCHABLE];
+//     unsigned char RAMInternal8KB[RAM_INTERNAL_8KB_ECHO - RAM_INTERNAL_8KB];
+//     unsigned char RAMInternal8KBEcho[SPRITE_ATTR_MEM - RAM_INTERNAL_8KB_ECHO];
+//     unsigned char spriteAttributeMemory[EMPTY_REGION_1 - SPRITE_ATTR_MEM];
+//     unsigned char emptyRegion1[IO_PORTS - EMPTY_REGION_1];
+//     unsigned char ioPorts[EMPTY_REGION_2 - IO_PORTS];
+//     unsigned char emptyRegion2[IO_PORTS - EMPTY_REGION_1];
+//     unsigned char RAMInternal[INTERRUPT_ENR - RAM_INTERNAL];
+//     unsigned char interruptEnable;
+// } extern memoryMap;
 
 // Begin Reserved Memory Locations
 
@@ -41,12 +41,24 @@ struct MemoryMap {
 #define SERIAL_TX_COMPLETION_INTR   0x58
 #define HIGH_LOW_P10_P13_INTR       0x60
 
-extern unsigned char tempMemCart[0xFFFF];
-
 void initializeMemory(void);
 
-unsigned char readByteFromMemory(unsigned short* memAddr);
+unsigned char MBC1_ReadByte(unsigned short* memAddr);
 unsigned short readShortFromMemory(unsigned short* memAddr);
 void writeByteToMemory(const unsigned short* memAddr, const unsigned char* value);
 void writeShortToMemory(unsigned short* memAddr, unsigned short* value);
 unsigned char* getPointerToMemory(unsigned short* memAddr);
+
+typedef char (*readByteFromMemory_test)(const unsigned short* memAddr);
+typedef short (*readShortFromMemory_test)(unsigned short* memAddr);
+typedef void (*writeByteToMemory_test)(const unsigned short* memAddr, const unsigned char* value);
+typedef void (*writeShortToMemory_test)(const unsigned short* memAddr, const unsigned short* value);
+typedef unsigned char* (*getPointerToMemory_test)(const unsigned short* memAddr);
+
+struct MBC {
+    readByteFromMemory_test readByte;
+    readShortFromMemory_test readShort;
+    writeByteToMemory_test writeByte;
+    writeShortToMemory_test writeShort;
+    getPointerToMemory_test getPtrToMemory;
+} extern *MBC;
