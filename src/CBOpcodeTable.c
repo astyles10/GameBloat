@@ -29,7 +29,7 @@ void rlc_L (void) {
 }
 
 void rlc_mHL (void) {
-    rlc_s(getPointerToMemory(&registers.HL));
+    rlc_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void rrc_B (void) {
@@ -57,7 +57,7 @@ void rrc_L (void) {
 }
 
 void rrc_mHL (void) {
-    rrc_s(getPointerToMemory(&registers.HL));
+    rrc_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void rl_B (void) {
@@ -85,7 +85,7 @@ void rl_L (void) {
 }
 
 void rl_mHL (void) {
-    rl_s(getPointerToMemory(&registers.HL));
+    rl_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void rr_B (void) {
@@ -113,7 +113,7 @@ void rr_L (void) {
 }
 
 void rr_mHL (void) {
-    rr_s(getPointerToMemory(&registers.HL));
+    rr_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void sla_B (void) {
@@ -141,7 +141,7 @@ void sla_L (void) {
 }
 
 void sla_mHL (void) {
-    sla_s(getPointerToMemory(&registers.HL));
+    sla_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void sla_A (void) {
@@ -173,7 +173,7 @@ void sra_L (void) {
 }
 
 void sra_mHL (void) {
-    sra_s(getPointerToMemory(&registers.HL));
+    sra_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void sra_A (void) {
@@ -205,7 +205,7 @@ void swap_L (void) {
 }
 
 void swap_mHL (void) {
-    swap_s(getPointerToMemory(&registers.HL));
+    swap_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void swap_A (void) {
@@ -237,7 +237,7 @@ void srl_L (void) {
 }
 
 void srl_mHL (void) {
-    srl_s(getPointerToMemory(&registers.HL));
+    srl_s(MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void srl_A (void) {
@@ -269,7 +269,7 @@ void bit_0_L (void) {
 }
 
 void bit_0_mHL (void) {
-    bit_b_s(0, getPointerToMemory(&registers.HL));
+    bit_b_s(0, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_0_A (void) {
@@ -301,7 +301,7 @@ void bit_1_L (void) {
 }
 
 void bit_1_mHL (void) {
-    bit_b_s(1, getPointerToMemory(&registers.HL));
+    bit_b_s(1, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_1_A (void) {
@@ -333,7 +333,7 @@ void bit_2_L (void) {
 }
 
 void bit_2_mHL (void) {
-    bit_b_s(2, getPointerToMemory(&registers.HL));
+    bit_b_s(2, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_2_A (void) {
@@ -365,7 +365,7 @@ void bit_3_L (void) {
 }
 
 void bit_3_mHL (void) {
-    bit_b_s(3, getPointerToMemory(&registers.HL));
+    bit_b_s(3, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_3_A (void) {
@@ -397,7 +397,7 @@ void bit_4_L (void) {
 }
 
 void bit_4_mHL (void) {
-    bit_b_s(4, getPointerToMemory(&registers.HL));
+    bit_b_s(4, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_4_A (void) {
@@ -429,7 +429,7 @@ void bit_5_L (void) {
 }
 
 void bit_5_mHL (void) {
-    bit_b_s(5, getPointerToMemory(&registers.HL));
+    bit_b_s(5, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_5_A (void) {
@@ -461,7 +461,7 @@ void bit_6_L (void) {
 }
 
 void bit_6_mHL (void) {
-    bit_b_s(6, getPointerToMemory(&registers.HL));
+    bit_b_s(6, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_6_A (void) {
@@ -493,7 +493,7 @@ void bit_7_L (void) {
 }
 
 void bit_7_mHL (void) {
-    bit_b_s(7, getPointerToMemory(&registers.HL));
+    bit_b_s(7, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void bit_7_A (void) {
@@ -525,7 +525,7 @@ void res_0_L (void) {
 }
 
 void res_0_mHL (void) {
-    res_b_s(0, getPointerToMemory(&registers.HL));
+    res_b_s(0, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_0_A (void) {
@@ -557,7 +557,7 @@ void res_1_L (void) {
 }
 
 void res_1_mHL (void) {
-    res_b_s(1, getPointerToMemory(&registers.HL));
+    res_b_s(1, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_1_A (void) {
@@ -589,7 +589,7 @@ void res_2_L (void) {
 }
 
 void res_2_mHL (void) {
-    res_b_s(2, getPointerToMemory(&registers.HL));
+    res_b_s(2, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_2_A (void) {
@@ -621,7 +621,7 @@ void res_3_L (void) {
 }
 
 void res_3_mHL (void) {
-    res_b_s(3, getPointerToMemory(&registers.HL));
+    res_b_s(3, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_3_A (void) {
@@ -653,7 +653,7 @@ void res_4_L (void) {
 }
 
 void res_4_mHL (void) {
-    res_b_s(4, getPointerToMemory(&registers.HL));
+    res_b_s(4, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_4_A (void) {
@@ -685,7 +685,7 @@ void res_5_L (void) {
 }
 
 void res_5_mHL (void) {
-    res_b_s(5, getPointerToMemory(&registers.HL));
+    res_b_s(5, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_5_A (void) {
@@ -717,7 +717,7 @@ void res_6_L (void) {
 }
 
 void res_6_mHL (void) {
-    res_b_s(6, getPointerToMemory(&registers.HL));
+    res_b_s(6, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_6_A (void) {
@@ -749,7 +749,7 @@ void res_7_L (void) {
 }
 
 void res_7_mHL (void) {
-    res_b_s(7, getPointerToMemory(&registers.HL));
+    res_b_s(7, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void res_7_A (void) {
@@ -781,7 +781,7 @@ void set_0_L (void) {
 }
 
 void set_0_mHL (void) {
-    set_b_s(0, getPointerToMemory(&registers.HL));
+    set_b_s(0, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_0_A (void) {
@@ -813,7 +813,7 @@ void set_1_L (void) {
 }
 
 void set_1_mHL (void) {
-    set_b_s(1, getPointerToMemory(&registers.HL));
+    set_b_s(1, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_1_A (void) {
@@ -845,7 +845,7 @@ void set_2_L (void) {
 }
 
 void set_2_mHL (void) {
-    set_b_s(2, getPointerToMemory(&registers.HL));
+    set_b_s(2, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_2_A (void) {
@@ -877,7 +877,7 @@ void set_3_L (void) {
 }
 
 void set_3_mHL (void) {
-    set_b_s(3, getPointerToMemory(&registers.HL));
+    set_b_s(3, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_3_A (void) {
@@ -909,7 +909,7 @@ void set_4_L (void) {
 }
 
 void set_4_mHL (void) {
-    set_b_s(4, getPointerToMemory(&registers.HL));
+    set_b_s(4, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_4_A (void) {
@@ -941,7 +941,7 @@ void set_5_L (void) {
 }
 
 void set_5_mHL (void) {
-    set_b_s(5, getPointerToMemory(&registers.HL));
+    set_b_s(5, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_5_A (void) {
@@ -973,7 +973,7 @@ void set_6_L (void) {
 }
 
 void set_6_mHL (void) {
-    set_b_s(6, getPointerToMemory(&registers.HL));
+    set_b_s(6, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_6_A (void) {
@@ -1005,7 +1005,7 @@ void set_7_L (void) {
 }
 
 void set_7_mHL (void) {
-    set_b_s(7, getPointerToMemory(&registers.HL));
+    set_b_s(7, MBC.fetchValueFromMemory(&registers.HL));
 }
 
 void set_7_A (void) {

@@ -43,22 +43,24 @@
 
 void initializeMemory(void);
 
-// unsigned char MBC1_ReadByte(const unsigned short* memAddr);
-// unsigned short MBC1_ReadShort(unsigned short* memAddr);
-// void MBC1_WriteByte(const unsigned short* memAddr, const unsigned char* value);
-// void MBC1_WriteShort(unsigned short* memAddr, const unsigned short* value);
-// unsigned char* getPointerToMemory(const unsigned short* memAddr);
-
-typedef unsigned char (*readByteFromMemory_test)(const unsigned short* memAddr);
-typedef unsigned short (*readShortFromMemory_test)(const unsigned short* memAddr);
-typedef void (*writeByteToMemory_test)(const unsigned short* memAddr, const unsigned char* value);
-typedef void (*writeShortToMemory_test)(unsigned short* memAddr, const unsigned short* value);
-typedef unsigned char* (*getPointerToMemory_test)(const unsigned short* memAddr);
+typedef unsigned char (*readByteFromMemory)(const unsigned short* memAddr);
+typedef unsigned short (*readShortFromMemory)(unsigned short* memAddr);
+typedef void (*writeByteToMemory)(const unsigned short* memAddr, const unsigned char* value);
+typedef void (*writeShortToMemory)(unsigned short* memAddr, const unsigned short* value);
+typedef unsigned char* (*getValueAtAddress)(const unsigned short* memAddr);
 
 struct MBC {
-    readByteFromMemory_test readByte;
-    readShortFromMemory_test readShort;
-    writeByteToMemory_test writeByte;
-    writeShortToMemory_test writeShort;
-    getPointerToMemory_test getPtrToMemory;
-} extern *MBC;
+    readByteFromMemory readByte;
+    readShortFromMemory readShort;
+    writeByteToMemory writeByte;
+    writeShortToMemory writeShort;
+    getValueAtAddress fetchValueFromMemory;
+} extern MBC;
+
+struct MMU {
+    readByteFromMemory readByte;
+    readShortFromMemory readShort;
+    writeByteToMemory writeByte;
+    writeShortToMemory writeShort;
+    getValueAtAddress fetchValueFromMemory;
+} extern MMU;

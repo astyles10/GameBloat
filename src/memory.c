@@ -12,9 +12,15 @@ unsigned short MBC1_ReadShort(unsigned short* memAddr);
 void MBC1_WriteByte(const unsigned short* memAddr, const unsigned char* value);
 void MBC1_WriteShort(unsigned short* memAddr, const unsigned short* value);
 
-unsigned char* getPointerToMemory(const unsigned short* memAddr);
+unsigned char* MBC_FetchValueAtAddress(const unsigned short* memAddr);
 
-struct MBC *MBC;
+struct MBC MBC;
+struct MMU MMU = {
+    .readByte = MMU_ReadByte,
+    .readShort = MMU_ReadShort,
+    .writeByte = MMU_WriteByte,
+    .writeShort = MMU_WriteByte
+};
 
 enum cartridgeTypes {
     ROM_ONLY = 0x00,
@@ -51,18 +57,20 @@ enum cartridgeTypes {
 void setMBCType (unsigned char cartMBC) {
     switch (cartMBC) {
         case ROM_ONLY:
-            MBC->readByte = ROMOnly_ReadByte;
-            MBC->readShort = ROMOnly_ReadShort;
-            MBC->writeByte = ROMOnly_WriteByte;
-            MBC->writeShort = ROMOnly_WriteShort;
+            MBC.readByte = &ROMOnly_ReadByte;
+            MBC.readShort = &ROMOnly_ReadShort;
+            MBC.writeByte = &ROMOnly_WriteByte;
+            MBC.writeShort = &ROMOnly_WriteShort;
+            MBC.fetchValueFromMemory = &MBC_FetchValueAtAddress;
             break;
         case MBC1:
         case MBC1_RAM:
         case MBC1_RAM_BATTERY:
-            MBC->readByte = MBC1_ReadByte;
-            MBC->readShort = MBC1_ReadShort;
-            MBC->writeByte = MBC1_WriteByte;
-            MBC->writeShort = MBC1_WriteShort;
+            MBC.readByte = &MBC1_ReadByte;
+            MBC.readShort = &MBC1_ReadShort;
+            MBC.writeByte = &MBC1_WriteByte;
+            MBC.fetchValueFromMemory = &MBC_FetchValueAtAddress;
+
             break;
     }
 }
@@ -70,56 +78,67 @@ void setMBCType (unsigned char cartMBC) {
 unsigned char memoryUnit[0xFFFF];
 
 void initializeMemory(void) {
+    setMBCType(0x01);
     memset(memoryUnit, 0x00, sizeof(memoryUnit));
 }
 
-unsigned char ROMOnly_ReadByte (const unsigned short* memAddr) {
+unsigned char MMU_ReadByte (const unsigned short* memAddr) {
     tickCounter += 4;
     return memoryUnit[*memAddr];
+}
+
+unsigned short MMU_ReadShort (unsigned short* memAddr) {
+    tickCounter += 8;
+    unsigned short memValue = memoryUnit[*memAddr];
+    memValue |= (memoryUnit[++(*memAddr)] << 8);
+    return memValue;
+}
+
+void MMU_WriteByte (const unsigned short* memAddr, const unsigned char* value) {
+    tickCounter += 4;
+    memoryUnit[*memAddr] = *value;
+}
+
+void MMU_WriteShort (unsigned short* memAddr, const unsigned short* value) {
+    tickCounter += 8;
+    memoryUnit[*memAddr] = (unsigned char)(*value & LOW_BYTE);
+    memoryUnit[++(*memAddr)] = (unsigned char)((*value & HIGH_BYTE) >> 8);
+}
+
+unsigned char ROMOnly_ReadByte (const unsigned short* memAddr) {
+
 }
 
 unsigned short ROMOnly_ReadShort (unsigned short* memAddr) {
-    tickCounter += 8;
-    unsigned short memValue = memoryUnit[*memAddr];
-    memValue |= (memoryUnit[++(*memAddr)] << 8);
-    return memValue;
+    // TODO: ROM Only reading/writing
 }
 
 void ROMOnly_WriteByte (const unsigned short* memAddr, const unsigned char* value) {
-    tickCounter += 4;
-    memoryUnit[*memAddr] = *value;
+    // TODO: ROM Only reading/writing
 }
 
 void ROMOnly_WriteShort (unsigned short* memAddr, const unsigned short* value) {
-    tickCounter += 8;
-    memoryUnit[*memAddr] = (unsigned char)(*value & LOW_BYTE);
-    memoryUnit[++(*memAddr)] = (unsigned char)((*value & HIGH_BYTE) >> 8);
+    // TODO: ROM Only reading/writing
+
 }
 
 unsigned char MBC1_ReadByte (const unsigned short* memAddr) {
-    tickCounter += 4;
-    return memoryUnit[*memAddr];
+    // TODO: MBC1 reading/writing
 }
 
 unsigned short MBC1_ReadShort (unsigned short* memAddr) {
-    tickCounter += 8;
-    unsigned short memValue = memoryUnit[*memAddr];
-    memValue |= (memoryUnit[++(*memAddr)] << 8);
-    return memValue;
+    // TODO: MBC1 reading/writing
 }
 
 void MBC1_WriteByte (const unsigned short* memAddr, const unsigned char* value) {
-    tickCounter += 4;
-    memoryUnit[*memAddr] = *value;
+    // TODO: MBC1 reading/writing
 }
 
 void MBC1_WriteShort (unsigned short* memAddr, const unsigned short* value) {
-    tickCounter += 8;
-    memoryUnit[*memAddr] = (unsigned char)(*value & LOW_BYTE);
-    memoryUnit[++(*memAddr)] = (unsigned char)((*value & HIGH_BYTE) >> 8);
+    // TODO: MBC1 reading/writing
 }
 
-unsigned char* getPointerToMemory (const unsigned short* memAddr) {
+unsigned char* MBC_FetchValueAtAddress (const unsigned short* memAddr) {
     tickCounter += 4;
     return &memoryUnit[*memAddr];
 }

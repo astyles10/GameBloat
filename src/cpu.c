@@ -75,6 +75,7 @@ const unsigned char resetValues[] = {
 };
 
 void reset(void) {
+    initializeMemory();
     registers.AF = 0x01B0;
     registers.BC = 0x0013;
     registers.DE = 0x00D8;
@@ -84,7 +85,7 @@ void reset(void) {
 
     int i;
     for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
-        MBC->writeByte(&resetAddresses[i], &resetValues[i]);
+        MMU.writeByte(&resetAddresses[i], &resetValues[i]);
     }
 }
 
@@ -102,12 +103,9 @@ int loadCartROM(char* cartName) {
 
         // Determine ROM Size
         // Map MBC setting from cartridge to MBC object
-        switch (cartridge.header.cartridgeType) {
-            case 1:
-            break;
-        }
+        fclose(fp);
     }
-    fclose(fp);
+
     return 0;
 }
 
@@ -126,51 +124,51 @@ void ld_d_n (unsigned char* ptrD, unsigned char* n) {
 }
 
 void ld_A_ss (unsigned short* memLocation) {
-    registers.A = MBC->readByte(memLocation);
+    registers.A = MBC.readByte(memLocation);
 }
 
 void ld_dd_A (unsigned short* memLocation) {
-    MBC->writeByte(memLocation, &registers.A);
+    MBC.writeByte(memLocation, &registers.A);
 }
 
 void ld_A_c (void) {
     unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-    registers.A = MBC->readByte(&memLocation);
+    registers.A = MBC.readByte(&memLocation);
 }
 
 void ld_c_A (void) {
     unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-    MBC->writeByte(&memLocation, &registers.A);
+    MBC.writeByte(&memLocation, &registers.A);
 }
 
 void ldd_A_mHL (void) {
-    registers.A = MBC->readByte(&registers.HL);
+    registers.A = MBC.readByte(&registers.HL);
     registers.HL -= 1;
 }
 
 void ldd_mHL_A (void) {
-    MBC->writeByte(&registers.HL, &registers.A);
+    MBC.writeByte(&registers.HL, &registers.A);
     registers.HL -= 1;
 }
 
 void ldi_A_mHL (void) {
-    registers.A = MBC->readByte(&registers.HL);
+    registers.A = MBC.readByte(&registers.HL);
     registers.HL += 1;
 }
 
 void ldi_mHL_A (void) {
-    MBC->writeByte(&registers.HL, &registers.A);
+    MBC.writeByte(&registers.HL, &registers.A);
     registers.HL += 1;
 }
 
 void ldh_n_A (unsigned char* n) {
     unsigned short memLocation = 0xFF00 + *n;
-    MBC->writeByte(&memLocation, &registers.A);
+    MBC.writeByte(&memLocation, &registers.A);
 }
 
 void ldh_A_n (unsigned char* n) {
     unsigned short memLocation = 0xFF00 + *n;
-    registers.A = MBC->readByte(&memLocation);
+    registers.A = MBC.readByte(&memLocation);
 }
 
 // 16-Bit loads
@@ -180,7 +178,7 @@ void ld_dd_nn (unsigned short* ptrDD, unsigned short* nn) {
 }
 
 void ld_nn_SP (unsigned short* nn) {
-    MBC->writeShort(nn, &registers.SP);
+    MBC.writeShort(nn, &registers.SP);
 }
 
 void ld_SP_HL (void) {
@@ -215,18 +213,18 @@ void push_ss (unsigned short* ptrSS) {
     unsigned char highSS = (unsigned char)((*ptrSS & 0xFF00) >> 8);
 
     registers.SP -= 1;
-    MBC->writeByte(&registers.SP, &lowSS);
+    MBC.writeByte(&registers.SP, &lowSS);
     registers.SP -= 1;
-    MBC->writeByte(&registers.SP, &highSS);
+    MBC.writeByte(&registers.SP, &highSS);
 
     tickCounter += 4;
 }
 
 void pop_dd (unsigned short* ptrDD) {
     unsigned short bytePair;
-    bytePair = ((MBC->readByte(&registers.SP)) << 8);
+    bytePair = ((MBC.readByte(&registers.SP)) << 8);
     registers.SP += 1;
-    bytePair = MBC->readByte(&registers.SP);
+    bytePair = MBC.readByte(&registers.SP);
     registers.SP += 1;
 
     *ptrDD = bytePair;
@@ -806,12 +804,12 @@ void jr_cc_e (unsigned char* e, unsigned char* flag, unsigned char condition) {
 void call_nn (unsigned short* nn) {
     unsigned short memLocation = registers.SP - 0x01;
     unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
-    MBC->writeByte(&memLocation, &PCh);
+    MBC.writeByte(&memLocation, &PCh);
 
     // (SP-2) = PCl
     memLocation -= 1;
     unsigned char PCl = (unsigned char)(registers.PC & LOW_BYTE);
-    MBC->writeByte(&memLocation, &PCl);
+    MBC.writeByte(&memLocation, &PCl);
 
     registers.PC = *nn;
     registers.SP = memLocation;
@@ -829,11 +827,11 @@ void rst_f (unsigned char f) {
     // (SP-1) = PCh
     unsigned short memLocation = registers.SP - 1;
     unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
-    MBC->writeByte(&memLocation, &PCh);
+    MBC.writeByte(&memLocation, &PCh);
 
     unsigned char PCl = (registers.PC & LOW_BYTE);
     memLocation -= 1;
-    MBC->writeByte(&memLocation, &PCl);
+    MBC.writeByte(&memLocation, &PCl);
 
     registers.PC = (f & LOW_BYTE);
     registers.SP = memLocation;
@@ -844,12 +842,12 @@ void rst_f (unsigned char f) {
 void ret (void) {
     unsigned short memLocation = registers.SP;
 
-    unsigned char valSP = MBC->readByte(&memLocation);
+    unsigned char valSP = MBC.readByte(&memLocation);
     registers.PC = (valSP & LOW_BYTE);
 
     memLocation += 1;
 
-    valSP = MBC->readByte(&memLocation);
+    valSP = MBC.readByte(&memLocation);
     registers.PC |= ((valSP & LOW_BYTE) << 8);
 
     registers.SP = (memLocation + 1);
