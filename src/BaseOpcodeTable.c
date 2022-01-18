@@ -820,7 +820,7 @@ void rst_20 (void) {
 }
 
 void jp_mHL (void) {
-    unsigned short value = readShortFromMemory(&registers.HL);
+    unsigned short value = MBC.readShort(&registers.HL);
     jp_nn(&value);
 }
 

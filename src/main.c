@@ -14,7 +14,8 @@ int main () {
   // Each time an opcode is called, increment by 4 ticks by default
 
   if ( validateCart("./GB_Games/PokemonRed.gb") ) {
-    reset();
+    // Determine MBC & Other Cartridge Values
+    // reset();
     loadCartROM("./GB_Games/PokemonRed.gb");
 
     printf("Cart title: %s\n", cartridge.header.title);

@@ -16,7 +16,7 @@ const unsigned char nintendoLogoBitmap[0x30] = {
 int checkLogo(FILE*);
 int checkHeaderValues(FILE*);
 int parseHeader(FILE*);
-void printHeaderValue(char*, const char*, long);
+void printHeaderValue(const char*, const char*, long);
 
 /* 
     Powerup Sequence:
@@ -33,7 +33,7 @@ int validateCart(char* fileName) {
 
     if (fp == NULL) {
         perror("Cartridge error: ");
-        cartValid = 0;
+        return 0;
     } else {
         fseek(fp, 0, SEEK_END);
         long cartSize = ftell(fp);
@@ -47,8 +47,8 @@ int validateCart(char* fileName) {
                 cartValid = 0;
             }
         }
+        fclose(fp);
     }
-    fclose(fp);
     return cartValid;
 }
 
@@ -131,9 +131,9 @@ int parseHeader(FILE* fp) {
     return 0;
 }
 
-void printHeaderValue(char* headerValueName, const char* toPrint, long size) {
+void printHeaderValue(const char* headerValueName, const char* toPrint, long size) {
     int i;
-    printf(headerValueName);
+    printf("%s", headerValueName);
     for (i = 0; i < size; i++) {
         printf("%02X", (unsigned char)toPrint[i]);
     }
