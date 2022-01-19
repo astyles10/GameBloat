@@ -19,7 +19,7 @@ void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
 
 void reset(void);
-int loadCartROM(char*);
+int loadROM(const char*);
 
 // 8-Bit loads
 void ld_r_s (unsigned char* ptrR, unsigned char* n);

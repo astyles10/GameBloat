@@ -9,7 +9,7 @@ void ld_BC_nn (unsigned short* immediate) {
     ld_dd_nn(&registers.BC, immediate);
 }
 
-void ld_mBC_A (void) {
+void ld_MMU_A (void) {
     ld_dd_A(&registers.BC);
 }
 
@@ -33,7 +33,7 @@ void add_HL_BC (void) {
     add_HL_ss(&registers.BC);
 }
 
-void ld_A_mBC (void) {
+void ld_A_MMU (void) {
     ld_A_ss(&registers.BC);
 }
 
@@ -82,7 +82,7 @@ void add_HL_DE (void) {
 }
 
 void ld_A_mDE (void) {
-    ld_r_s(&registers.A, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.A, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void dec_DE (void) {
@@ -162,11 +162,11 @@ void inc_SP (void) {
 }
 
 void inc_mHL (void) {
-    inc_s(MBC.fetchValueFromMemory(&registers.HL));
+    inc_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void dec_mHL (void) {
-    dec_s(MBC.fetchValueFromMemory(&registers.HL));
+    dec_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void jr_C_n (unsigned char *immediate) {
@@ -216,7 +216,7 @@ void ld_B_L (void) {
 }
 
 void ld_B_mHL (void) {
-    ld_r_s(&registers.B, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.B, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_B_A (void) {
@@ -248,7 +248,7 @@ void ld_C_L (void) {
 }
 
 void ld_C_mHL (void) {
-    ld_r_s(&registers.C, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.C, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_C_A (void) {
@@ -280,7 +280,7 @@ void ld_D_L (void) {
 }
 
 void ld_D_mHL (void) {
-    ld_r_s (&registers.D, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s (&registers.D, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_D_A (void) {
@@ -312,7 +312,7 @@ void ld_E_L (void) {
 }
 
 void ld_E_mHL (void) {
-    ld_r_s(&registers.E, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.E, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_E_A (void) {
@@ -344,7 +344,7 @@ void ld_H_L (void) {
 }
 
 void ld_H_mHL (void) {
-    ld_r_s(&registers.H, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.H, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_H_A (void) {
@@ -376,7 +376,7 @@ void ld_L_L (void) {
 }
 
 void ld_L_mHL (void) {
-    ld_r_s(&registers.L, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.L, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_L_A (void) {
@@ -384,31 +384,31 @@ void ld_L_A (void) {
 }
 
 void ld_mHL_B (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.B);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.B);
 }
 
 void ld_mHL_C (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.C);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.C);
 }
 
 void ld_mHL_D (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.D);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.D);
 }
 
 void ld_mHL_E (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.E);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.E);
 }
 
 void ld_mHL_H (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.H);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.H);
 }
 
 void ld_mHL_L (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.L);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.L);
 }
 
 void ld_mHL_A (void) {
-    ld_d_r(MBC.fetchValueFromMemory(&registers.HL), &registers.A);
+    ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.A);
 }
 
 void ld_A_B (void) {
@@ -436,7 +436,7 @@ void ld_A_L (void) {
 }
 
 void ld_A_mHL (void) {
-    ld_r_s(&registers.A, MBC.fetchValueFromMemory(&registers.HL));
+    ld_r_s(&registers.A, MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void ld_A_A (void) {
@@ -468,7 +468,7 @@ void add_A_L (void) {
 }
 
 void add_A_mHL (void) {
-    add_s(MBC.fetchValueFromMemory(&registers.HL));
+    add_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void add_A_A (void) {
@@ -500,7 +500,7 @@ void adc_A_L (void) {
 }
 
 void adc_A_mHL (void) {
-    adc_s(MBC.fetchValueFromMemory(&registers.HL));
+    adc_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void adc_A_A (void) {
@@ -532,7 +532,7 @@ void sub_A_L (void) {
 }
 
 void sub_A_mHL (void) {
-    sub_s(MBC.fetchValueFromMemory(&registers.HL));
+    sub_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void sub_A_A (void) {
@@ -564,7 +564,7 @@ void sbc_A_L (void) {
 }
 
 void sbc_A_mHL (void) {
-    sub_s(MBC.fetchValueFromMemory(&registers.HL));
+    sub_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void sbc_A_A (void) {
@@ -596,7 +596,7 @@ void and_L (void) {
 }
 
 void and_mHL (void) {
-    and_s(MBC.fetchValueFromMemory(&registers.HL));
+    and_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void and_A (void) {
@@ -628,7 +628,7 @@ void xor_L (void) {
 }
 
 void xor_mHL (void) {
-    xor_s(MBC.fetchValueFromMemory(&registers.HL));
+    xor_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void xor_A (void) {
@@ -660,7 +660,7 @@ void or_L (void) {
 }
 
 void or_mHL (void) {
-    or_s(MBC.fetchValueFromMemory(&registers.HL));
+    or_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void or_A (void) {
@@ -692,7 +692,7 @@ void cmp_L (void) {
 }
 
 void cmp_mHL (void) {
-    cmp_s(MBC.fetchValueFromMemory(&registers.HL));
+    cmp_s(MMU.fetchValueFromMemory(&registers.HL));
 }
 
 void cmp_A (void) {
@@ -820,7 +820,7 @@ void rst_20 (void) {
 }
 
 void jp_mHL (void) {
-    unsigned short value = MBC.readShort(&registers.HL);
+    unsigned short value = MMU.readShort(&registers.HL);
     jp_nn(&value);
 }
 
@@ -867,7 +867,7 @@ void rst_38 (void) {
 const opcode baseOpcodeTable[256] = {
     { "NOP", eNoOperands, nop },                // 0x00
     { "LD BC,nn", eOperandShort, ld_BC_nn },    // 0x01
-    { "LD (BC),A", eNoOperands, ld_mBC_A },     // 0x02
+    { "LD (BC),A", eNoOperands, ld_MMU_A },     // 0x02
     { "INC BC", eNoOperands, inc_BC },          // 0x03
     { "INC B", eNoOperands, inc_B },            // 0x04
     { "DEC B", eNoOperands, dec_B },            // 0x05
@@ -875,7 +875,7 @@ const opcode baseOpcodeTable[256] = {
     { "RLC A", eNoOperands, rlc_A },            // 0x07
     { "LD (nn),SP", eOperandShort, ld_nn_SP },  // 0x08
     { "ADD HL,BC", eNoOperands, add_HL_BC },    // 0x09
-    { "LD A,(BC)", eNoOperands, ld_A_mBC },     // 0x0A
+    { "LD A,(BC)", eNoOperands, ld_A_MMU },     // 0x0A
     { "DEC BC", eNoOperands, dec_BC },          // 0x0B
     { "INC C", eNoOperands, inc_C },            // 0x0C
     { "DEC C", eNoOperands, dec_C },            // 0x0D

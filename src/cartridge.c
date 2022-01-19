@@ -139,3 +139,19 @@ void printHeaderValue(const char* headerValueName, const char* toPrint, long siz
     }
     printf("\n");
 }
+
+int loadCartROM(const char* cartName) {
+    // FILE* fp = fopen(cartName, "rb");
+    // if (fp == NULL) {
+    //     perror("Cartridge error: ");
+    //     return 0;
+    // } else {
+    //     setHeaderValues(fp);
+    //     fseek(fp, 0L, SEEK_END);
+    //     long filesize = ftell(fp);
+    //     printf("File size = %ld\n", filesize);
+    //     rewind(fp);
+        
+
+    // }
+}

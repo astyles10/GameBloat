@@ -15,7 +15,6 @@ int main () {
 
   if ( validateCart("./GB_Games/PokemonRed.gb") ) {
     // Determine MBC & Other Cartridge Values
-    reset();
     loadCartROM("./GB_Games/PokemonRed.gb");
 
     printf("Cart title: %s\n", cartridge.header.title);

@@ -43,3 +43,4 @@ struct cartridge {
 
 int validateCart(char*);
 void setHeaderValues(FILE*);
+int loadCartROM(const char*);

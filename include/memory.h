@@ -42,6 +42,7 @@
 #define HIGH_LOW_P10_P13_INTR       0x60
 
 void initializeMemory(void);
+int setMBCType(unsigned char cartMbcType);
 
 typedef unsigned char (*readByteFromMemory)(const unsigned short* memAddr);
 typedef unsigned short (*readShortFromMemory)(unsigned short* memAddr);
@@ -49,13 +50,13 @@ typedef void (*writeByteToMemory)(const unsigned short* memAddr, const unsigned 
 typedef void (*writeShortToMemory)(unsigned short* memAddr, const unsigned short* value);
 typedef unsigned char* (*getValueAtAddress)(const unsigned short* memAddr);
 
-struct MBC {
-    readByteFromMemory readByte;
-    readShortFromMemory readShort;
-    writeByteToMemory writeByte;
-    writeShortToMemory writeShort;
-    getValueAtAddress fetchValueFromMemory;
-} extern MBC;
+// struct MBC {
+//     readByteFromMemory readByte;
+//     readShortFromMemory readShort;
+//     writeByteToMemory writeByte;
+//     writeShortToMemory writeShort;
+//     getValueAtAddress fetchValueFromMemory;
+// } extern MBC;
 
 struct MMU {
     readByteFromMemory readByte;
