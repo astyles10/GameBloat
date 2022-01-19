@@ -19,6 +19,7 @@ void removeFlag (unsigned char flag);
 unsigned char checkFlag (unsigned char flag);
 
 void reset(void);
+void close(void);
 int loadROM(const char*);
 
 // 8-Bit loads

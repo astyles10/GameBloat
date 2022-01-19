@@ -96,6 +96,11 @@ int loadROM(const char* cartName) {
     return 0;
 }
 
+void close()
+{
+    cartCleanup();
+}
+
 // 8-Bit Loads
 
 void ld_r_s (unsigned char* ptrR, unsigned char* n) {

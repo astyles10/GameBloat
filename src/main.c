@@ -8,14 +8,17 @@
 #include "opcode.h"
 #include "cartridge.h"
 
-int main () {
+const char* parseArguments(int, const char**);
+
+int main (int argc, const char* argv[]) {
   // In driver code, if operand exists, increment ticks by 4 per char
   // Memory module will increment ticks on read/write/getPointer functions
   // Each time an opcode is called, increment by 4 ticks by default
+  const char* cartName = parseArguments(argc, argv);
 
-  if ( validateCart("./GB_Games/PokemonRed.gb") ) {
+  if ( validateCart(cartName) ) {
     // Determine MBC & Other Cartridge Values
-    loadCartROM("./GB_Games/PokemonRed.gb");
+    loadCartROM(cartName);
 
     printf("Cart title: %s\n", cartridge.header.title);
     printf("Cart name: %s\n", cartridge.header.shortTitle);
@@ -30,5 +33,11 @@ int main () {
     printf("Cart RAM Size: %02X\n", cartridge.header.ramSize);
     printf("Header checksum: %02X\n", cartridge.header.headerChecksum);
   }
+  close();
   return 0;
+}
+
+const char* parseArguments(int argc, const char* argv[])
+{
+  return "./GB_Games/PokemonRed.gb";
 }

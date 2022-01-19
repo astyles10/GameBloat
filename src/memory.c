@@ -109,6 +109,9 @@ int setMBCType (unsigned char cartMBC) {
         case MBC5_RUMBLE_RAM_BATTERY:
             printf("Cart MBC Type 5\n");
             return 1;
+        default:
+            printf("MBC type unknown, closing...\n");
+            return 0;
     }
 }
 

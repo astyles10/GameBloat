@@ -35,12 +35,13 @@ struct header {
 
 struct cartridge {
   struct header header;
+  char* rom;
 } extern cartridge;
 
 /* 
     Public Functions
  */
 
-int validateCart(char*);
-void setHeaderValues(FILE*);
+int validateCart(const char*);
 int loadCartROM(const char*);
+void cartCleanup(void);

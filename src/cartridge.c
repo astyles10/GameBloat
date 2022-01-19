@@ -1,4 +1,6 @@
 #include "cartridge.h"
+#include "memory.h"
+#include <stdlib.h>
 #include <string.h>
 
 // Cart variables
@@ -17,6 +19,13 @@ int checkLogo(FILE*);
 int checkHeaderValues(FILE*);
 int parseHeader(FILE*);
 void printHeaderValue(const char*, const char*, long);
+void setHeaderValues(FILE*);
+int getCartSize(FILE*);
+
+void cartCleanup(void)
+{
+    free(cartridge.rom);
+}
 
 /* 
     Powerup Sequence:
@@ -26,7 +35,7 @@ void printHeaderValue(const char*, const char*, long);
     If at any step the checks fail, the Gameboy halts operations (i.e. freezes)
  */
 
-int validateCart(char* fileName) {
+int validateCart(const char* fileName) {
     int cartValid = 1;
     FILE* fp;
     fp = fopen(fileName, "rb");
@@ -141,17 +150,32 @@ void printHeaderValue(const char* headerValueName, const char* toPrint, long siz
 }
 
 int loadCartROM(const char* cartName) {
-    // FILE* fp = fopen(cartName, "rb");
-    // if (fp == NULL) {
-    //     perror("Cartridge error: ");
-    //     return 0;
-    // } else {
-    //     setHeaderValues(fp);
-    //     fseek(fp, 0L, SEEK_END);
-    //     long filesize = ftell(fp);
-    //     printf("File size = %ld\n", filesize);
-    //     rewind(fp);
-        
+    FILE* fp = fopen(cartName, "rb");
+    if (fp == NULL) {
+        perror("Cartridge error: ");
+        return 0;
+    } else {
+        setHeaderValues(fp);
+        int cartSize = getCartSize(fp);
 
-    // }
+        cartridge.rom = (char *)malloc(sizeof(char) * cartSize);
+        if (!cartridge.rom)
+        {
+            printf("Loading cart ROM failed: could not allocate memory.\n");
+            return 0;
+        }
+        fread(cartridge.rom, 1, cartSize, fp);
+        setMBCType(cartridge.header.cartridgeType);
+
+        fclose(fp);
+    }
+    return 1;
+}
+
+int getCartSize(FILE* fp)
+{
+    fseek(fp, 0L, SEEK_END);
+    long filesize = ftell(fp);
+    rewind(fp);
+    return filesize;
 }
