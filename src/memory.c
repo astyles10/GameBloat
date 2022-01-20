@@ -2,16 +2,6 @@
 #include "cpu.h"
 #include "memory.h"
 
-unsigned char ROMOnly_ReadByte(const unsigned short *memAddr);
-unsigned short ROMOnly_ReadShort(unsigned short *memAddr);
-void ROMOnly_WriteByte(const unsigned short *memAddr, const unsigned char *value);
-void ROMOnly_WriteShort(unsigned short *memAddr, const unsigned short *value);
-
-unsigned char MBC1_ReadByte(const unsigned short *memAddr);
-unsigned short MBC1_ReadShort(unsigned short *memAddr);
-void MBC1_WriteByte(const unsigned short *memAddr, const unsigned char *value);
-void MBC1_WriteShort(unsigned short *memAddr, const unsigned short *value);
-
 unsigned char MMU_ReadByte(const unsigned short *memAddr);
 unsigned short MMU_ReadShort(unsigned short *memAddr);
 void MMU_WriteByte(const unsigned short *memAddr, const unsigned char *value);
@@ -63,21 +53,12 @@ int setMBCType(unsigned char cartMBC)
   switch (cartMBC)
   {
   case ROM_ONLY:
-    // MBC.readByte = &ROMOnly_ReadByte;
-    // MBC.readShort = &ROMOnly_ReadShort;
-    // MBC.writeByte = &ROMOnly_WriteByte;
-    // MBC.writeShort = &ROMOnly_WriteShort;
-    // MBC.fetchValueFromMemory = &MBC_FetchValueAtAddress;
     printf("Cart MBC Rom Only\n");
     return 1;
   case MBC1:
   case MBC1_RAM:
   case MBC1_RAM_BATTERY:
     printf("Cart MBC Type 1\n");
-    // MBC.readByte = &MBC1_ReadByte;
-    // MBC.readShort = &MBC1_ReadShort;
-    // MBC.writeByte = &MBC1_WriteByte;
-    // MBC.fetchValueFromMemory = &MBC_FetchValueAtAddress;
     return 1;
   case MBC2:
   case MBC2_BATTERY:
@@ -151,50 +132,7 @@ void MMU_WriteShort(unsigned short *memAddr, const unsigned short *value)
   memoryUnit[++(*memAddr)] = (unsigned char)((*value & HIGH_BYTE) >> 8);
 }
 
-unsigned char ROMOnly_ReadByte(const unsigned short *memAddr)
-{
-  return 0;
-}
-
-unsigned short ROMOnly_ReadShort(unsigned short *memAddr)
-{
-  // TODO: ROM Only reading/writing
-  return 0;
-}
-
-void ROMOnly_WriteByte(const unsigned short *memAddr, const unsigned char *value)
-{
-  // TODO: ROM Only reading/writing
-}
-
-void ROMOnly_WriteShort(unsigned short *memAddr, const unsigned short *value)
-{
-  // TODO: ROM Only reading/writing
-}
-
-unsigned char MBC1_ReadByte(const unsigned short *memAddr)
-{
-  // TODO: MBC1 reading/writing
-  return 0;
-}
-
-unsigned short MBC1_ReadShort(unsigned short *memAddr)
-{
-  // TODO: MBC1 reading/writing
-  return 0;
-}
-
-void MBC1_WriteByte(const unsigned short *memAddr, const unsigned char *value)
-{
-  // TODO: MBC1 reading/writing
-}
-
-void MBC1_WriteShort(unsigned short *memAddr, const unsigned short *value)
-{
-  // TODO: MBC1 reading/writing
-}
-
-unsigned char *MBC_FetchValueAtAddress(const unsigned short *memAddr)
+unsigned char* MBC_FetchValueAtAddress(const unsigned short *memAddr)
 {
   tickCounter += 4;
   return &memoryUnit[*memAddr];

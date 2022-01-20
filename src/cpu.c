@@ -83,7 +83,6 @@ const unsigned char resetValues[] = {
 
 void reset(void)
 {
-  initializeMemory();
   registers.AF = 0x01B0;
   registers.BC = 0x0013;
   registers.DE = 0x00D8;
@@ -100,6 +99,7 @@ void reset(void)
 
 int loadROM(const char *cartName)
 {
+  initializeMemory();
   reset();
   loadCartROM(cartName);
   return 0;

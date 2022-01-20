@@ -20,6 +20,8 @@ int parseHeader(FILE *);
 void printHeaderValue(const char *, const char *, long);
 void setHeaderValues(FILE *);
 int getCartSize(FILE *);
+int readCartROMToMemory(FILE *);
+int validateCartSize(const unsigned int);
 
 void cartCleanup(void)
 {
@@ -177,32 +179,27 @@ void printHeaderValue(const char *headerValueName, const char *toPrint, long siz
 
 int loadCartROM(const char *cartName)
 {
+  int success = 0;
   FILE *fp = fopen(cartName, "rb");
   if (fp == NULL)
   {
     perror("Cartridge error: ");
-    return 0;
+    return success;
   }
   else
   {
-    setHeaderValues(fp);
-    int cartSize = getCartSize(fp);
-
-    cartridge.rom = (char *)malloc(sizeof(char) * cartSize);
-    if (!cartridge.rom)
+    if ((success = readCartROMToMemory(fp)))
     {
-      printf("Loading cart ROM failed: could not allocate memory.\n");
-      return 0;
+      printf("Cart read into memory successfully!\n");
+      if ((success = setMBCType(cartridge.header.cartridgeType)))
+      {
+        printf("Cart MBC setting successful!\n");
+      }
     }
-    fread(cartridge.rom, 1, cartSize, fp);
-
-    if (setMBCType(cartridge.header.cartridgeType))
-    {
-    }
-
     fclose(fp);
+    return success;
   }
-  return 1;
+  return success;
 }
 
 int getCartSize(FILE *fp)
@@ -211,4 +208,66 @@ int getCartSize(FILE *fp)
   long filesize = ftell(fp);
   rewind(fp);
   return filesize;
+}
+
+int readCartROMToMemory(FILE *fp)
+{
+  if (fp)
+  {
+    setHeaderValues(fp);
+    unsigned int cartSize = getCartSize(fp);
+
+    if (validateCartSize(cartSize))
+    {
+      cartridge.rom = (char *)malloc(sizeof(char) * cartSize);
+      if (!cartridge.rom)
+      {
+        printf("Loading cart ROM failed: could not allocate memory.\n");
+        return 0;
+      }
+      fread(cartridge.rom, 1, cartSize, fp);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int validateCartSize(const unsigned int cartSize)
+{
+  unsigned int expectedRomSize = 0;
+
+  if (cartridge.header.romSize < 0x08)
+  {
+    expectedRomSize = (1 << (15 + cartridge.header.romSize));
+  }
+  else if (cartridge.header.romSize >= 0x52 && cartridge.header.romSize <= 0x54)
+  {
+    switch (cartridge.header.romSize)
+    {
+    case (0x52):
+      expectedRomSize = 0x120000; // 1.1MB
+      break;
+    case (0x53):
+      expectedRomSize = 0x140000; // 1.3MB
+      break;
+    case (0x54):
+      expectedRomSize = 0x180000; // 1.5MB
+      break;
+    default:
+      printf("loadCartROM invalid ROM size flag: %d\n", cartridge.header.romSize);
+      return 0;
+    }
+  }
+  else
+  {
+    printf("loadCartROM invalid ROM size flag: %d\n", cartridge.header.romSize);
+    return 0;
+  }
+
+  if (expectedRomSize != cartSize)
+  {
+    printf("loadCartROM mismatched cart size: Expected size %d, got %d\n", expectedRomSize, cartSize);
+    return 0;
+  }
+  return 1;
 }
