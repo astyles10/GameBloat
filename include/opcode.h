@@ -1,19 +1,22 @@
-typedef enum {
-    eNoOperands,
-    eOperandChar,
-    eOperandShort
+typedef enum
+{
+  eNoOperands,
+  eOperandChar,
+  eOperandShort
 } operandType;
 
-typedef enum {
-    eFlagNotSet,
-    eFlagSet,
-    eNoCondition
+typedef enum
+{
+  eFlagNotSet,
+  eFlagSet,
+  eNoCondition
 } condition;
 
-typedef struct opcode {
-    char* asmName;
-    unsigned char operandType;
-    void *function;
+typedef struct opcode
+{
+  char *asmName;
+  unsigned char operandType;
+  void *function;
 } opcode;
 
 extern operandType eOperandType;
