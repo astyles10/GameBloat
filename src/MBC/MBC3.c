@@ -115,7 +115,8 @@ const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned 
           printf("MBC3 Clock Register : attempt write to invalid register [0x%X]\n", RAMBankNumber_RTCRegister);
           return 0x00;
         }
-        // Write value to RTC register (5 registers)
+        // TODO: Need to determine what value to return when writing to RTC registers
+        return 0x01;
       }
     }
     printf("MBC3_WriteByte: Attempted to write when RAM/RTC disabled!\n");

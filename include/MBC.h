@@ -2,9 +2,6 @@
 typedef const unsigned int (*ReadByte)(const unsigned short *memAddr);
 typedef const unsigned int (*WriteByte)(const unsigned short *memAddr, const unsigned char value);
 
-#define ROM_MODE 0x00
-#define RAM_MODE 0x01
-
 int setMBCType(unsigned char cartMbcType);
 
 struct MBC {
