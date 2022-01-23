@@ -1,5 +1,6 @@
 #pragma once
 #include <stdio.h>
+#include "MBC.h"
 
 #define HEADER_START 0x100
 #define CART_LOGO_START_LOC 0x104
@@ -9,6 +10,11 @@
 
 #define GB_OR_CGB 0x80
 #define CGB_ONLY 0xC0
+
+#define RAM_NONE 0x00
+#define RAM_2KB 0x01
+#define RAM_8KB 0x02
+#define RAM_32KB 0x03
 
 struct header
 {
@@ -39,13 +45,14 @@ struct header
 struct cartridge
 {
   struct header header;
-  char *rom;
+  unsigned char *rom;
+  unsigned char *ram;
+  struct MBC *mbc;
 } extern cartridge;
 
 /*
     Public Functions
  */
 
-int validateCart(const char *);
-int loadCartROM(const char *);
+int loadCartridge(const char *);
 void cartCleanup(void);

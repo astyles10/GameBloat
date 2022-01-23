@@ -101,7 +101,7 @@ int loadROM(const char *cartName)
 {
   initializeMemory();
   reset();
-  loadCartROM(cartName);
+  loadCartridge(cartName);
   return 0;
 }
 
@@ -127,19 +127,19 @@ void ld_d_n(unsigned char *ptrD, unsigned char *n)
   *ptrD = *n;
 }
 
-void ld_A_ss(unsigned short *memLocation)
+void ld_A_ss(const unsigned short *memLocation)
 {
   registers.A = MMU.readByte(memLocation);
 }
 
-void ld_dd_A(unsigned short *memLocation)
+void ld_dd_A(const unsigned short *memLocation)
 {
   MMU.writeByte(memLocation, &registers.A);
 }
 
 void ld_A_c(void)
 {
-  unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
+  const unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
   registers.A = MMU.readByte(&memLocation);
 }
 
@@ -181,7 +181,7 @@ void ldh_n_A(unsigned char *n)
 
 void ldh_A_n(unsigned char *n)
 {
-  unsigned short memLocation = 0xFF00 + *n;
+  const unsigned short memLocation = 0xFF00 + *n;
   registers.A = MMU.readByte(&memLocation);
 }
 

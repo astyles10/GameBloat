@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "opcode.h"
 #include "cartridge.h"
+#include "bios.h"
 
 const char *parseArguments(int, const char **);
 void printHeaderValues(void);
@@ -22,6 +23,8 @@ int main(int argc, const char *argv[])
   {
     // Determine MBC & Other Cartridge Values
     loadROM(cartName);
+    // printHeaderValues();
+    checkRamEcho();
   }
   close();
   return 0;

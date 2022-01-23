@@ -1,31 +1,22 @@
-#include "cartridge.h"
-#include "memory.h"
 #include <stdlib.h>
 #include <string.h>
 
-// Cart variables
+#include "MBC.h"
+#include "cartridge.h"
+#include "memory.h"
 
 struct cartridge cartridge;
 
-const unsigned char nintendoLogoBitmap[0x30] = {
-    0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
-    0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
-    0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E};
-
-// Private Function Declarations
-
-int checkLogo(FILE *);
-int checkHeaderValues(FILE *);
-int parseHeader(FILE *);
-void printHeaderValue(const char *, const char *, long);
 void setHeaderValues(FILE *);
 int getCartSize(FILE *);
 int readCartROMToMemory(FILE *);
 int validateCartSize(const unsigned int);
+int initializeRAM(const unsigned char);
 
 void cartCleanup(void)
 {
   free(cartridge.rom);
+  free(cartridge.ram);
 }
 
 /*
@@ -35,99 +26,6 @@ void cartCleanup(void)
     3. If step 2 valid, begin cartridge program execution from address 0x100. Load specific set of values into registers.
     If at any step the checks fail, the Gameboy halts operations (i.e. freezes)
  */
-
-int validateCart(const char *fileName)
-{
-  int cartValid = 1;
-  FILE *fp;
-  fp = fopen(fileName, "rb");
-
-  if (fp == NULL)
-  {
-    perror("Cartridge error: ");
-    return 0;
-  }
-  else
-  {
-    fseek(fp, 0, SEEK_END);
-    long cartSize = ftell(fp);
-    if (cartSize < 0x14F)
-    {
-      printf("Error: Cartridge is too small. Exiting...\n");
-      cartValid = 0;
-    }
-    else
-    {
-      rewind(fp);
-      if (!(checkLogo(fp) && checkHeaderValues(fp)))
-      {
-        printf("Error: Cartridge invalid. Exiting...\n");
-        cartValid = 0;
-      }
-    }
-    fclose(fp);
-  }
-  return cartValid;
-}
-
-int checkLogo(FILE *fp)
-{
-  fseek(fp, CART_LOGO_START_LOC, SEEK_SET);
-  fread(&cartridge.header.nintendoLogo, 1, sizeof(cartridge.header.nintendoLogo), fp);
-  int i;
-  int logoEnd = sizeof(cartridge.header.nintendoLogo);
-  int isMatch = 1;
-  for (i = 0; i < logoEnd; i++)
-  {
-    if (nintendoLogoBitmap[i] != cartridge.header.nintendoLogo[i])
-    {
-      printf("Powerup error: logo byte %d does not match. Expected 0x%02X, got 0x%02X.\n", i, nintendoLogoBitmap[i], cartridge.header.nintendoLogo[i]);
-      isMatch = 0;
-    }
-    else
-    {
-#ifdef DEBUG
-      printf("Powerup: byte %d: 0x%02X matches logo bitmap.\n", i, nintendoLogoBitmap[i]);
-#endif
-    }
-  }
-  return isMatch;
-}
-
-int checkHeaderValues(FILE *fp)
-{
-  int isValid = 1;
-  int headerValuesSize = HEADER_VALUES_END - HEADER_VALUES_START;
-  unsigned char headerValues[headerValuesSize];
-
-  fseek(fp, HEADER_VALUES_START, SEEK_SET);
-  fread(&headerValues, 1, headerValuesSize, fp);
-
-  int i = 0;
-  int valueSum = 0;
-
-  for (i = 0; i < headerValuesSize; i++)
-  {
-#ifdef DEBUG
-    printf("0x%02X: Value = 0x%02X\n", (i + HEADER_VALUES_START), headerValues[i]);
-#endif
-    valueSum += headerValues[i];
-  }
-
-  valueSum += 0x19; // Magic Number - verification code adds decimal 25 to the sum of header values
-
-  if ((valueSum & 1))
-  {
-    printf("Powerup error: Sum of header values invalid: 0x%02X\n", valueSum);
-    isValid = 0;
-  }
-  else
-  {
-    printf("Powerup: Sum of header values passed with: 0x%02X\n", valueSum);
-  }
-
-  return isValid;
-}
 
 void setHeaderValues(FILE *fp)
 {
@@ -147,37 +45,7 @@ void setHeaderValues(FILE *fp)
   fread(&cartridge.header.globalChecksum, 1, sizeof(cartridge.header.globalChecksum), fp);
 }
 
-int parseHeader(FILE *fp)
-{
-  // Parse title - check the CGB flag
-  if (cartridge.header.cgbFlag == CGB_ONLY)
-  {
-    printf("Cartridge supports Gameboy Color only.\n");
-  }
-  else if (cartridge.header.cgbFlag == GB_OR_CGB)
-  {
-    printf("Cartridge supports Gameboy & Gameboy Color.\n");
-  }
-  else
-  {
-    printf("Cartridge predates the Gameboy Color.\n");
-  }
-  printHeaderValue("New Licensee Code: ", (const char *)cartridge.header.newLicenseeCode, sizeof(cartridge.header.newLicenseeCode));
-  return 0;
-}
-
-void printHeaderValue(const char *headerValueName, const char *toPrint, long size)
-{
-  int i;
-  printf("%s", headerValueName);
-  for (i = 0; i < size; i++)
-  {
-    printf("%02X", (unsigned char)toPrint[i]);
-  }
-  printf("\n");
-}
-
-int loadCartROM(const char *cartName)
+int loadCartridge(const char *cartName)
 {
   int success = 0;
   FILE *fp = fopen(cartName, "rb");
@@ -190,24 +58,22 @@ int loadCartROM(const char *cartName)
   {
     if ((success = readCartROMToMemory(fp)))
     {
-      printf("Cart read into memory successfully!\n");
-      if ((success = setMBCType(cartridge.header.cartridgeType)))
+      printf("Cart ROM read into memory successfully!\n");
+
+      if ((success = initializeRAM(cartridge.header.ramSize)))
       {
-        printf("Cart MBC setting successful!\n");
+        printf("Cart RAM allocation successful!\n");
+        if ((success = setMBCType(cartridge.header.cartridgeType)))
+        {
+          cartridge.mbc = &MBC;
+          printf("Cart MBC setting successful!\n");
+        }
       }
     }
     fclose(fp);
     return success;
   }
   return success;
-}
-
-int getCartSize(FILE *fp)
-{
-  fseek(fp, 0L, SEEK_END);
-  long filesize = ftell(fp);
-  rewind(fp);
-  return filesize;
 }
 
 int readCartROMToMemory(FILE *fp)
@@ -219,7 +85,7 @@ int readCartROMToMemory(FILE *fp)
 
     if (validateCartSize(cartSize))
     {
-      cartridge.rom = (char *)malloc(sizeof(char) * cartSize);
+      cartridge.rom = (unsigned char *)malloc(sizeof(char) * cartSize);
       if (!cartridge.rom)
       {
         printf("Loading cart ROM failed: could not allocate memory.\n");
@@ -230,6 +96,45 @@ int readCartROMToMemory(FILE *fp)
     }
   }
   return 0;
+}
+
+int initializeRAM(const unsigned char cartRamSize)
+{
+  unsigned int ramSize = 0;
+  switch (cartRamSize)
+  {
+  case (RAM_NONE):
+    ramSize = 0;
+    break;
+  case (RAM_2KB):
+    ramSize = (1024 * 2);
+    break;
+  case (RAM_32KB):
+    ramSize = (1024 * 32);
+    break;
+  default:
+    printf("initializeRAM: Invalid cartridge RAM size!\n");
+    return 0;
+  }
+
+  cartridge.ram = (unsigned char *)malloc(ramSize);
+
+  if (!cartridge.ram)
+  {
+    printf("setMBCType1: Failed to allocate memory!\n");
+    return 0;
+  }
+
+  memset(cartridge.ram, 0x00, ramSize);
+  return 1;
+}
+
+int getCartSize(FILE *fp)
+{
+  fseek(fp, 0L, SEEK_END);
+  long filesize = ftell(fp);
+  rewind(fp);
+  return filesize;
 }
 
 int validateCartSize(const unsigned int cartSize)
@@ -254,19 +159,19 @@ int validateCartSize(const unsigned int cartSize)
       expectedRomSize = 0x180000; // 1.5MB
       break;
     default:
-      printf("loadCartROM invalid ROM size flag: %d\n", cartridge.header.romSize);
+      printf("loadCartridge: invalid ROM size flag = %d\n", cartridge.header.romSize);
       return 0;
     }
   }
   else
   {
-    printf("loadCartROM invalid ROM size flag: %d\n", cartridge.header.romSize);
+    printf("loadCartridge: invalid ROM size flag = %d\n", cartridge.header.romSize);
     return 0;
   }
 
   if (expectedRomSize != cartSize)
   {
-    printf("loadCartROM mismatched cart size: Expected size %d, got %d\n", expectedRomSize, cartSize);
+    printf("loadCartridge: mismatched cart size: Expected size %d, got %d\n", expectedRomSize, cartSize);
     return 0;
   }
   return 1;
