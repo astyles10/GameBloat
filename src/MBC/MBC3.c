@@ -80,7 +80,12 @@ const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned 
   }
   else if (address <= 0x7FFF)
   {
-    // Set ROM/RAM mode: 0x00 = ROM mode, 0x01 = RAM mode
+    // Latch Clock Data
+    // 1. Write 0x00
+    // 2. Write 0x01.
+    // 3. Latch current time to RTC registers. Does not change until next latch
+    printf("Latch Clock Data unsupported\n");
+    return 0x00;
   }
   else if (address >= 0xA000 && address <= 0xBFFF)
   {
