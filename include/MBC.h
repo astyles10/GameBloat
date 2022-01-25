@@ -8,8 +8,3 @@ struct MBC {
     ReadByte readByte;
     WriteByte writeByte;
 } extern MBC;
-
-extern unsigned char RAMEnable;
-extern unsigned char AccessMode;
-extern unsigned char ROMBankLow;
-extern unsigned char RAMBank_ROMBankUpper;

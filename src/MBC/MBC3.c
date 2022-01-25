@@ -1,10 +1,37 @@
 #include "MBC/MBC3.h"
+#include "cartridge.h"
+
+#include <time.h>
 #include <stdio.h>
+
+unsigned char readRTCRegister(void);
+unsigned char writeToRTCRegister(unsigned char);
+void latchRTC(void);
 
 unsigned char RAM_TimerEnable = 0;
 unsigned char ROMBankNumber = 1;
-unsigned char RAMBankNumber_RTCRegister = 0;
+unsigned char RAMBankNumber = 0;
 unsigned char RTCRegisterSelect = 0;
+unsigned char LatchClockSequence = 255;
+unsigned char RTCAccessMode = 0;
+
+time_t LastTimestamp;
+time_t BaseTimestamp;
+
+enum
+{
+  RAMMode = 0,
+  RTCMode = 1
+};
+
+enum
+{
+  RTC_Seconds = 0x08,
+  RTC_Minutes = 0x09,
+  RTC_Hours = 0x0A,
+  RTC_DayLower = 0x0B,
+  RTC_DayHigher = 0x0C
+};
 
 struct ClockRegisters
 {
@@ -32,21 +59,28 @@ const unsigned int MBC3_ReadByte(const unsigned short *memAddr)
   unsigned int address = (*memAddr);
   if (address <= 0x3FFF) // ROM Bank 00
   {
-    return address;
+    return cartridge.rom[address];
   }
   else if (address <= 0x7FFF) // ROM Bank 01-7F
   {
     address -= 0x4000;
     address = (address << ROMBankNumber);
-    return address;
+    return cartridge.rom[address];
   }
   else if (address >= 0xA000 && address <= 0xBFFF)
   {
     if (RAM_TimerEnable)
     {
-      address -= 0xA000;
-      address = (address << RAMBankNumber_RTCRegister);
-      return address;
+      if (RTCAccessMode == RAMMode)
+      {
+        address -= 0xA000;
+        address = (address << RAMBankNumber);
+        return cartridge.ram[address];
+      }
+      else if (RTCAccessMode == RTCMode)
+      {
+        return readRTCRegister();
+      }
     }
     printf("RAM read attempt before enabled!\n");
   }
@@ -60,23 +94,45 @@ const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned 
   if (address <= 0x1FFF)
   {
     if ((value & 0x0A) == 0x0A)
+    {
       RAM_TimerEnable = 1;
+    }
     else
+    {
       RAM_TimerEnable = 0;
+    }
   }
   else if (address <= 0x3FFF)
   {
     // Set ROM bank number
     unsigned char value_7Bit = (value & 0x7F);
     if (value_7Bit == 0x00)
+    {
       ROMBankNumber = 0x01;
+    }
     else
+    {
       ROMBankNumber = value_7Bit;
+    }
   }
   else if (address <= 0x5FFF)
   {
     // Set RAM bank number || Set RTCRegisterSelect
-    RAMBankNumber_RTCRegister = value;
+    if (value <= 0x07)
+    {
+      RAMBankNumber = value;
+      RTCAccessMode = RAMMode;
+    }
+    else if (value >= 0x08 && value <= 0x0C)
+    {
+      RTCRegisterSelect = value;
+      RTCAccessMode = RTCMode;
+    }
+    else
+    {
+      printf("MBC3 WriteByte invalid value: [0x%X]\n", value);
+      return 0x00;
+    }
   }
   else if (address <= 0x7FFF)
   {
@@ -84,44 +140,28 @@ const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned 
     // 1. Write 0x00
     // 2. Write 0x01.
     // 3. Latch current time to RTC registers. Does not change until next latch
-    printf("Latch Clock Data unsupported\n");
-    return 0x00;
+    if (RTCAccessMode == RTCMode)
+    {
+      if (LatchClockSequence == 0x00 && value == 0x01)
+      {
+        latchRTC();
+      }
+      LatchClockSequence = value;
+    }
   }
   else if (address >= 0xA000 && address <= 0xBFFF)
   {
     if (RAM_TimerEnable)
     {
-      if (RAMBankNumber_RTCRegister <= 0x03)
+      if (RTCAccessMode == RAMMode)
       {
         address -= 0xA000;
-        address = (address << RAMBankNumber_RTCRegister);
-        return address;
+        address = (address << RAMBankNumber);
+        cartridge.ram[address] = value;
       }
-      else if (RAMBankNumber_RTCRegister >= 0x08 && RAMBankNumber_RTCRegister <= 0x0C)
+      else if (RTCAccessMode == RTCMode)
       {
-        switch (RAMBankNumber_RTCRegister)
-        {
-        case (0x08):
-          Clock.seconds = value;
-          break;
-        case (0x09):
-          Clock.minutes = value;
-          break;
-        case (0x0A):
-          Clock.hours = value;
-          break;
-        case (0x0B):
-          Clock.lowerDayCounter = value;
-          break;
-        case (0x0C):
-          Clock.upperDayCounter = value;
-          break;
-        default:
-          printf("MBC3 Clock Register : attempt write to invalid register [0x%X]\n", RAMBankNumber_RTCRegister);
-          return 0x00;
-        }
-        // TODO: Need to determine what value to return when writing to RTC registers
-        return 0x01;
+        return writeToRTCRegister(value);
       }
     }
     printf("MBC3_WriteByte: Attempted to write when RAM/RTC disabled!\n");
@@ -133,4 +173,55 @@ const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned 
     return 0x00;
   }
   return 0x01;
+}
+
+unsigned char writeToRTCRegister(unsigned char value)
+{
+  switch (RTCRegisterSelect)
+  {
+  case (RTC_Seconds):
+    Clock.seconds = value;
+    break;
+  case (RTC_Minutes):
+    Clock.minutes = value;
+    break;
+  case (RTC_Hours):
+    Clock.hours = value;
+    break;
+  case (RTC_DayLower):
+    Clock.lowerDayCounter = value;
+    break;
+  case (RTC_DayHigher):
+    Clock.upperDayCounter = value;
+    break;
+  default:
+    printf("MBC3 Clock Register : attempt write to invalid register [0x%X]\n", RTCRegisterSelect);
+    return 0x00;
+  }
+  return 0x01;
+}
+
+unsigned char readRTCRegister(void)
+{
+  switch (RTCRegisterSelect)
+  {
+  case RTC_Seconds:
+    return Clock.seconds;
+  case RTC_Minutes:
+    return Clock.minutes;
+  case RTC_Hours:
+    return Clock.hours;
+  case RTC_DayLower:
+    return Clock.lowerDayCounter;
+  case RTC_DayHigher:
+    return Clock.upperDayCounter;
+  default:
+    printf("No RTC register has been selected!\n");
+    return 0x00;
+  }
+}
+
+void latchRTC(void)
+{
+  printf("Would Latch RTC\n");
 }
