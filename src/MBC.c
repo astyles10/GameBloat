@@ -10,11 +10,6 @@
 
 struct MBC MBC;
 
-unsigned char RAMEnable = 0;
-unsigned char AccessMode = 0;
-unsigned char ROMBankLow = 0;
-unsigned char RAMBank_ROMBankUpper = 0;
-
 enum cartridgeTypes
 {
   ROM_ONLY = 0x00,

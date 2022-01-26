@@ -2,10 +2,10 @@
 #include "MBC.h"
 #include <stdio.h>
 
-extern unsigned char RAMEnable;
-extern unsigned char AccessMode;
-extern unsigned char ROMBankLow;
-extern unsigned char RAMBank_ROMBankUpper;
+unsigned char RAMEnable = 0;
+unsigned char AccessMode = 0;
+unsigned char ROMBankLow = 0;
+unsigned char RAMBank_ROMBankUpper = 0;
 
 const unsigned int MBC1_ReadByte(const unsigned short *memAddr)
 {

@@ -162,10 +162,7 @@ const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned 
   }
   else if (address <= 0x7FFF)
   {
-    // Latch Clock Data
-    // 1. Write 0x00
-    // 2. Write 0x01.
-    // 3. Latch current time to RTC registers. Does not change until next latch
+    // Latch Clock Data sequence Write 0x00, then 0x01 to latch to RTC registers.
     if (RTCAccessMode == RTCMode)
     {
       if (LatchClockSequence == 0x00 && value == 0x01)
@@ -213,7 +210,7 @@ void updateBaseTimestamp(unsigned int timeUnitAsSeconds, unsigned short timeUnit
   }
   else
   {
-    baseTimestamp -= writeValue;
+    baseTimestamp -= writeValue * timeUnitAsSeconds;
   }
 }
 
