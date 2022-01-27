@@ -24,7 +24,6 @@ int main(int argc, const char *argv[])
     // Determine MBC & Other Cartridge Values
     loadROM(cartName);
     // printHeaderValues();
-    checkRamEcho();
   }
   close();
   return 0;

@@ -1,35 +1,20 @@
 /*
     Memory Map
+
+      ROM_BANK_ZERO            0x0000 - 0x3FFF
+      ROM_BANK_SWITCHABLE      0x4000 - 0x7FFF
+      RAM_VIDEO                0x8000 - 0x9FFF
+      RAM_SWITCHABLE           0xA000 - 0xBFFF
+      RAM_INTERNAL_4KB         0xC000 - 0xCFFF
+      RAM_INTERNAL_4KB_Switch  0xD000 - 0xDFFF // Switching on CBG only
+      RAM_INTERNAL_8KB_ECHO    0xE000 - 0xFDFF
+      SPRITE_ATTR_MEM          0xFE00 - 0xFE9F
+      EMPTY_REGION_1           0xFEA0 - 0xFEFF
+      IO_PORTS                 0xFF00 - 0xFF7F
+      EMPTY_REGION_2           ????
+      RAM_INTERNAL (hRAM)      0xFF80 - 0xFFFE
+      INTERRUPT_ENR            0xFFFF
 */
-#define ROM_BANK_ZERO 0x0000
-#define ROM_BANK_SWITCHABLE 0x4000
-#define RAM_VIDEO 0x8000
-#define RAM_SWITCHABLE 0xA000
-#define RAM_INTERNAL_8KB 0xC000
-#define RAM_INTERNAL_8KB_ECHO 0xE000
-#define SPRITE_ATTR_MEM 0xFE00
-#define EMPTY_REGION_1 0xFEA0
-#define IO_PORTS 0xFF00
-#define EMPTY_REGION_2 0xFF4C
-#define RAM_INTERNAL 0xFF80
-#define INTERRUPT_ENR 0xFFFF
-
-// struct MemoryMap {
-//     unsigned char ROMBankZero[ROM_BANK_SWITCHABLE - ROM_BANK_ZERO];
-//     unsigned char ROMBankSwitchable[RAM_VIDEO - ROM_BANK_SWITCHABLE];
-//     unsigned char RAMVideo[RAM_SWITCHABLE - RAM_VIDEO];
-//     unsigned char RAMSwitchable[RAM_INTERNAL_8KB - RAM_SWITCHABLE];
-//     unsigned char RAMInternal8KB[RAM_INTERNAL_8KB_ECHO - RAM_INTERNAL_8KB];
-//     unsigned char RAMInternal8KBEcho[SPRITE_ATTR_MEM - RAM_INTERNAL_8KB_ECHO];
-//     unsigned char spriteAttributeMemory[EMPTY_REGION_1 - SPRITE_ATTR_MEM];
-//     unsigned char emptyRegion1[IO_PORTS - EMPTY_REGION_1];
-//     unsigned char ioPorts[EMPTY_REGION_2 - IO_PORTS];
-//     unsigned char emptyRegion2[IO_PORTS - EMPTY_REGION_1];
-//     unsigned char RAMInternal[INTERRUPT_ENR - RAM_INTERNAL];
-//     unsigned char interruptEnable;
-// } extern memoryMap;
-
-// Begin Reserved Memory Locations
 
 /*
     Interrupt Addresses
@@ -42,7 +27,6 @@
 #define HIGH_LOW_P10_P13_INTR 0x60
 
 void initializeMemory(void);
-void checkRamEcho(void);
 
 typedef unsigned char (*readByteFromMemory)(const unsigned short *memAddr);
 typedef unsigned short (*readShortFromMemory)(const unsigned short *memAddr);

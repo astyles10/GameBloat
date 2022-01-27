@@ -117,15 +117,19 @@ int initializeRAM(const unsigned char cartRamSize)
     return 0;
   }
 
-  cartridge.ram = (unsigned char *)malloc(ramSize);
-
-  if (!cartridge.ram)
+  if (ramSize)
   {
-    printf("setMBCType1: Failed to allocate memory!\n");
-    return 0;
+    cartridge.ram = (unsigned char *)malloc(ramSize);
+
+    if (!cartridge.ram)
+    {
+      printf("setMBCType1: Failed to allocate memory!\n");
+      return 0;
+    }
+
+    memset(cartridge.ram, 0x00, ramSize);
   }
 
-  memset(cartridge.ram, 0x00, ramSize);
   return 1;
 }
 
