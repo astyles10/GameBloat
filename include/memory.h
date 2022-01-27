@@ -32,7 +32,6 @@ typedef unsigned char (*readByteFromMemory)(const unsigned short *memAddr);
 typedef unsigned short (*readShortFromMemory)(const unsigned short *memAddr);
 typedef int (*writeByteToMemory)(const unsigned short *memAddr, const unsigned char *value);
 typedef int (*writeShortToMemory)(const unsigned short *memAddr, const unsigned short *value);
-typedef unsigned char *(*getValueAtAddress)(const unsigned short *memAddr);
 
 struct MMU
 {
@@ -40,5 +39,4 @@ struct MMU
   readShortFromMemory readShort;
   writeByteToMemory writeByte;
   writeShortToMemory writeShort;
-  getValueAtAddress fetchValueFromMemory;
 } extern MMU;

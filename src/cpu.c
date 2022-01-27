@@ -112,14 +112,14 @@ void close()
 
 // 8-Bit Loads
 
-void ld_r_s(unsigned char *ptrR, unsigned char *n)
+void ld_r_s(unsigned char *ptrR, unsigned char n)
 {
-  *ptrR = *n;
+  *ptrR = n;
 }
 
-void ld_d_r(unsigned char *ptrD, unsigned char *ptrR)
+void ld_d_r(unsigned char r)
 {
-  *ptrD = *ptrR;
+  MMU.writeByte(&registers.HL, &r);
 }
 
 void ld_d_n(unsigned char *ptrD, unsigned char *n)
@@ -187,9 +187,9 @@ void ldh_A_n(unsigned char *n)
 
 // 16-Bit loads
 
-void ld_dd_nn(unsigned short *ptrDD, unsigned short *nn)
+void ld_dd_nn(unsigned short *ptrDD, unsigned short nn)
 {
-  *ptrDD = *nn;
+  *ptrDD = nn;
 }
 
 void ld_nn_SP(unsigned short *nn)
@@ -258,9 +258,9 @@ void pop_dd(unsigned short *ptrDD)
 
 // 8-bit ALU ops
 
-void add_s(unsigned char *s)
+void add_s(unsigned char s)
 {
-  unsigned short sum = registers.A + *s;
+  unsigned short sum = registers.A + s;
 
   removeFlag(flagNegative);
 
@@ -273,7 +273,7 @@ void add_s(unsigned char *s)
     removeFlag(flagCarry);
   }
 
-  if (((registers.A & LOW_NIBBLE) + (*s & LOW_NIBBLE)) > LOW_NIBBLE)
+  if (((registers.A & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE)
   {
     setFlag(flagHalfCarry);
   }
@@ -294,10 +294,10 @@ void add_s(unsigned char *s)
   }
 }
 
-void adc_s(unsigned char *s)
+void adc_s(unsigned char s)
 {
-  *s += checkFlag(flagCarry);
-  unsigned short sum = registers.A + *s;
+  s += checkFlag(flagCarry);
+  unsigned short sum = registers.A + s;
 
   removeFlag(flagNegative);
 
@@ -310,7 +310,7 @@ void adc_s(unsigned char *s)
     removeFlag(flagCarry);
   }
 
-  if (((registers.A & LOW_NIBBLE) + (*s & LOW_NIBBLE)) > LOW_NIBBLE)
+  if (((registers.A & LOW_NIBBLE) + (s & LOW_NIBBLE)) > LOW_NIBBLE)
   {
     setFlag(flagHalfCarry);
   }
@@ -331,11 +331,11 @@ void adc_s(unsigned char *s)
   }
 }
 
-void sub_s(unsigned char *s)
+void sub_s(unsigned char s)
 {
   setFlag(flagNegative);
 
-  if (*s > registers.A)
+  if (s > registers.A)
   {
     setFlag(flagCarry);
   }
@@ -344,7 +344,7 @@ void sub_s(unsigned char *s)
     removeFlag(flagCarry);
   }
 
-  if ((*s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE))
+  if ((s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE))
   {
     setFlag(flagHalfCarry);
   }
@@ -352,7 +352,7 @@ void sub_s(unsigned char *s)
   {
     removeFlag(flagHalfCarry);
   }
-  registers.A -= *s;
+  registers.A -= s;
 
   if (registers.A)
   {
@@ -364,12 +364,12 @@ void sub_s(unsigned char *s)
   }
 }
 
-void sbc_s(unsigned char *s)
+void sbc_s(unsigned char s)
 {
   setFlag(flagNegative);
-  *s += checkFlag(flagCarry);
+  s += checkFlag(flagCarry);
 
-  if (*s > registers.A)
+  if (s > registers.A)
   {
     setFlag(flagCarry);
   }
@@ -378,7 +378,7 @@ void sbc_s(unsigned char *s)
     removeFlag(flagCarry);
   }
 
-  if ((*s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE))
+  if ((s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE))
   {
     setFlag(flagHalfCarry);
   }
@@ -387,7 +387,7 @@ void sbc_s(unsigned char *s)
     removeFlag(flagHalfCarry);
   }
 
-  registers.A -= *s;
+  registers.A -= s;
 
   if (registers.A)
   {
@@ -399,11 +399,11 @@ void sbc_s(unsigned char *s)
   }
 }
 
-void and_s(unsigned char *s)
+void and_s(unsigned char s)
 {
   removeFlag(flagNegative | flagCarry);
   setFlag(flagHalfCarry);
-  registers.A &= *s;
+  registers.A &= s;
 
   if (registers.A)
   {
@@ -415,10 +415,10 @@ void and_s(unsigned char *s)
   }
 }
 
-void or_s(unsigned char *s)
+void or_s(unsigned char s)
 {
   removeFlag(flagNegative | flagHalfCarry | flagCarry);
-  registers.A |= *s;
+  registers.A |= s;
 
   if (registers.A)
   {
@@ -430,10 +430,10 @@ void or_s(unsigned char *s)
   }
 }
 
-void xor_s(unsigned char *s)
+void xor_s(unsigned char s)
 {
   removeFlag(flagNegative | flagHalfCarry | flagCarry);
-  registers.A ^= *s;
+  registers.A ^= s;
 
   if (registers.A)
   {
@@ -445,11 +445,11 @@ void xor_s(unsigned char *s)
   }
 }
 
-void cmp_s(unsigned char *s)
+void cmp_s(unsigned char s)
 {
   setFlag(flagNegative);
 
-  if (*s > registers.A)
+  if (s > registers.A)
   {
     setFlag(flagCarry);
   }
@@ -458,7 +458,7 @@ void cmp_s(unsigned char *s)
     removeFlag(flagCarry);
   }
 
-  if ((*s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE))
+  if ((s & LOW_NIBBLE) > (registers.A & LOW_NIBBLE))
   {
     setFlag(flagHalfCarry);
   }
@@ -467,7 +467,7 @@ void cmp_s(unsigned char *s)
     removeFlag(flagHalfCarry);
   }
 
-  if (registers.A == *s)
+  if (registers.A == s)
   {
     removeFlag(flagZero);
   }
@@ -518,6 +518,66 @@ void dec_s(unsigned char *s)
   *s -= 1;
 
   if (*s)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
+void inc_sHL(void)
+{
+  removeFlag(flagNegative);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if ((value & LOW_NIBBLE) == LOW_NIBBLE)
+  {
+    setFlag(flagHalfCarry);
+  }
+  else
+  {
+    removeFlag(flagHalfCarry);
+  }
+
+  value++;
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("inc_sHL: Failed to increment source at address %d!\n", registers.HL);
+  }
+
+  if (value)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
+void dec_sHL(void)
+{
+  setFlag(flagNegative);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & LOW_NIBBLE)
+  {
+    removeFlag(flagHalfCarry);
+  }
+  else
+  {
+    setFlag(flagHalfCarry);
+  }
+
+  value--;
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("Failed to decrement source at address %d!\n", registers.HL);
+  }
+
+  if (value)
   {
     removeFlag(flagZero);
   }
@@ -606,6 +666,29 @@ void swap_s(unsigned char *ptrS)
   *ptrS = ((*ptrS & HIGH_NIBBLE) >> 4) | ((*ptrS & LOW_NIBBLE) << 4);
 
   if (*ptrS)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+  tickCounter += 4;
+}
+
+void swap_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry | flagCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  value = ((value & HIGH_NIBBLE) >> 4) | ((value & LOW_NIBBLE) << 4);
+
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("swap_sHL: Failed to write to address %d!\n", registers.HL);
+  }
+
+  if (value)
   {
     removeFlag(flagZero);
   }
@@ -815,6 +898,38 @@ void rlc_s(unsigned char *ptrS)
   }
 }
 
+void rlc_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x80)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    removeFlag(flagCarry);
+  }
+
+  value <<= 1;
+  value += checkFlag(flagCarry);
+
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("rlc_sHL: Failed to write byte to %d!", registers.HL);
+  }
+
+  if (value)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
 void rl_s(unsigned char *ptrS)
 {
   removeFlag(flagNegative | flagHalfCarry);
@@ -831,6 +946,36 @@ void rl_s(unsigned char *ptrS)
   *ptrS <<= 1;
 
   if (*ptrS)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
+void rl_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x80)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    removeFlag(flagCarry);
+  }
+
+  value <<= 1;
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("rl_sHL: Failed to write byte to address %d!\n", registers.HL);
+  }
+
+  if (value)
   {
     removeFlag(flagZero);
   }
@@ -870,6 +1015,42 @@ void rrc_s(unsigned char *ptrS)
   }
 }
 
+void rrc_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x01)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    removeFlag(flagCarry);
+  }
+
+  value >>= 1;
+
+  if (checkFlag(flagCarry))
+  {
+    value |= 0x80;
+  }
+
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("rrc_sHL: Failed to write value at %d!\n", registers.HL);
+  }
+
+  if (value)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
 void rr_s(unsigned char *ptrS)
 {
   removeFlag(flagNegative | flagHalfCarry);
@@ -895,9 +1076,39 @@ void rr_s(unsigned char *ptrS)
   }
 }
 
+void rr_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x01)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    removeFlag(flagCarry);
+  }
+
+  value >>= 1;
+
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("rr_sHL: Failed to write to address %d!\n", registers.HL);
+  }
+
+  if (value)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
 void sla_s(unsigned char *ptrS)
 {
-  // TODO
   removeFlag(flagNegative | flagHalfCarry);
 
   if (*ptrS & 0x80)
@@ -912,6 +1123,36 @@ void sla_s(unsigned char *ptrS)
   *ptrS <<= 1;
 
   if (*ptrS)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
+void sla_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x80)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    removeFlag(flagCarry);
+  }
+
+  value <<= 1;
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("sla_sHL: Failed to write to address %d!\n", registers.HL);
+  }
+
+  if (value)
   {
     removeFlag(flagZero);
   }
@@ -946,6 +1187,37 @@ void sra_s(unsigned char *ptrS)
   }
 }
 
+void sra_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x01)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    removeFlag(flagCarry);
+  }
+
+  value = (value >> 1) | (value & 0x80);
+
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("sra_sHL: Failed to write to address %d!\n", registers.HL);
+  }
+
+  if (value)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
 void srl_s(unsigned char *ptrS)
 {
   removeFlag(flagNegative | flagHalfCarry);
@@ -962,6 +1234,37 @@ void srl_s(unsigned char *ptrS)
   *ptrS >>= 1;
 
   if (*ptrS)
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
+void srl_sHL(void)
+{
+  removeFlag(flagNegative | flagHalfCarry);
+  unsigned char value = MMU.readByte(&registers.HL);
+
+  if (value & 0x01)
+  {
+    setFlag(flagCarry);
+  }
+  else
+  {
+    setFlag(flagCarry);
+  }
+
+  value >>= 1;
+
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("srl_sHL: Failed to write to address %d!\n", registers.HL);
+  }
+
+  if (value)
   {
     removeFlag(flagZero);
   }
@@ -988,14 +1291,51 @@ void bit_b_s(unsigned char bitPosition, unsigned char *ptrS)
   }
 }
 
+void bit_b_sHL(unsigned char bitPosition)
+{
+  removeFlag(flagNegative);
+  setFlag(flagHalfCarry);
+
+  unsigned value = MMU.readByte(&registers.HL);
+
+  if (value & (1 << bitPosition))
+  {
+    removeFlag(flagZero);
+  }
+  else
+  {
+    setFlag(flagZero);
+  }
+}
+
 void set_b_s(unsigned char bitPosition, unsigned char *ptrS)
 {
   *ptrS |= (1 << bitPosition);
 }
 
+void set_b_sHL(unsigned char bitPosition)
+{
+  unsigned char value = MMU.readByte(&registers.HL);
+  value |= (1 << bitPosition);
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("set_b_sHL: Failed to write to address %d!\n", registers.HL);
+  }
+}
+
 void res_b_s(unsigned char bitPosition, unsigned char *ptrS)
 {
   *ptrS &= ~(1 << bitPosition);
+}
+
+void res_b_sHL(unsigned char bitPosition)
+{
+  unsigned char value = MMU.readByte(&registers.HL);
+  value &= ~(1 << bitPosition);
+  if (!MMU.writeByte(&registers.HL, &value))
+  {
+    printf("res_b_sHL: Failed to write value to address %d!\n", registers.HL);
+  }
 }
 
 // Jumps

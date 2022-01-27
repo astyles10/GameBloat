@@ -1,7 +1,5 @@
 #include <string.h>
-#include "cpu.h"
 #include "memory.h"
-#include "MBC.h"
 #include "cartridge.h"
 
 unsigned char MMU_ReadByte(const unsigned short *memAddr);
@@ -17,9 +15,7 @@ struct MMU MMU = {
 };
 
 unsigned char vRAM[0x2000]; // 0x8000 - 0x9FFF GB Video RAM (Internal)
-//  0xA000 - 0xBFFF Cart RAM (External) | Owned by cartridge.ram
 unsigned char wRAM[0x2000]; // 0xC000 - 0xDFFF Internal working RAM (0xD000 - 0xDFFF switchable CGB)
-// unsigned char* echo_wRAM[0x1E00]; // Echo wRAM, should not be used
 unsigned char OAM[0xA0]; // Object Attribute Memory
 unsigned char ioPorts[0x80]; // Hardware I/O Registers
 unsigned char hRAM[0x7F]; // High RAM / Zero Page
@@ -36,7 +32,6 @@ void initializeMemory(void)
 
 unsigned char MMU_ReadByte(const unsigned short *memAddr)
 {
-  tickCounter += 4;
   const unsigned short address = *memAddr;
   if (address <= 0x7FFF)
   {
@@ -90,7 +85,6 @@ unsigned char MMU_ReadByte(const unsigned short *memAddr)
 unsigned short MMU_ReadShort(const unsigned short *memAddr)
 {
   unsigned short address = *memAddr;
-  tickCounter += 8;
   unsigned short returnValue = MMU_ReadByte(&address);
   address++;
   returnValue |= ((unsigned short)(MMU_ReadByte(&address)) << 8);
@@ -99,7 +93,6 @@ unsigned short MMU_ReadShort(const unsigned short *memAddr)
 
 int MMU_WriteByte(const unsigned short *memAddr, const unsigned char *value)
 {
-  tickCounter += 4;
   const unsigned short address = *memAddr;
   if (address <= 0x7FFF)
   {
