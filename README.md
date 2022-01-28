@@ -1,11 +1,14 @@
 # GBC_Emulator_C
 
-CPU
-1. Implement Flags & Registers - Done
-2. Opcodes, ticks etc.
+TODO:
+* Write RAM switching for CGB
+* Update use of CPU tick counting, should be internal to CPU only
 
-TODO: Move enums out of structs & into their own variables
-Possibly separate opcode defs from the table
-May need to make the opcodes consistent re memory locations for consistency. There are functions using memory locations and registers which are separated to use either, should use one function to take in a pointer to an unsigned char and have the instruction parser check the operand type enum to read a value from memory.
+Clean up code:
 
-3. Write tests for opcodes
+* Change #define to enums, currently mix of both littered in code
+* Set uniform casing throughout code (camel case with upper case FunctionNames, lowercase variableNames)
+* Update function declarations to have only data type
+
+Nice to haves:
+* Logging system

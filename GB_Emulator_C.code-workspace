@@ -1,0 +1,31 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../Cinoop-master"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"memorymanager.h": "c",
+			"cpu.h": "c",
+			"stdio.h": "c",
+			"errno.h": "c",
+			"errno-base.h": "c",
+			"features.h": "c",
+			"libc-header-start.h": "c",
+			"stubs.h": "c",
+			"registers.h": "c",
+			"endian.h": "c",
+			"memory.h": "c",
+			"string.h": "c",
+			"cstdio": "c"
+		},
+		"C_Cpp.default.cppStandard": "c++17",
+		"C_Cpp.default.cStandard": "c17",
+		"C_Cpp.default.intelliSenseMode": "linux-gcc-x86",
+		"C_Cpp.default.includePath": ["${workspaceFolder}/*"]
+	}
+}

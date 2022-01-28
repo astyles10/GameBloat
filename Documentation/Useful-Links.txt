@@ -1,0 +1,2 @@
+http://problemkaputt.de/pandocs.htm#thecartridgeheader
+https://github.com/Dooskington/GameLad/wiki/Part-04---Booting
