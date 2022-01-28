@@ -10,7 +10,7 @@
 
 struct MBC MBC;
 
-enum cartridgeTypes
+enum CartridgeTypes
 {
   ROM_ONLY = 0x00,
   MBC1 = 0x01,

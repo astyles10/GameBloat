@@ -2,6 +2,11 @@
 #include "MBC.h"
 #include <stdio.h>
 
+enum MBC1_AccessModes {
+  ROM_MODE = 0x00,
+  RAM_MODE = 0x01
+};
+
 unsigned char RAMEnable = 0;
 unsigned char AccessMode = 0;
 unsigned char ROMBankLow = 0;

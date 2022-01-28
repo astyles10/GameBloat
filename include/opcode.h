@@ -1,16 +1,16 @@
-typedef enum
+enum OperandNumber
 {
-  eNoOperands,
-  eOperandChar,
-  eOperandShort
-} operandType;
+  NO_OPERANDS,
+  OPERAND_CHAR,
+  OPERAND_SHORT
+};
 
-typedef enum
+enum Conditions
 {
-  eFlagNotSet,
-  eFlagSet,
-  eNoCondition
-} condition;
+  FLAG_NOT_SET,
+  FLAG_SET,
+  NO_CONDITION
+};
 
 typedef struct opcode
 {
@@ -19,7 +19,5 @@ typedef struct opcode
   void *function;
 } opcode;
 
-extern operandType eOperandType;
-extern condition eCondition;
 extern const opcode baseOpcodeTable[256];
 extern const opcode CBOpcodeTable[256];

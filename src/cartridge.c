@@ -6,6 +6,19 @@
 #include "memory.h"
 
 struct cartridge cartridge;
+const unsigned short HeaderStart = 0x100;
+
+enum GameboyType {
+  GB_OR_CGB = 0x80,
+  CGB_ONLY = 0xC0
+};
+
+enum RAMSizeFlags {
+  RAM_NONE = 0x00,
+  RAM_2KB = 0x01,
+  RAM_8KB = 0x02,
+  RAM_32KB = 0x03
+};
 
 void setHeaderValues(FILE *);
 int getCartSize(FILE *);
@@ -29,7 +42,7 @@ void cartCleanup(void)
 
 void setHeaderValues(FILE *fp)
 {
-  fseek(fp, HEADER_START, SEEK_SET);
+  fseek(fp, HeaderStart, SEEK_SET);
   fread(&cartridge.header.entryPoint, 1, sizeof(cartridge.header.entryPoint), fp);
   fread(&cartridge.header.nintendoLogo, 1, sizeof(cartridge.header.nintendoLogo), fp);
   fread(&cartridge.header.title, 1, sizeof(cartridge.header.title), fp);

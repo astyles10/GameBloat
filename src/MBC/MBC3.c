@@ -14,20 +14,20 @@ void latchRTC(void);
 
 enum MBC3_AccessModes
 {
-  RAMMode = 0,
-  RTCMode = 1
+  RAM_MODE = 0,
+  RTC_MODE = 1
 };
 
 enum RTC_Registers
 {
-  RTC_Seconds = 0x08,
-  RTC_Minutes = 0x09,
-  RTC_Hours = 0x0A,
-  RTC_DayLower = 0x0B,
-  RTC_DayUpper = 0x0C
+  RTC_SECONDS = 0x08,
+  RTC_MINUTES = 0x09,
+  RTC_HOURS = 0x0A,
+  RTC_DAY_LOWER = 0x0B,
+  RTC_DAY_UPPER = 0x0C
 };
 
-enum timeAsSeconds
+enum TimeAsSeconds
 {
   SECOND = 1,
   MINUTE = 60,
@@ -35,7 +35,7 @@ enum timeAsSeconds
   DAY = 86400
 };
 
-enum timeUnits
+enum TimeUnits
 {
   SECONDS_UNIT = 60,
   MINUTES_UNIT = 60,
@@ -97,13 +97,13 @@ const unsigned int MBC3_ReadByte(const unsigned short memAddr)
   {
     if (RAM_TimerEnable)
     {
-      if (RTCAccessMode == RAMMode)
+      if (RTCAccessMode == RAM_MODE)
       {
         address -= 0xA000;
         address = (address << RAMBankNumber);
         return cartridge.ram[address];
       }
-      else if (RTCAccessMode == RTCMode)
+      else if (RTCAccessMode == RTC_MODE)
       {
         return readRTCRegister();
       }
@@ -147,12 +147,12 @@ const unsigned int MBC3_WriteByte(const unsigned short memAddr, const unsigned c
     if (value <= 0x07)
     {
       RAMBankNumber = value;
-      RTCAccessMode = RAMMode;
+      RTCAccessMode = RAM_MODE;
     }
     else if (value >= 0x08 && value <= 0x0C)
     {
       RTCRegisterSelect = value;
-      RTCAccessMode = RTCMode;
+      RTCAccessMode = RTC_MODE;
     }
     else
     {
@@ -163,7 +163,7 @@ const unsigned int MBC3_WriteByte(const unsigned short memAddr, const unsigned c
   else if (address <= 0x7FFF)
   {
     // Latch Clock Data sequence Write 0x00, then 0x01 to latch to RTC registers.
-    if (RTCAccessMode == RTCMode)
+    if (RTCAccessMode == RTC_MODE)
     {
       if (LatchClockSequence == 0x00 && value == 0x01)
       {
@@ -176,13 +176,13 @@ const unsigned int MBC3_WriteByte(const unsigned short memAddr, const unsigned c
   {
     if (RAM_TimerEnable)
     {
-      if (RTCAccessMode == RAMMode)
+      if (RTCAccessMode == RAM_MODE)
       {
         address -= 0xA000;
         address = (address << RAMBankNumber);
         cartridge.ram[address] = value;
       }
-      else if (RTCAccessMode == RTCMode)
+      else if (RTCAccessMode == RTC_MODE)
       {
         return writeToRTCRegister(value);
       }
@@ -218,19 +218,19 @@ unsigned char writeToRTCRegister(unsigned char value)
 {
   switch (RTCRegisterSelect)
   {
-  case (RTC_Seconds):
+  case (RTC_SECONDS):
     updateBaseTimestamp(SECOND, SECONDS_UNIT, value);
     break;
-  case (RTC_Minutes):
+  case (RTC_MINUTES):
     updateBaseTimestamp(MINUTE, MINUTES_UNIT, value);
     break;
-  case (RTC_Hours):
+  case (RTC_HOURS):
     updateBaseTimestamp(HOUR, HOURS_UNIT, value);
     break;
-  case (RTC_DayLower):
+  case (RTC_DAY_LOWER):
     updateBaseTimestamp(DAY, DAYS_LOWER_UNIT, value);
     break;
-  case (RTC_DayUpper):
+  case (RTC_DAY_UPPER):
     updateBaseTimestamp(DAY, DAYS_UPPER_UNIT, value);
 
     if ((Clock.upperDayCounter ^ value) & haltFlag)
@@ -270,15 +270,15 @@ unsigned char readRTCRegister(void)
 {
   switch (RTCRegisterSelect)
   {
-  case RTC_Seconds:
+  case RTC_SECONDS:
     return Clock.seconds;
-  case RTC_Minutes:
+  case RTC_MINUTES:
     return Clock.minutes;
-  case RTC_Hours:
+  case RTC_HOURS:
     return Clock.hours;
-  case RTC_DayLower:
+  case RTC_DAY_LOWER:
     return Clock.lowerDayCounter;
-  case RTC_DayUpper:
+  case RTC_DAY_UPPER:
     return Clock.upperDayCounter;
   default:
     printf("No RTC register has been selected!\n");
