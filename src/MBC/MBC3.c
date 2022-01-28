@@ -80,9 +80,9 @@ struct ClockRegisters
   };
 } Clock;
 
-const unsigned int MBC3_ReadByte(const unsigned short *memAddr)
+const unsigned int MBC3_ReadByte(const unsigned short memAddr)
 {
-  unsigned int address = (*memAddr);
+  unsigned int address = memAddr;
   if (address <= 0x3FFF) // ROM Bank 00
   {
     return cartridge.rom[address];
@@ -114,9 +114,9 @@ const unsigned int MBC3_ReadByte(const unsigned short *memAddr)
   return 0x00;
 }
 
-const unsigned int MBC3_WriteByte(const unsigned short *memAddr, const unsigned char value)
+const unsigned int MBC3_WriteByte(const unsigned short memAddr, const unsigned char value)
 {
-  unsigned short address = (*memAddr);
+  unsigned short address = memAddr;
   if (address <= 0x1FFF)
   {
     if ((value & 0x0A) == 0x0A)

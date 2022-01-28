@@ -5,14 +5,14 @@
 #include "cpu.h"
 #include "memory.h"
 
-void ld_BC_nn(unsigned short *immediate)
+void ld_BC_nn(unsigned short immediate)
 {
   ld_dd_nn(&registers.BC, immediate);
 }
 
-void ld_MMU_A(void)
+void ld_mBC_A(void)
 {
-  ld_dd_A(&registers.BC);
+  ld_dd_A(registers.BC);
 }
 
 void inc_BC(void)
@@ -30,19 +30,19 @@ void dec_B(void)
   dec_s(&registers.B);
 }
 
-void ld_B_n(unsigned char *immediate)
+void ld_B_n(unsigned char immediate)
 {
   ld_r_s(&registers.B, immediate);
 }
 
 void add_HL_BC(void)
 {
-  add_HL_ss(&registers.BC);
+  add_HL_ss(registers.BC);
 }
 
-void ld_A_MMU(void)
+void ld_A_mBC(void)
 {
-  ld_A_ss(&registers.BC);
+  ld_A_ss(registers.BC);
 }
 
 void dec_BC(void)
@@ -60,19 +60,19 @@ void dec_C(void)
   dec_s(&registers.C);
 }
 
-void ld_C_n(unsigned char *immediate)
+void ld_C_n(unsigned char immediate)
 {
   ld_r_s(&registers.C, immediate);
 }
 
-void ld_DE_nn(unsigned short *immediate)
+void ld_DE_nn(unsigned short immediate)
 {
   ld_dd_nn(&registers.DE, immediate);
 }
 
 void ld_mDE_A(void)
 {
-  ld_dd_A(&registers.DE);
+  ld_dd_A(registers.DE);
 }
 
 void inc_DE(void)
@@ -90,19 +90,19 @@ void dec_D(void)
   dec_s(&registers.D);
 }
 
-void ld_D_n(unsigned char *immediate)
+void ld_D_n(unsigned char immediate)
 {
   ld_r_s(&registers.D, immediate);
 }
 
 void add_HL_DE(void)
 {
-  add_HL_ss(&registers.DE);
+  add_HL_ss(registers.DE);
 }
 
 void ld_A_mDE(void)
 {
-  ld_r_s(&registers.A, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.A, MMU.readByte(registers.DE));
 }
 
 void dec_DE(void)
@@ -120,17 +120,17 @@ void dec_E(void)
   inc_s(&registers.E);
 }
 
-void ld_E_n(unsigned char *immediate)
+void ld_E_n(unsigned char immediate)
 {
   ld_r_s(&registers.E, immediate);
 }
 
-void jr_NZ_n(unsigned char *immediate)
+void jr_NZ_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagZero, eFlagNotSet);
+  jr_cc_e(immediate, flagZero, eFlagNotSet);
 }
 
-void ld_HL_nn(unsigned short *immediate)
+void ld_HL_nn(unsigned short immediate)
 {
   ld_dd_nn(&registers.HL, immediate);
 }
@@ -150,19 +150,19 @@ void dec_H(void)
   dec_s(&registers.H);
 }
 
-void ld_H_n(unsigned char *immediate)
+void ld_H_n(unsigned char immediate)
 {
   ld_r_s(&registers.H, immediate);
 }
 
-void jr_Z_n(unsigned char *immediate)
+void jr_Z_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagZero, eFlagSet);
+  jr_cc_e(immediate, flagZero, eFlagSet);
 }
 
 void add_HL_HL(void)
 {
-  add_HL_ss(&registers.HL);
+  add_HL_ss(registers.HL);
 }
 
 void dec_HL(void)
@@ -180,17 +180,17 @@ void dec_L(void)
   dec_s(&registers.L);
 }
 
-void ld_L_n(unsigned char *immediate)
+void ld_L_n(unsigned char immediate)
 {
   ld_r_s(&registers.L, immediate);
 }
 
-void jr_NC_n(unsigned char *immediate)
+void jr_NC_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagCarry, eFlagNotSet);
+  jr_cc_e(immediate, flagCarry, eFlagNotSet);
 }
 
-void ld_SP_nn(unsigned short *immediate)
+void ld_SP_nn(unsigned short immediate)
 {
   ld_dd_nn(&registers.SP, immediate);
 }
@@ -202,22 +202,22 @@ void inc_SP(void)
 
 void inc_mHL(void)
 {
-  inc_s(MMU.fetchValueFromMemory(&registers.HL));
+  inc_sHL();
 }
 
 void dec_mHL(void)
 {
-  dec_s(MMU.fetchValueFromMemory(&registers.HL));
+  dec_sHL();
 }
 
-void jr_C_n(unsigned char *immediate)
+void jr_C_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagCarry, eFlagSet);
+  jr_cc_e(immediate, flagCarry, eFlagSet);
 }
 
 void add_HL_SP(void)
 {
-  add_HL_ss(&registers.SP);
+  add_HL_ss(registers.SP);
 }
 
 void dec_SP(void)
@@ -235,647 +235,647 @@ void dec_A(void)
   dec_s(&registers.A);
 }
 
-void ld_A_n(unsigned char *immediate)
+void ld_A_n(unsigned char immediate)
 {
   ld_r_s(&registers.A, immediate);
 }
 
 void ld_B_B(void)
 {
-  ld_r_s(&registers.B, &registers.B);
+  ld_r_s(&registers.B, registers.B);
 }
 
 void ld_B_C(void)
 {
-  ld_r_s(&registers.B, &registers.C);
+  ld_r_s(&registers.B, registers.C);
 }
 void ld_B_D(void)
 {
-  ld_r_s(&registers.B, &registers.D);
+  ld_r_s(&registers.B, registers.D);
 }
 void ld_B_E(void)
 {
-  ld_r_s(&registers.B, &registers.E);
+  ld_r_s(&registers.B, registers.E);
 }
 
 void ld_B_H(void)
 {
-  ld_r_s(&registers.B, &registers.H);
+  ld_r_s(&registers.B, registers.H);
 }
 
 void ld_B_L(void)
 {
-  ld_r_s(&registers.B, &registers.L);
+  ld_r_s(&registers.B, registers.L);
 }
 
 void ld_B_mHL(void)
 {
-  ld_r_s(&registers.B, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.B, MMU.readByte(registers.HL));
 }
 
 void ld_B_A(void)
 {
-  ld_r_s(&registers.B, &registers.A);
+  ld_r_s(&registers.B, registers.A);
 }
 
 void ld_C_B(void)
 {
-  ld_r_s(&registers.C, &registers.B);
+  ld_r_s(&registers.C, registers.B);
 }
 
 void ld_C_C(void)
 {
-  ld_r_s(&registers.C, &registers.C);
+  ld_r_s(&registers.C, registers.C);
 }
 
 void ld_C_D(void)
 {
-  ld_r_s(&registers.C, &registers.D);
+  ld_r_s(&registers.C, registers.D);
 }
 
 void ld_C_E(void)
 {
-  ld_r_s(&registers.C, &registers.E);
+  ld_r_s(&registers.C, registers.E);
 }
 
 void ld_C_H(void)
 {
-  ld_r_s(&registers.C, &registers.H);
+  ld_r_s(&registers.C, registers.H);
 }
 
 void ld_C_L(void)
 {
-  ld_r_s(&registers.C, &registers.L);
+  ld_r_s(&registers.C, registers.L);
 }
 
 void ld_C_mHL(void)
 {
-  ld_r_s(&registers.C, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.C, MMU.readByte(registers.HL));
 }
 
 void ld_C_A(void)
 {
-  ld_r_s(&registers.C, &registers.A);
+  ld_r_s(&registers.C, registers.A);
 }
 
 void ld_D_B(void)
 {
-  ld_r_s(&registers.D, &registers.B);
+  ld_r_s(&registers.D, registers.B);
 }
 
 void ld_D_C(void)
 {
-  ld_r_s(&registers.D, &registers.C);
+  ld_r_s(&registers.D, registers.C);
 }
 
 void ld_D_D(void)
 {
-  ld_r_s(&registers.D, &registers.D);
+  ld_r_s(&registers.D, registers.D);
 }
 
 void ld_D_E(void)
 {
-  ld_r_s(&registers.D, &registers.E);
+  ld_r_s(&registers.D, registers.E);
 }
 
 void ld_D_H(void)
 {
-  ld_r_s(&registers.D, &registers.H);
+  ld_r_s(&registers.D, registers.H);
 }
 
 void ld_D_L(void)
 {
-  ld_r_s(&registers.D, &registers.L);
+  ld_r_s(&registers.D, registers.L);
 }
 
 void ld_D_mHL(void)
 {
-  ld_r_s(&registers.D, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.D, MMU.readByte(registers.HL));
 }
 
 void ld_D_A(void)
 {
-  ld_r_s(&registers.D, &registers.A);
+  ld_r_s(&registers.D, registers.A);
 }
 
 void ld_E_B(void)
 {
-  ld_r_s(&registers.E, &registers.B);
+  ld_r_s(&registers.E, registers.B);
 }
 
 void ld_E_C(void)
 {
-  ld_r_s(&registers.E, &registers.C);
+  ld_r_s(&registers.E, registers.C);
 }
 
 void ld_E_D(void)
 {
-  ld_r_s(&registers.E, &registers.D);
+  ld_r_s(&registers.E, registers.D);
 }
 
 void ld_E_E(void)
 {
-  ld_r_s(&registers.E, &registers.E);
+  ld_r_s(&registers.E, registers.E);
 }
 
 void ld_E_H(void)
 {
-  ld_r_s(&registers.E, &registers.H);
+  ld_r_s(&registers.E, registers.H);
 }
 
 void ld_E_L(void)
 {
-  ld_r_s(&registers.E, &registers.L);
+  ld_r_s(&registers.E, registers.L);
 }
 
 void ld_E_mHL(void)
 {
-  ld_r_s(&registers.E, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.E, MMU.readByte(registers.HL));
 }
 
 void ld_E_A(void)
 {
-  ld_r_s(&registers.E, &registers.A);
+  ld_r_s(&registers.E, registers.A);
 }
 
 void ld_H_B(void)
 {
-  ld_r_s(&registers.H, &registers.B);
+  ld_r_s(&registers.H, registers.B);
 }
 
 void ld_H_C(void)
 {
-  ld_r_s(&registers.H, &registers.C);
+  ld_r_s(&registers.H, registers.C);
 }
 
 void ld_H_D(void)
 {
-  ld_r_s(&registers.H, &registers.D);
+  ld_r_s(&registers.H, registers.D);
 }
 
 void ld_H_E(void)
 {
-  ld_r_s(&registers.H, &registers.E);
+  ld_r_s(&registers.H, registers.E);
 }
 
 void ld_H_H(void)
 {
-  ld_r_s(&registers.H, &registers.H);
+  ld_r_s(&registers.H, registers.H);
 }
 
 void ld_H_L(void)
 {
-  ld_r_s(&registers.H, &registers.L);
+  ld_r_s(&registers.H, registers.L);
 }
 
 void ld_H_mHL(void)
 {
-  ld_r_s(&registers.H, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.H, MMU.readByte(registers.HL));
 }
 
 void ld_H_A(void)
 {
-  ld_r_s(&registers.H, &registers.A);
+  ld_r_s(&registers.H, registers.A);
 }
 
 void ld_L_B(void)
 {
-  ld_r_s(&registers.L, &registers.B);
+  ld_r_s(&registers.L, registers.B);
 }
 
 void ld_L_C(void)
 {
-  ld_r_s(&registers.L, &registers.C);
+  ld_r_s(&registers.L, registers.C);
 }
 
 void ld_L_D(void)
 {
-  ld_r_s(&registers.L, &registers.D);
+  ld_r_s(&registers.L, registers.D);
 }
 
 void ld_L_E(void)
 {
-  ld_r_s(&registers.L, &registers.E);
+  ld_r_s(&registers.L, registers.E);
 }
 
 void ld_L_H(void)
 {
-  ld_r_s(&registers.L, &registers.H);
+  ld_r_s(&registers.L, registers.H);
 }
 
 void ld_L_L(void)
 {
-  ld_r_s(&registers.L, &registers.L);
+  ld_r_s(&registers.L, registers.L);
 }
 
 void ld_L_mHL(void)
 {
-  ld_r_s(&registers.L, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.L, MMU.readByte(registers.HL));
 }
 
 void ld_L_A(void)
 {
-  ld_r_s(&registers.L, &registers.A);
+  ld_r_s(&registers.L, registers.A);
 }
 
 void ld_mHL_B(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.B);
+  ld_d_r(registers.B);
 }
 
 void ld_mHL_C(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.C);
+  ld_d_r(registers.C);
 }
 
 void ld_mHL_D(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.D);
+  ld_d_r(registers.D);
 }
 
 void ld_mHL_E(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.E);
+  ld_d_r(registers.E);
 }
 
 void ld_mHL_H(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.H);
+  ld_d_r(registers.H);
 }
 
 void ld_mHL_L(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.L);
+  ld_d_r(registers.L);
 }
 
 void ld_mHL_A(void)
 {
-  ld_d_r(MMU.fetchValueFromMemory(&registers.HL), &registers.A);
+  ld_d_r(registers.A);
 }
 
 void ld_A_B(void)
 {
-  ld_r_s(&registers.A, &registers.B);
+  ld_r_s(&registers.A, registers.B);
 }
 
 void ld_A_C(void)
 {
-  ld_r_s(&registers.A, &registers.C);
+  ld_r_s(&registers.A, registers.C);
 }
 
 void ld_A_D(void)
 {
-  ld_r_s(&registers.A, &registers.D);
+  ld_r_s(&registers.A, registers.D);
 }
 
 void ld_A_E(void)
 {
-  ld_r_s(&registers.A, &registers.E);
+  ld_r_s(&registers.A, registers.E);
 }
 
 void ld_A_H(void)
 {
-  ld_r_s(&registers.A, &registers.H);
+  ld_r_s(&registers.A, registers.H);
 }
 
 void ld_A_L(void)
 {
-  ld_r_s(&registers.A, &registers.L);
+  ld_r_s(&registers.A, registers.L);
 }
 
 void ld_A_mHL(void)
 {
-  ld_r_s(&registers.A, MMU.fetchValueFromMemory(&registers.HL));
+  ld_r_s(&registers.A, MMU.readByte(registers.HL));
 }
 
 void ld_A_A(void)
 {
-  ld_r_s(&registers.A, &registers.A);
+  ld_r_s(&registers.A, registers.A);
 }
 
 void add_A_B(void)
 {
-  add_s(&registers.B);
+  add_s(registers.B);
 }
 
 void add_A_C(void)
 {
-  add_s(&registers.C);
+  add_s(registers.C);
 }
 
 void add_A_D(void)
 {
-  add_s(&registers.D);
+  add_s(registers.D);
 }
 
 void add_A_E(void)
 {
-  add_s(&registers.E);
+  add_s(registers.E);
 }
 
 void add_A_H(void)
 {
-  add_s(&registers.H);
+  add_s(registers.H);
 }
 
 void add_A_L(void)
 {
-  add_s(&registers.L);
+  add_s(registers.L);
 }
 
 void add_A_mHL(void)
 {
-  add_s(MMU.fetchValueFromMemory(&registers.HL));
+  add_s(MMU.readByte(registers.HL));
 }
 
 void add_A_A(void)
 {
-  add_s(&registers.A);
+  add_s(registers.A);
 }
 
 void adc_A_B(void)
 {
-  adc_s(&registers.B);
+  adc_s(registers.B);
 }
 
 void adc_A_C(void)
 {
-  adc_s(&registers.C);
+  adc_s(registers.C);
 }
 
 void adc_A_D(void)
 {
-  adc_s(&registers.D);
+  adc_s(registers.D);
 }
 
 void adc_A_E(void)
 {
-  adc_s(&registers.E);
+  adc_s(registers.E);
 }
 
 void adc_A_H(void)
 {
-  adc_s(&registers.H);
+  adc_s(registers.H);
 }
 
 void adc_A_L(void)
 {
-  adc_s(&registers.L);
+  adc_s(registers.L);
 }
 
 void adc_A_mHL(void)
 {
-  adc_s(MMU.fetchValueFromMemory(&registers.HL));
+  adc_s(MMU.readByte(registers.HL));
 }
 
 void adc_A_A(void)
 {
-  adc_s(&registers.A);
+  adc_s(registers.A);
 }
 
 void sub_A_B(void)
 {
-  sub_s(&registers.B);
+  sub_s(registers.B);
 }
 
 void sub_A_C(void)
 {
-  sub_s(&registers.C);
+  sub_s(registers.C);
 }
 
 void sub_A_D(void)
 {
-  sub_s(&registers.D);
+  sub_s(registers.D);
 }
 
 void sub_A_E(void)
 {
-  sub_s(&registers.E);
+  sub_s(registers.E);
 }
 
 void sub_A_H(void)
 {
-  sub_s(&registers.H);
+  sub_s(registers.H);
 }
 
 void sub_A_L(void)
 {
-  sub_s(&registers.L);
+  sub_s(registers.L);
 }
 
 void sub_A_mHL(void)
 {
-  sub_s(MMU.fetchValueFromMemory(&registers.HL));
+  sub_s(MMU.readByte(registers.HL));
 }
 
 void sub_A_A(void)
 {
-  sub_s(&registers.A);
+  sub_s(registers.A);
 }
 
 void sbc_A_B(void)
 {
-  sub_s(&registers.B);
+  sbc_s(registers.B);
 }
 
 void sbc_A_C(void)
 {
-  sub_s(&registers.C);
+  sbc_s(registers.C);
 }
 
 void sbc_A_D(void)
 {
-  sub_s(&registers.D);
+  sbc_s(registers.D);
 }
 
 void sbc_A_E(void)
 {
-  sub_s(&registers.E);
+  sbc_s(registers.E);
 }
 
 void sbc_A_H(void)
 {
-  sub_s(&registers.H);
+  sbc_s(registers.H);
 }
 
 void sbc_A_L(void)
 {
-  sub_s(&registers.L);
+  sbc_s(registers.L);
 }
 
 void sbc_A_mHL(void)
 {
-  sub_s(MMU.fetchValueFromMemory(&registers.HL));
+  sbc_s(MMU.readByte(registers.HL));
 }
 
 void sbc_A_A(void)
 {
-  sub_s(&registers.A);
+  sbc_s(registers.A);
 }
 
 void and_B(void)
 {
-  and_s(&registers.B);
+  and_s(registers.B);
 }
 
 void and_C(void)
 {
-  and_s(&registers.C);
+  and_s(registers.C);
 }
 
 void and_D(void)
 {
-  and_s(&registers.D);
+  and_s(registers.D);
 }
 
 void and_E(void)
 {
-  and_s(&registers.E);
+  and_s(registers.E);
 }
 
 void and_H(void)
 {
-  and_s(&registers.H);
+  and_s(registers.H);
 }
 
 void and_L(void)
 {
-  and_s(&registers.L);
+  and_s(registers.L);
 }
 
 void and_mHL(void)
 {
-  and_s(MMU.fetchValueFromMemory(&registers.HL));
+  and_s(MMU.readByte(registers.HL));
 }
 
 void and_A(void)
 {
-  and_s(&registers.A);
+  and_s(registers.A);
 }
 
 void xor_B(void)
 {
-  xor_s(&registers.B);
+  xor_s(registers.B);
 }
 
 void xor_C(void)
 {
-  xor_s(&registers.C);
+  xor_s(registers.C);
 }
 
 void xor_D(void)
 {
-  xor_s(&registers.D);
+  xor_s(registers.D);
 }
 
 void xor_E(void)
 {
-  xor_s(&registers.E);
+  xor_s(registers.E);
 }
 
 void xor_H(void)
 {
-  xor_s(&registers.H);
+  xor_s(registers.H);
 }
 
 void xor_L(void)
 {
-  xor_s(&registers.L);
+  xor_s(registers.L);
 }
 
 void xor_mHL(void)
 {
-  xor_s(MMU.fetchValueFromMemory(&registers.HL));
+  xor_s(MMU.readByte(registers.HL));
 }
 
 void xor_A(void)
 {
-  xor_s(&registers.A);
+  xor_s(registers.A);
 }
 
 void or_B(void)
 {
-  or_s(&registers.B);
+  or_s(registers.B);
 }
 
 void or_C(void)
 {
-  or_s(&registers.C);
+  or_s(registers.C);
 }
 
 void or_D(void)
 {
-  or_s(&registers.D);
+  or_s(registers.D);
 }
 
 void or_E(void)
 {
-  or_s(&registers.E);
+  or_s(registers.E);
 }
 
 void or_H(void)
 {
-  or_s(&registers.H);
+  or_s(registers.H);
 }
 
 void or_L(void)
 {
-  or_s(&registers.L);
+  or_s(registers.L);
 }
 
 void or_mHL(void)
 {
-  or_s(MMU.fetchValueFromMemory(&registers.HL));
+  or_s(MMU.readByte(registers.HL));
 }
 
 void or_A(void)
 {
-  or_s(&registers.A);
+  or_s(registers.A);
 }
 
 void cmp_B(void)
 {
-  cmp_s(&registers.B);
+  cmp_s(registers.B);
 }
 
 void cmp_C(void)
 {
-  cmp_s(&registers.C);
+  cmp_s(registers.C);
 }
 
 void cmp_D(void)
 {
-  cmp_s(&registers.D);
+  cmp_s(registers.D);
 }
 
 void cmp_E(void)
 {
-  cmp_s(&registers.E);
+  cmp_s(registers.E);
 }
 
 void cmp_H(void)
 {
-  cmp_s(&registers.H);
+  cmp_s(registers.H);
 }
 
 void cmp_L(void)
 {
-  cmp_s(&registers.L);
+  cmp_s(registers.L);
 }
 
 void cmp_mHL(void)
 {
-  cmp_s(MMU.fetchValueFromMemory(&registers.HL));
+  cmp_s(MMU.readByte(registers.HL));
 }
 
 void cmp_A(void)
 {
-  cmp_s(&registers.A);
+  cmp_s(registers.A);
 }
 
 void ret_NZ(void)
 {
-  ret_cc(&flagZero, eFlagNotSet);
+  ret_cc(flagZero, eFlagNotSet);
 }
 
 void pop_BC(void)
@@ -883,22 +883,22 @@ void pop_BC(void)
   pop_dd(&registers.BC);
 }
 
-void jp_NZ_nn(unsigned short *immediate)
+void jp_NZ_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagZero, eFlagNotSet);
+  jp_cc_nn(immediate, flagZero, eFlagNotSet);
 }
 
-void call_NZ_nn(unsigned short *immediate)
+void call_NZ_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagZero, eFlagNotSet);
+  call_cc_nn(immediate, flagZero, eFlagNotSet);
 }
 
 void push_BC(void)
 {
-  push_ss(&registers.BC);
+  push_ss(registers.BC);
 }
 
-void add_A_n(unsigned char *immediate)
+void add_A_n(unsigned char immediate)
 {
   add_s(immediate);
 }
@@ -910,12 +910,12 @@ void rst_0(void)
 
 void ret_Z(void)
 {
-  ret_cc(&flagZero, eFlagSet);
+  ret_cc(flagZero, eFlagSet);
 }
 
-void jp_Z_nn(unsigned short *immediate)
+void jp_Z_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagZero, eFlagSet);
+  jp_cc_nn(immediate, flagZero, eFlagSet);
 }
 
 void extOps()
@@ -923,12 +923,12 @@ void extOps()
   // TODO
 }
 
-void call_Z_nn(unsigned short *immediate)
+void call_Z_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagZero, eFlagSet);
+  call_cc_nn(immediate, flagZero, eFlagSet);
 }
 
-void adc_A_n(unsigned char *immediate)
+void adc_A_n(unsigned char immediate)
 {
   adc_s(immediate);
 }
@@ -940,7 +940,7 @@ void rst_08(void)
 
 void ret_NC(void)
 {
-  ret_cc(&flagCarry, eFlagNotSet);
+  ret_cc(flagCarry, eFlagNotSet);
 }
 
 void pop_DE(void)
@@ -948,22 +948,22 @@ void pop_DE(void)
   pop_dd(&registers.DE);
 }
 
-void jp_NC_nn(unsigned short *immediate)
+void jp_NC_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagCarry, eFlagNotSet);
+  jp_cc_nn(immediate, flagCarry, eFlagNotSet);
 }
 
-void call_NC_nn(unsigned short *immediate)
+void call_NC_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagCarry, eFlagNotSet);
+  call_cc_nn(immediate, flagCarry, eFlagNotSet);
 }
 
 void push_DE(void)
 {
-  push_ss(&registers.DE);
+  push_ss(registers.DE);
 }
 
-void sub_A_n(unsigned char *immediate)
+void sub_A_n(unsigned char immediate)
 {
   sub_s(immediate);
 }
@@ -975,20 +975,20 @@ void rst_10(void)
 
 void ret_C(void)
 {
-  ret_cc(&flagCarry, eFlagSet);
+  ret_cc(flagCarry, eFlagSet);
 }
 
-void jp_C_nn(unsigned short *immediate)
+void jp_C_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagCarry, eFlagSet);
+  jp_cc_nn(immediate, flagCarry, eFlagSet);
 }
 
-void call_C_nn(unsigned short *immediate)
+void call_C_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagCarry, eFlagNotSet);
+  call_cc_nn(immediate, flagCarry, eFlagNotSet);
 }
 
-void sbc_A_n(unsigned char *immediate)
+void sbc_A_n(unsigned char immediate)
 {
   sbc_s(immediate);
 }
@@ -1005,15 +1005,15 @@ void pop_HL(void)
 
 void ldh_mC_A(void)
 {
-  ldh_n_A(&registers.C);
+  ldh_n_A(registers.C);
 }
 
 void push_HL(void)
 {
-  push_ss(&registers.HL);
+  push_ss(registers.HL);
 }
 
-void and_n(unsigned char *immediate)
+void and_n(unsigned char immediate)
 {
   and_s(immediate);
 }
@@ -1025,16 +1025,16 @@ void rst_20(void)
 
 void jp_mHL(void)
 {
-  unsigned short value = MMU.readShort(&registers.HL);
-  jp_nn(&value);
+  unsigned short value = MMU.readShort(registers.HL);
+  jp_nn(value);
 }
 
-void ld_nn_A(unsigned short *immediate)
+void ld_nn_A(unsigned short immediate)
 {
   ld_dd_A(immediate);
 }
 
-void xor_n(unsigned char *immediate)
+void xor_n(unsigned char immediate)
 {
   xor_s(immediate);
 }
@@ -1051,10 +1051,10 @@ void pop_AF(void)
 
 void push_AF(void)
 {
-  push_ss(&registers.AF);
+  push_ss(registers.AF);
 }
 
-void or_n(unsigned char *immediate)
+void or_n(unsigned char immediate)
 {
   or_s(immediate);
 }
@@ -1064,12 +1064,12 @@ void rst_30(void)
   rst_f(0x30);
 }
 
-void ld_A_m_nn(unsigned short *immediate)
+void ld_A_m_nn(unsigned short immediate)
 {
   ld_A_ss(immediate);
 }
 
-void cp_n(unsigned char *immediate)
+void cp_n(unsigned char immediate)
 {
   cmp_s(immediate);
 }
@@ -1082,7 +1082,7 @@ void rst_38(void)
 const opcode baseOpcodeTable[256] = {
     {"NOP", eNoOperands, nop},               // 0x00
     {"LD BC,nn", eOperandShort, ld_BC_nn},   // 0x01
-    {"LD (BC),A", eNoOperands, ld_MMU_A},    // 0x02
+    {"LD (BC),A", eNoOperands, ld_mBC_A},    // 0x02
     {"INC BC", eNoOperands, inc_BC},         // 0x03
     {"INC B", eNoOperands, inc_B},           // 0x04
     {"DEC B", eNoOperands, dec_B},           // 0x05
@@ -1090,7 +1090,7 @@ const opcode baseOpcodeTable[256] = {
     {"RLC A", eNoOperands, rlc_A},           // 0x07
     {"LD (nn),SP", eOperandShort, ld_nn_SP}, // 0x08
     {"ADD HL,BC", eNoOperands, add_HL_BC},   // 0x09
-    {"LD A,(BC)", eNoOperands, ld_A_MMU},    // 0x0A
+    {"LD A,(BC)", eNoOperands, ld_A_mBC},    // 0x0A
     {"DEC BC", eNoOperands, dec_BC},         // 0x0B
     {"INC C", eNoOperands, inc_C},           // 0x0C
     {"DEC C", eNoOperands, dec_C},           // 0x0D
