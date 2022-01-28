@@ -127,7 +127,7 @@ void ld_E_n(unsigned char immediate)
 
 void jr_NZ_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagZero, eFlagNotSet);
+  jr_cc_e(immediate, flagZero, eFlagNotSet);
 }
 
 void ld_HL_nn(unsigned short immediate)
@@ -157,7 +157,7 @@ void ld_H_n(unsigned char immediate)
 
 void jr_Z_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagZero, eFlagSet);
+  jr_cc_e(immediate, flagZero, eFlagSet);
 }
 
 void add_HL_HL(void)
@@ -187,7 +187,7 @@ void ld_L_n(unsigned char immediate)
 
 void jr_NC_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagCarry, eFlagNotSet);
+  jr_cc_e(immediate, flagCarry, eFlagNotSet);
 }
 
 void ld_SP_nn(unsigned short immediate)
@@ -212,7 +212,7 @@ void dec_mHL(void)
 
 void jr_C_n(unsigned char immediate)
 {
-  jr_cc_e(immediate, &flagCarry, eFlagSet);
+  jr_cc_e(immediate, flagCarry, eFlagSet);
 }
 
 void add_HL_SP(void)
@@ -875,7 +875,7 @@ void cmp_A(void)
 
 void ret_NZ(void)
 {
-  ret_cc(&flagZero, eFlagNotSet);
+  ret_cc(flagZero, eFlagNotSet);
 }
 
 void pop_BC(void)
@@ -885,17 +885,17 @@ void pop_BC(void)
 
 void jp_NZ_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagZero, eFlagNotSet);
+  jp_cc_nn(immediate, flagZero, eFlagNotSet);
 }
 
 void call_NZ_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagZero, eFlagNotSet);
+  call_cc_nn(immediate, flagZero, eFlagNotSet);
 }
 
 void push_BC(void)
 {
-  push_ss(&registers.BC);
+  push_ss(registers.BC);
 }
 
 void add_A_n(unsigned char immediate)
@@ -910,12 +910,12 @@ void rst_0(void)
 
 void ret_Z(void)
 {
-  ret_cc(&flagZero, eFlagSet);
+  ret_cc(flagZero, eFlagSet);
 }
 
 void jp_Z_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagZero, eFlagSet);
+  jp_cc_nn(immediate, flagZero, eFlagSet);
 }
 
 void extOps()
@@ -925,7 +925,7 @@ void extOps()
 
 void call_Z_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagZero, eFlagSet);
+  call_cc_nn(immediate, flagZero, eFlagSet);
 }
 
 void adc_A_n(unsigned char immediate)
@@ -940,7 +940,7 @@ void rst_08(void)
 
 void ret_NC(void)
 {
-  ret_cc(&flagCarry, eFlagNotSet);
+  ret_cc(flagCarry, eFlagNotSet);
 }
 
 void pop_DE(void)
@@ -950,17 +950,17 @@ void pop_DE(void)
 
 void jp_NC_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagCarry, eFlagNotSet);
+  jp_cc_nn(immediate, flagCarry, eFlagNotSet);
 }
 
 void call_NC_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagCarry, eFlagNotSet);
+  call_cc_nn(immediate, flagCarry, eFlagNotSet);
 }
 
 void push_DE(void)
 {
-  push_ss(&registers.DE);
+  push_ss(registers.DE);
 }
 
 void sub_A_n(unsigned char immediate)
@@ -975,17 +975,17 @@ void rst_10(void)
 
 void ret_C(void)
 {
-  ret_cc(&flagCarry, eFlagSet);
+  ret_cc(flagCarry, eFlagSet);
 }
 
 void jp_C_nn(unsigned short immediate)
 {
-  jp_cc_nn(immediate, &flagCarry, eFlagSet);
+  jp_cc_nn(immediate, flagCarry, eFlagSet);
 }
 
 void call_C_nn(unsigned short immediate)
 {
-  call_cc_nn(immediate, &flagCarry, eFlagNotSet);
+  call_cc_nn(immediate, flagCarry, eFlagNotSet);
 }
 
 void sbc_A_n(unsigned char immediate)
@@ -1005,12 +1005,12 @@ void pop_HL(void)
 
 void ldh_mC_A(void)
 {
-  ldh_n_A(&registers.C);
+  ldh_n_A(registers.C);
 }
 
 void push_HL(void)
 {
-  push_ss(&registers.HL);
+  push_ss(registers.HL);
 }
 
 void and_n(unsigned char immediate)
@@ -1051,7 +1051,7 @@ void pop_AF(void)
 
 void push_AF(void)
 {
-  push_ss(&registers.AF);
+  push_ss(registers.AF);
 }
 
 void or_n(unsigned char immediate)

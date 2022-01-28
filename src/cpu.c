@@ -173,15 +173,15 @@ void ldi_mHL_A(void)
   registers.HL += 1;
 }
 
-void ldh_n_A(unsigned char *n)
+void ldh_n_A(unsigned char n)
 {
-  unsigned short memLocation = 0xFF00 + *n;
+  unsigned short memLocation = 0xFF00 + n;
   MMU.writeByte(memLocation, registers.A);
 }
 
-void ldh_A_n(unsigned char *n)
+void ldh_A_n(unsigned char n)
 {
-  const unsigned short memLocation = 0xFF00 + *n;
+  const unsigned short memLocation = 0xFF00 + n;
   registers.A = MMU.readByte(memLocation);
 }
 
@@ -203,9 +203,9 @@ void ld_SP_HL(void)
   tickCounter += 4;
 }
 
-void ld_HL_SP_e(unsigned char *e)
+void ld_HL_SP_e(unsigned char e)
 {
-  char signedE = (char)*e;
+  char signedE = (char)e;
   unsigned short value = registers.SP + signedE;
 
   if (((registers.SP & LOW_WORD) + (signedE & LOW_WORD)) > LOW_WORD)
@@ -232,10 +232,10 @@ void ld_HL_SP_e(unsigned char *e)
   tickCounter += 4;
 }
 
-void push_ss(unsigned short *ptrSS)
+void push_ss(unsigned short ss)
 {
-  unsigned char lowSS = (*ptrSS & 0xFF);
-  unsigned char highSS = (unsigned char)((*ptrSS & 0xFF00) >> 8);
+  unsigned char lowSS = (ss & 0xFF);
+  unsigned char highSS = (unsigned char)((ss & 0xFF00) >> 8);
 
   registers.SP -= 1;
   MMU.writeByte(registers.SP, lowSS);
@@ -616,11 +616,11 @@ void add_HL_ss(unsigned short ss)
   tickCounter += 4;
 }
 
-void add_SP_e(unsigned char *e)
+void add_SP_e(unsigned char e)
 {
   // e: 8-bit signed 2's complement displacement
   removeFlag(flagZero | flagNegative);
-  char signedE = (char)*e;
+  char signedE = (char)e;
   unsigned short sum = registers.SP + signedE;
 
   if (((registers.SP & LOW_WORD) + (signedE & LOW_WORD)) > LOW_WORD)
@@ -1347,9 +1347,9 @@ void jp_nn(unsigned short nn)
   registers.PC = nn;
 }
 
-void jp_cc_nn(unsigned short nn, unsigned char *flag, unsigned char condition)
+void jp_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition)
 {
-  if (checkFlag(*flag) == condition)
+  if (checkFlag(flag) == condition)
   {
     registers.PC = nn;
   }
@@ -1360,9 +1360,9 @@ void jr_e(unsigned char e)
   registers.PC += (char)e;
 }
 
-void jr_cc_e(unsigned char e, unsigned char *flag, unsigned char condition)
+void jr_cc_e(unsigned char e, unsigned char flag, unsigned char condition)
 {
-  if (checkFlag(*flag) == condition)
+  if (checkFlag(flag) == condition)
   {
     registers.PC += (char)e;
   }
@@ -1385,9 +1385,9 @@ void call_nn(unsigned short nn)
   registers.SP = memLocation;
 }
 
-void call_cc_nn(unsigned short nn, unsigned char *flag, unsigned char condition)
+void call_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition)
 {
-  if (checkFlag(*flag) == condition)
+  if (checkFlag(flag) == condition)
   {
     call_nn(nn);
   }
@@ -1427,9 +1427,9 @@ void ret(void)
   registers.SP = (memLocation + 1);
 }
 
-void ret_cc(unsigned char *flag, unsigned char condition)
+void ret_cc(unsigned char flag, unsigned char condition)
 {
-  if (checkFlag(*flag) == condition)
+  if (checkFlag(flag) == condition)
   {
     ret();
   }

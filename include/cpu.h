@@ -34,16 +34,16 @@ void ldd_A_mHL(void);
 void ldd_mHL_A(void);
 void ldi_A_mHL(void);
 void ldi_mHL_A(void);
-void ldh_n_A(unsigned char *n);
-void ldh_A_n(unsigned char *n);
+void ldh_n_A(unsigned char n);
+void ldh_A_n(unsigned char n);
 
 // 16-Bit Loads
 
 void ld_dd_nn(unsigned short *ptrDD, unsigned short nn);
 void ld_nn_SP(unsigned short nn);
 void ld_SP_HL(void);
-void ld_HL_SP_e(unsigned char *e);
-void push_ss(unsigned short *ptrSS);
+void ld_HL_SP_e(unsigned char e);
+void push_ss(unsigned short ss);
 void pop_dd(unsigned short *ptrDD);
 
 // 8-Bit ALU opcodes
@@ -62,7 +62,7 @@ void dec_sHL(void);
 
 // 16-Bit ALU opcodes
 void add_HL_ss(unsigned short ss);
-void add_SP_e(unsigned char *e);
+void add_SP_e(unsigned char e);
 void inc_ss(unsigned short *ptrSS);
 void dec_ss(unsigned short *ptrSS);
 
@@ -113,19 +113,19 @@ void res_b_sHL(unsigned char bitPosition);
 // Jumps
 
 void jp_nn(unsigned short nn);
-void jp_cc_nn(unsigned short nn, unsigned char *flag, unsigned char condition);
+void jp_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition);
 void jp_HL(void);
 void jr_e(unsigned char e);
-void jr_cc_e(unsigned char e, unsigned char *flag, unsigned char condition);
+void jr_cc_e(unsigned char e, unsigned char flag, unsigned char condition);
 
 // Calls
 
 void call_nn(unsigned short nn);
-void call_cc_nn(unsigned short nn, unsigned char *flag, unsigned char condition);
+void call_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition);
 
 // Restarts
 
 void rst_f(unsigned char f);
 void ret(void);
-void ret_cc(unsigned char *flag, unsigned char condition);
+void ret_cc(unsigned char flag, unsigned char condition);
 void reti(void);
