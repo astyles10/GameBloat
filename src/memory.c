@@ -2,10 +2,10 @@
 #include "memory.h"
 #include "cartridge.h"
 
-unsigned char MMU_ReadByte(const unsigned short *memAddr);
-unsigned short MMU_ReadShort(const unsigned short *memAddr);
-int MMU_WriteByte(const unsigned short *memAddr, const unsigned char *value);
-int MMU_WriteShort(const unsigned short *memAddr, const unsigned short *value);
+unsigned char MMU_ReadByte(const unsigned short address);
+unsigned short MMU_ReadShort(const unsigned short address);
+int MMU_WriteByte(const unsigned short address, const unsigned char value);
+int MMU_WriteShort(const unsigned short address, const unsigned short value);
 
 struct MMU MMU = {
     .readByte = MMU_ReadByte,
@@ -30,20 +30,19 @@ void initializeMemory(void)
   memset(hRAM, 0x00, sizeof(hRAM));
 }
 
-unsigned char MMU_ReadByte(const unsigned short *memAddr)
+unsigned char MMU_ReadByte(const unsigned short address)
 {
-  const unsigned short address = *memAddr;
   if (address <= 0x7FFF)
   {
-    return cartridge.mbc->readByte(&address);
+    return cartridge.mbc->readByte(address);
   }
   else if (address <= 0x9FFF)
   {
-    return vRAM[(address - 0x8000)];
+    return vRAM[address - 0x8000];
   }
   else if (address <= 0xBFFF)
   {
-    return cartridge.mbc->readByte(&address);
+    return cartridge.mbc->readByte(address);
   }
   else if (address <= 0xDFFF)
   {
@@ -82,45 +81,42 @@ unsigned char MMU_ReadByte(const unsigned short *memAddr)
   }
 }
 
-unsigned short MMU_ReadShort(const unsigned short *memAddr)
+unsigned short MMU_ReadShort(const unsigned short address)
 {
-  unsigned short address = *memAddr;
-  unsigned short returnValue = MMU_ReadByte(&address);
-  address++;
-  returnValue |= ((unsigned short)(MMU_ReadByte(&address)) << 8);
+  unsigned short returnValue = MMU_ReadByte(address);
+  returnValue |= ((unsigned short)(MMU_ReadByte(address + 1)) << 8);
   return returnValue;
 }
 
-int MMU_WriteByte(const unsigned short *memAddr, const unsigned char *value)
+int MMU_WriteByte(const unsigned short address, const unsigned char value)
 {
-  const unsigned short address = *memAddr;
   if (address <= 0x7FFF)
   {
-    return cartridge.mbc->writeByte(&address, *value);
+    return cartridge.mbc->writeByte(address, value);
   }
   else if (address <= 0x9FFF)
   {
-    vRAM[address - 0x8000] = *value;
+    vRAM[address - 0x8000] = value;
     return 1;
   }
   else if (address <= 0xBFFF)
   {
-    return cartridge.mbc->writeByte(&address, *value);
+    return cartridge.mbc->writeByte(address, value);
   }
   else if (address <= 0xDFFF)
   {
-    wRAM[address - 0xDFFF] = *value;
+    wRAM[address - 0xDFFF] = value;
     return 1;
   }
   else if (address <= 0xFDFF)
   {
-    printf("Warning:: MMU_WriteByte wrote to echo wRAM!\n");
-    wRAM[address - 0xFDFF] = *value;
+    printf("Warning: MMU_WriteByte wrote to echo wRAM!\n");
+    wRAM[address - 0xFDFF] = value;
     return 1;
   }
   else if (address <= 0xFE9F)
   {
-    OAM[address - 0xFE9F] = *value;
+    OAM[address - 0xFE9F] = value;
     return 1;
   }
   else if (address <= 0xFEFF)
@@ -130,17 +126,17 @@ int MMU_WriteByte(const unsigned short *memAddr, const unsigned char *value)
   }
   else if (address <= 0xFF7F)
   {
-    ioPorts[address - 0xFF7F] = *value;
+    ioPorts[address - 0xFF7F] = value;
     return 1;
   }
   else if (address <= 0xFFFE)
   {
-    hRAM[address - 0xFFFE] = *value;
+    hRAM[address - 0xFFFE] = value;
     return 1;
   }
   else if (address == 0xFFFF)
   {
-    interruptEnable = *value;
+    interruptEnable = value;
     return 1;
   }
   else
@@ -150,13 +146,11 @@ int MMU_WriteByte(const unsigned short *memAddr, const unsigned char *value)
   }
 }
 
-int MMU_WriteShort(const unsigned short *memAddr, const unsigned short *value)
+int MMU_WriteShort(const unsigned short address, const unsigned short value)
 {
-  unsigned short address = *memAddr;
-  unsigned char valueLower = (*value) & 0xFF;
-  unsigned char valueUpper = ((*value) & 0xFF00) >> 8;
-  int success = MMU_WriteByte(&address, &valueLower);
-  address++;
-  success = MMU_WriteByte(&address, &valueUpper);
+  unsigned char valueLower = (value) & 0xFF;
+  unsigned char valueUpper = (value & 0xFF00) >> 8;
+  int success = MMU_WriteByte(address, valueLower);
+  success = MMU_WriteByte(address + 1, valueUpper);
   return success;
 }

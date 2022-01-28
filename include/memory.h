@@ -28,10 +28,10 @@
 
 void initializeMemory(void);
 
-typedef unsigned char (*readByteFromMemory)(const unsigned short *memAddr);
-typedef unsigned short (*readShortFromMemory)(const unsigned short *memAddr);
-typedef int (*writeByteToMemory)(const unsigned short *memAddr, const unsigned char *value);
-typedef int (*writeShortToMemory)(const unsigned short *memAddr, const unsigned short *value);
+typedef unsigned char (*readByteFromMemory)(const unsigned short memAddr);
+typedef unsigned short (*readShortFromMemory)(const unsigned short memAddr);
+typedef int (*writeByteToMemory)(const unsigned short memAddr, const unsigned char value);
+typedef int (*writeShortToMemory)(const unsigned short memAddr, const unsigned short value);
 
 struct MMU
 {
