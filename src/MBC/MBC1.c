@@ -1,8 +1,10 @@
-#include "MBC/MBC1.h"
 #include "MBC.h"
+#include "MBC/MBC1.h"
+#include "cartridge.h"
 #include <stdio.h>
 
-enum MBC1_AccessModes {
+enum MBC1_AccessModes
+{
   ROM_MODE = 0x00,
   RAM_MODE = 0x01
 };
@@ -17,17 +19,19 @@ const unsigned int MBC1_ReadByte(const unsigned short memAddr)
   unsigned int address = memAddr;
   if (address <= 0x3FFF) // ROM Bank 00
   {
-    return address;
+    return cartridge.rom[address];
   }
   else if (address <= 0x7FFF) // ROM Bank 01-7F
   {
     unsigned char bank = ROMBankLow;
     if (AccessMode == ROM_MODE)
+    {
       bank |= (RAMBank_ROMBankUpper << 4);
+    }
 
     address -= 0x4000;
     address = (address << bank);
-    return address;
+    return cartridge.rom[address];
   }
   else if (address >= 0xA000 && address <= 0xBFFF)
   {
@@ -38,7 +42,7 @@ const unsigned int MBC1_ReadByte(const unsigned short memAddr)
       {
         address = (address << RAMBank_ROMBankUpper);
       }
-      return address;
+      return cartridge.ram[address];
     }
     printf("RAM read attempt before enabled!\n");
   }
@@ -52,16 +56,22 @@ const unsigned int MBC1_WriteByte(const unsigned short memAddr, const unsigned c
   if (address <= 0x1FFF)
   {
     if ((value & 0x0A) == 0x0A)
+    {
       RAMEnable = 1;
+    }
     else
+    {
       RAMEnable = 0;
+    }
   }
   else if (address <= 0x3FFF)
   {
     // Set ROM bank number (lower)
     unsigned char value_5Bit = (value & 0x1F);
     if (value_5Bit == 0x00)
+    {
       ROMBankLow = 0x01;
+    }
     else
     {
       if (value_5Bit == 0x20 || value_5Bit == 0x40 || value_5Bit == 0x60)
@@ -88,10 +98,13 @@ const unsigned int MBC1_WriteByte(const unsigned short memAddr, const unsigned c
       {
         address = (address << RAMBank_ROMBankUpper);
       }
-      return address;
+      cartridge.ram[address] = value;
     }
-    printf("MBC1_WriteByte: Attempted to write when RAM disabled!\n");
-    return 0x00;
+    else
+    {
+      printf("MBC1_WriteByte: Attempted to write when RAM disabled!\n");
+      return 0x00;
+    }
   }
   else
   {

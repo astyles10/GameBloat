@@ -2,6 +2,7 @@
 
 #include "MBC.h"
 
+#include "MBC/MBCNone.h"
 #include "MBC/MBC1.h"
 #include "MBC/MBC2.h"
 #include "MBC/MBC3.h"
@@ -49,6 +50,8 @@ int setMBCType(unsigned char cartMBC)
   switch (cartMBC)
   {
   case ROM_ONLY:
+    MBC.readByte = MBCNone_ReadByte;
+    MBC.writeByte = MBCNone_WriteByte;
     printf("Cart MBC Rom Only\n");
     return 1;
   case MBC1:
@@ -67,7 +70,8 @@ int setMBCType(unsigned char cartMBC)
   case ROM_RAM:
   case ROM_RAM_BATTERY:
     // "Optionally up to 8KB of RAM coult be connected at A000-BFFF, does not require MBC chip"
-    // TODO
+    MBC.readByte = MBCNone_ReadByte;
+    MBC.writeByte = MBCNone_WriteByte;
     printf("Cart ROM RAM -- Unsupported\n");
     return 0;
   case MMM01:

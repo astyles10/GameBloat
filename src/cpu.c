@@ -32,10 +32,24 @@ Z 	Zero Flag.
 Functions with register name hard coded are Upper case to suit struct naming
 */
 
-unsigned char flagZero = (1 << 7);
-unsigned char flagNegative = (1 << 6);
-unsigned char flagHalfCarry = (1 << 5);
-unsigned char flagCarry = (1 << 4);
+enum ByteSizes
+{
+  LOW_NIBBLE = 0x000F,
+  HIGH_NIBBLE = 0x00F0,
+  LOW_BYTE = 0x00FF,
+  HIGH_BYTE = 0xFF00,
+  LOW_WORD = 0x0000FFFF,
+  HIGH_WORD = 0xFFFF0000
+};
+
+void setFlag(unsigned char flag);
+void removeFlag(unsigned char flag);
+unsigned char checkFlag(unsigned char flag);
+
+const unsigned char flagZero = (1 << 7);
+const unsigned char flagNegative = (1 << 6);
+const unsigned char flagHalfCarry = (1 << 5);
+const unsigned char flagCarry = (1 << 4);
 
 unsigned long tickCounter = 0;
 
@@ -69,7 +83,8 @@ const unsigned short resetAddresses[] = {
     0xFF22, 0xFF23, 0xFF24, 0xFF25,
     0xFF26, 0xFF40, 0xFF42, 0xFF43,
     0xFF45, 0xFF47, 0xFF48, 0xFF49,
-    0xFF4A, 0xFF4B, 0xFFFF};
+    0xFF4A, 0xFF4B, 0xFFFF
+};
 
 const unsigned char resetValues[] = {
     0x00, 0x00, 0x00, 0x80,
@@ -79,7 +94,8 @@ const unsigned char resetValues[] = {
     0x00, 0xBF, 0x77, 0xF3,
     0xF1, 0x91, 0x00, 0x00,
     0x00, 0xFC, 0xFF, 0xFF,
-    0x00, 0x00, 0x00};
+    0x00, 0x00, 0x00
+};
 
 void reset(void)
 {
@@ -200,7 +216,6 @@ void ld_nn_SP(unsigned short nn)
 void ld_SP_HL(void)
 {
   registers.SP = registers.HL;
-  tickCounter += 4;
 }
 
 void ld_HL_SP_e(unsigned char e)
@@ -229,7 +244,6 @@ void ld_HL_SP_e(unsigned char e)
   removeFlag(flagZero | flagNegative);
 
   registers.HL = value;
-  tickCounter += 4;
 }
 
 void push_ss(unsigned short ss)
@@ -241,8 +255,6 @@ void push_ss(unsigned short ss)
   MMU.writeByte(registers.SP, lowSS);
   registers.SP -= 1;
   MMU.writeByte(registers.SP, highSS);
-
-  tickCounter += 4;
 }
 
 void pop_dd(unsigned short *ptrDD)
@@ -613,7 +625,6 @@ void add_HL_ss(unsigned short ss)
   }
 
   registers.HL = sum;
-  tickCounter += 4;
 }
 
 void add_SP_e(unsigned char e)
@@ -642,19 +653,16 @@ void add_SP_e(unsigned char e)
   }
 
   registers.SP = sum;
-  tickCounter += 8;
 }
 
 void inc_ss(unsigned short *ptrSS)
 {
   *ptrSS += 1;
-  tickCounter += 4;
 }
 
 void dec_ss(unsigned short *ptrSS)
 {
   *ptrSS -= 1;
-  tickCounter += 4;
 }
 
 // Misc
@@ -673,7 +681,6 @@ void swap_s(unsigned char *ptrS)
   {
     setFlag(flagZero);
   }
-  tickCounter += 4;
 }
 
 void swap_sHL(void)
@@ -696,7 +703,6 @@ void swap_sHL(void)
   {
     setFlag(flagZero);
   }
-  tickCounter += 4;
 }
 
 void daa(void)

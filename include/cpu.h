@@ -1,25 +1,10 @@
 #pragma once
 #include <stdio.h>
 
-extern unsigned char flagCarry;
-extern unsigned char flagHalfCarry;
-extern unsigned char flagNegative;
-extern unsigned char flagZero;
-extern unsigned long tickCounter;
-
-enum ByteSizes
-{
-  LOW_NIBBLE = 0x000F,
-  HIGH_NIBBLE = 0x00F0,
-  LOW_BYTE = 0x00FF,
-  HIGH_BYTE = 0xFF00,
-  LOW_WORD = 0x0000FFFF,
-  HIGH_WORD = 0xFFFF0000
-};
-
-void setFlag(unsigned char flag);
-void removeFlag(unsigned char flag);
-unsigned char checkFlag(unsigned char flag);
+extern const unsigned char flagCarry;
+extern const unsigned char flagHalfCarry;
+extern const unsigned char flagNegative;
+extern const unsigned char flagZero;
 
 void reset(void);
 void close(void);

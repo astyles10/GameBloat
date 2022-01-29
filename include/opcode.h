@@ -21,3 +21,5 @@ typedef struct opcode
 
 extern const opcode baseOpcodeTable[256];
 extern const opcode CBOpcodeTable[256];
+extern const unsigned char baseOpcodeTicks[256];
+extern const unsigned char cbOpcodeTicks[256];
