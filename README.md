@@ -1,6 +1,10 @@
 # GBC_Emulator_C
 
 TODO:
+* Migrate to CMake + make build system
+* Create window with GTK 4.0
+* Handle Interrupts
+* Finish TODO CPU functions
 * Begin reading instructions in CPU
 * Write RAM switching for CGB
 * Update use of CPU tick counting, should be internal to CPU only

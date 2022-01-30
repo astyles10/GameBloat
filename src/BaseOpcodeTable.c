@@ -1154,7 +1154,7 @@ const opcode baseOpcodeTable[256] = {
     {"INC SP", NO_OPERANDS, inc_SP},        // 0x33
     {"INC (HL)", NO_OPERANDS, inc_mHL},     // 0x34
     {"DEC (HL)", NO_OPERANDS, dec_mHL},     // 0x35
-    {"LD (HL),n", OPERAND_SHORT, ld_d_n},   // 0x36
+    {"LD (HL),n", OPERAND_CHAR, ld_d_n},   // 0x36
     {"SCF", NO_OPERANDS, scf},              // 0x37
     {"JR C,n", OPERAND_CHAR, jr_C_n},       // 0x38
     {"ADD HL,SP", NO_OPERANDS, add_HL_SP},  // 0x39

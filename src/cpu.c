@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "opcode.h"
 #include "registers.h"
 #include "memory.h"
 #include "cartridge.h"
@@ -42,6 +43,26 @@ enum ByteSizes
   HIGH_WORD = 0xFFFF0000
 };
 
+const unsigned short resetAddresses[] = {
+    0xFF05, 0xFF06, 0xFF07, 0xFF10,
+    0xFF11, 0xFF12, 0xFF14, 0xFF16,
+    0xFF17, 0xFF19, 0xFF1A, 0xFF1B,
+    0xFF1C, 0xFF1E, 0xFF20, 0xFF21,
+    0xFF22, 0xFF23, 0xFF24, 0xFF25,
+    0xFF26, 0xFF40, 0xFF42, 0xFF43,
+    0xFF45, 0xFF47, 0xFF48, 0xFF49,
+    0xFF4A, 0xFF4B, 0xFFFF};
+
+const unsigned char resetValues[] = {
+    0x00, 0x00, 0x00, 0x80,
+    0xBF, 0xF3, 0xBF, 0x3F,
+    0x00, 0xBF, 0x7F, 0xFF,
+    0x9F, 0xBF, 0xFF, 0x00,
+    0x00, 0xBF, 0x77, 0xF3,
+    0xF1, 0x91, 0x00, 0x00,
+    0x00, 0xFC, 0xFF, 0xFF,
+    0x00, 0x00, 0x00};
+
 void setFlag(unsigned char flag);
 void removeFlag(unsigned char flag);
 unsigned char checkFlag(unsigned char flag);
@@ -75,28 +96,6 @@ unsigned char checkFlag(unsigned char flag)
   }
 }
 
-const unsigned short resetAddresses[] = {
-    0xFF05, 0xFF06, 0xFF07, 0xFF10,
-    0xFF11, 0xFF12, 0xFF14, 0xFF16,
-    0xFF17, 0xFF19, 0xFF1A, 0xFF1B,
-    0xFF1C, 0xFF1E, 0xFF20, 0xFF21,
-    0xFF22, 0xFF23, 0xFF24, 0xFF25,
-    0xFF26, 0xFF40, 0xFF42, 0xFF43,
-    0xFF45, 0xFF47, 0xFF48, 0xFF49,
-    0xFF4A, 0xFF4B, 0xFFFF
-};
-
-const unsigned char resetValues[] = {
-    0x00, 0x00, 0x00, 0x80,
-    0xBF, 0xF3, 0xBF, 0x3F,
-    0x00, 0xBF, 0x7F, 0xFF,
-    0x9F, 0xBF, 0xFF, 0x00,
-    0x00, 0xBF, 0x77, 0xF3,
-    0xF1, 0x91, 0x00, 0x00,
-    0x00, 0xFC, 0xFF, 0xFF,
-    0x00, 0x00, 0x00
-};
-
 void reset(void)
 {
   registers.AF = 0x01B0;
@@ -121,9 +120,50 @@ int loadROM(const char *cartName)
   return 0;
 }
 
-void close()
+void cpuClose()
 {
   cartCleanup();
+}
+
+void cpuCycle()
+{
+  // Read instruction from address stored in PC register
+  unsigned char instruction = MMU.readByte(registers.PC++);
+
+  // Emulator should continue processing opcodes until tick counter reaches 70,224 clock cycles
+
+  opcode aOpcode;
+  if (instruction == 0xCB)
+  {
+    instruction = MMU.readByte(registers.PC++);
+    aOpcode = CBOpcodeTable[instruction];
+  }
+  else
+  {
+    aOpcode = baseOpcodeTable[instruction];
+  }
+  // Determine number of instruction operands
+  unsigned short operand = 0;
+
+  switch (aOpcode.operandType)
+  {
+  case (OPERAND_CHAR):
+    operand = MMU.readByte(registers.PC);
+    ((void (*)(unsigned char))aOpcode.function)(operand);
+    break;
+  case (OPERAND_SHORT):
+    operand = MMU.readShort(registers.PC);
+    ((void (*)(unsigned short))aOpcode.function)(operand);
+    break;
+  case (NO_OPERANDS):
+    ((void (*)(void))aOpcode.function)();
+    break;
+  }
+  printf("Instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
+
+  registers.PC += aOpcode.operandType;
+
+  tickCounter += baseOpcodeTicks[instruction];
 }
 
 // 8-Bit Loads
@@ -138,9 +178,9 @@ void ld_d_r(unsigned char r)
   MMU.writeByte(registers.HL, r);
 }
 
-void ld_d_n(unsigned char *ptrD, unsigned char n)
+void ld_d_n(unsigned char n)
 {
-  *ptrD = n;
+  MMU.writeByte(registers.HL, n);
 }
 
 void ld_A_ss(const unsigned short memLocation)
@@ -789,21 +829,25 @@ void undefined(void)
 void halt(void)
 {
   // TODO
+  printf("Would halt!\n");
 }
 
 void stop(void)
 {
   // TODO
+  printf("Would stop!\n");
 }
 
 void di(void)
 {
   // TODO
+  printf("Would DI!\n");
 }
 
 void ei(void)
 {
   // TODO
+  printf("Would EI!\n");
 }
 
 // Rotates and Shifts

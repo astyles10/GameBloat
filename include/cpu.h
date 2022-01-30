@@ -7,13 +7,14 @@ extern const unsigned char flagNegative;
 extern const unsigned char flagZero;
 
 void reset(void);
-void close(void);
+void cpuClose(void);
 int loadROM(const char *);
+void cpuCycle(void);
 
 // 8-Bit loads
 void ld_r_s(unsigned char *ptrR, unsigned char n);
 void ld_d_r(unsigned char r);
-void ld_d_n(unsigned char *ptrD, unsigned char n);
+void ld_d_n(unsigned char n);
 void ld_A_ss(const unsigned short ss);
 void ld_dd_A(const unsigned short memLocation);
 void ld_A_c(void);

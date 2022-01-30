@@ -9,14 +9,13 @@
 #include "cartridge.h"
 #include "bios.h"
 
+#include <gtk-4.0/gtk/gtk.h>
+
 const char *parseArguments(int, const char **);
 void printHeaderValues(void);
 
 int main(int argc, const char *argv[])
 {
-  // In driver code, if operand exists, increment ticks by 4 per char
-  // Memory module will increment ticks on read/write/getPointer functions
-  // Each time an opcode is called, increment by 4 ticks by default
   const char *cartName = parseArguments(argc, argv);
 
   if (validateCart(cartName))
@@ -24,8 +23,14 @@ int main(int argc, const char *argv[])
     // Determine MBC & Other Cartridge Values
     loadROM(cartName);
     // printHeaderValues();
+    int i;
+    for ( i = 0; i < 100; i++)
+    {
+      printf("%d: ", i);
+      cpuCycle(); 
+    }
   }
-  close();
+  cpuClose();
   return 0;
 }
 
@@ -48,5 +53,6 @@ void printHeaderValues()
 
 const char *parseArguments(int argc, const char *argv[])
 {
-  return "./GB_Games/PokemonRed.gb";
+  return "./GB_Games/Tetris.gb";
+  // return "./GB_Games/PokemonRed.gb";
 }
