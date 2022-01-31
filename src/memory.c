@@ -105,33 +105,33 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value)
   }
   else if (address <= 0xDFFF)
   {
-    wRAM[address - 0xDFFF] = value;
+    wRAM[address - 0xC000] = value;
     return 1;
   }
   else if (address <= 0xFDFF)
   {
     printf("Warning: MMU_WriteByte wrote to echo wRAM!\n");
-    wRAM[address - 0xFDFF] = value;
+    wRAM[address - 0xE000] = value;
     return 1;
   }
   else if (address <= 0xFE9F)
   {
-    OAM[address - 0xFE9F] = value;
+    OAM[address - 0xFE00] = value;
     return 1;
   }
   else if (address <= 0xFEFF)
   {
-    printf("Illegal read attempt from unusable area: %d!\n", (address - 0xFEFF));
+    printf("Illegal read attempt from unusable area: %d!\n", (address - 0xFEA0));
     return 0;
   }
   else if (address <= 0xFF7F)
   {
-    ioPorts[address - 0xFF7F] = value;
+    ioPorts[address - 0xFF00] = value;
     return 1;
   }
   else if (address <= 0xFFFE)
   {
-    hRAM[address - 0xFFFE] = value;
+    hRAM[address - 0xFF80] = value;
     return 1;
   }
   else if (address == 0xFFFF)
