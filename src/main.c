@@ -9,50 +9,76 @@
 #include "cartridge.h"
 #include "bios.h"
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
-const char *parseArguments(int, const char **);
-void printHeaderValues(void);
+int parseArguments(int, char **, char *);
 
-int main(int argc, const char *argv[])
+static void onStartup(GtkApplication *, gconstpointer);
+static void onActivate(GtkApplication *, gconstpointer);
+static void onShutdown(GtkApplication *, gconstpointer);
+
+static void onActivate(GtkApplication *app, gconstpointer userData)
 {
-  const char *cartName = parseArguments(argc, argv);
+  GtkWidget *window;
+  window = gtk_application_window_new(app);
+  gtk_window_set_title(GTK_WINDOW(window), "changeme");
+  gtk_window_set_default_size(GTK_WINDOW(window), 160, 144);
+  gtk_widget_show(window);
+}
 
+static void onStartup(GtkApplication *app, gconstpointer userData)
+{
+  const char *cartName = (const char *)userData;
   if (validateCart(cartName))
   {
-    // Determine MBC & Other Cartridge Values
     loadROM(cartName);
-    // printHeaderValues();
+
     int i;
-    for ( i = 0; i < 100; i++)
+    for (i = 0; i < 20; i++)
     {
       printf("%d: ", i);
-      cpuCycle(); 
+      cpuCycle();
     }
   }
+}
+
+static void onShutdown(GtkApplication *app, gconstpointer userData)
+{
   cpuClose();
-  return 0;
 }
 
-void printHeaderValues()
+int main(int argc, char **argv)
 {
-  printf("Cart title: %s\n", cartridge.header.title);
-  printf("Cart name: %s\n", cartridge.header.shortTitle);
-  printf("Cart CGB flag: %d\n", cartridge.header.cgbFlag);
-  printf("Cart manufacturer code: ");
-  for (int i = 0; i < (sizeof(cartridge.header.manufacturerCode) / sizeof(char)); i++)
+  char *cartPath = "";
+
+  if (!parseArguments(argc, argv, cartPath))
   {
-    printf("%d", cartridge.header.manufacturerCode[i]);
+    return 1;
   }
-  printf("\n");
-  printf("Cart MBC type: %02X\n", cartridge.header.cartridgeType);
-  printf("Cart ROM Size: %02X\n", cartridge.header.romSize);
-  printf("Cart RAM Size: %02X\n", cartridge.header.ramSize);
-  printf("Header checksum: %02X\n", cartridge.header.headerChecksum);
+  GtkApplication *app;
+  app = gtk_application_new("gamebloat.app", G_APPLICATION_FLAGS_NONE);
+  // Refer to https://wiki.gnome.org/HowDoI/GtkApplication/CommandLine
+  g_application_add_main_option(G_APPLICATION(app), "file", 'f', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_FILENAME, "Gameboy file path", "Description of file path");
+  printf("Cart name = %s\n", cartPath);
+  g_signal_connect(app, "startup", G_CALLBACK(onStartup), &cartPath);
+  g_signal_connect(app, "activate", G_CALLBACK(onActivate), NULL);
+  g_signal_connect(app, "shutdown", G_CALLBACK(onShutdown), NULL);
+  int status = g_application_run(G_APPLICATION(app), argc, argv);
+  return status;
 }
 
-const char *parseArguments(int argc, const char *argv[])
+int parseArguments(int argc, char **argv, char *cartPath)
 {
-  return "./GB_Games/Tetris.gb";
+  if (argc < 2)
+  {
+    printf("Too few arguments in call, exiting...\n");
+    return 0;
+  }
+  else if (argc == 2)
+  {
+    cartPath = *argv[1];
+    return 1;
+  }
+  // return "./GB_Games/Tetris.gb";
   // return "./GB_Games/PokemonRed.gb";
 }
