@@ -1,0 +1,10 @@
+https://docs.gtk.org/gobject/concepts.html#signal-emission
+
+GTK is event driven - clicks, drags, movement etc. control the application.
+GTK events are messages received from X server. When event reaches a widget, it may react by emitting a signal.
+
+Input Handling
+https://docs.gtk.org/gtk4/input-handling.html
+
+Will need to handle keyboard events for controlling the game (WASD/Arrow keys, Enter, etc.)
+Will also need to update the graphics on non-input events (game startups, wait screens etc.)
