@@ -9,50 +9,90 @@
 #include "cartridge.h"
 #include "bios.h"
 
-#include <gtk-4.0/gtk/gtk.h>
+#include <gtk/gtk.h>
 
-const char *parseArguments(int, const char **);
-void printHeaderValues(void);
+int parseArguments(int, char *[], char *);
 
-int main(int argc, const char *argv[])
+static void onStartup(GtkApplication *, gconstpointer);
+static void onActivate(GtkApplication *, gconstpointer);
+static void onShutdown(GtkApplication *, gconstpointer);
+static void onClick(GtkWidget *widget, gpointer data);
+
+static void onClick(GtkWidget *widget, gpointer data)
 {
-  const char *cartName = parseArguments(argc, argv);
-
+  const char *cartName = "./GB_Games/PokemonRed.gb";
   if (validateCart(cartName))
   {
-    // Determine MBC & Other Cartridge Values
     loadROM(cartName);
-    // printHeaderValues();
+
     int i;
-    for ( i = 0; i < 100; i++)
+    for (i = 0; i < 20; i++)
     {
       printf("%d: ", i);
-      cpuCycle(); 
+      cpuCycle();
     }
   }
   cpuClose();
-  return 0;
 }
 
-void printHeaderValues()
+static void onActivate(GtkApplication *app, gconstpointer userData)
 {
-  printf("Cart title: %s\n", cartridge.header.title);
-  printf("Cart name: %s\n", cartridge.header.shortTitle);
-  printf("Cart CGB flag: %d\n", cartridge.header.cgbFlag);
-  printf("Cart manufacturer code: ");
-  for (int i = 0; i < (sizeof(cartridge.header.manufacturerCode) / sizeof(char)); i++)
+  GtkWidget *window;
+  GtkWidget *button;
+  GtkWidget *box;
+
+  window = gtk_application_window_new(app);
+  gtk_window_set_title(GTK_WINDOW(window), "GameBloat: Yet Another GameBoy Emulator");
+  gtk_window_set_default_size(GTK_WINDOW(window), 300, 300);
+
+  box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+  gtk_widget_set_halign(box, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign(box, GTK_ALIGN_CENTER);
+
+  gtk_window_set_child(GTK_WINDOW(window), box);
+
+  button = gtk_button_new_with_label("Launch Game");
+
+  g_signal_connect(button, "clicked", G_CALLBACK(onClick), NULL);
+  // g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_window_destroy), window);
+
+  gtk_box_append(GTK_BOX(box), button);
+  gtk_widget_show(window);
+}
+
+static void onStartup(GtkApplication *app, gconstpointer userData)
+{
+  const char *cartName = "./GB_Games/PokemonRed.gb";
+  if (validateCart(cartName))
   {
-    printf("%d", cartridge.header.manufacturerCode[i]);
+    loadROM(cartName);
+
+    int i;
+    for (i = 0; i < 20; i++)
+    {
+      printf("%d: ", i);
+      cpuCycle();
+    }
   }
-  printf("\n");
-  printf("Cart MBC type: %02X\n", cartridge.header.cartridgeType);
-  printf("Cart ROM Size: %02X\n", cartridge.header.romSize);
-  printf("Cart RAM Size: %02X\n", cartridge.header.ramSize);
-  printf("Header checksum: %02X\n", cartridge.header.headerChecksum);
 }
 
-const char *parseArguments(int argc, const char *argv[])
+static void onShutdown(GtkApplication *app, gconstpointer userData)
 {
-  return "./GB_Games/Tetris.gb";
-  // return "./GB_Games/PokemonRed.gb";
+  printf("Shutting down...\n");
+  cpuClose();
+}
+
+int main(int argc, char *argv[])
+{
+  GtkApplication *app;
+  app = gtk_application_new("gamebloat.app", G_APPLICATION_FLAGS_NONE);
+  // Refer to https://wiki.gnome.org/HowDoI/GtkApplication/CommandLine
+  // g_application_add_main_option(G_APPLICATION(app), "file", 'f', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_STRING, "Gameboy file path", "Description of file path");
+
+  // g_signal_connect(app, "startup", G_CALLBACK(onStartup), NULL);
+  g_signal_connect(app, "activate", G_CALLBACK(onActivate), NULL);
+  g_signal_connect(app, "shutdown", G_CALLBACK(onShutdown), NULL);
+  int status = g_application_run(G_APPLICATION(app), argc, argv);
+  g_object_unref(app);
+  return status;
 }
