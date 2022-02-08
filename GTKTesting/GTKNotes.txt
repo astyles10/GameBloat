@@ -8,3 +8,47 @@ https://docs.gtk.org/gtk4/input-handling.html
 
 Will need to handle keyboard events for controlling the game (WASD/Arrow keys, Enter, etc.)
 Will also need to update the graphics on non-input events (game startups, wait screens etc.)
+
+Preparing GTK4 development environment
+
+Ubuntu 20 doesn't have libgtk4-dev in the APT repository, need to compile from scratch.
+
+sudo apt-get -y install libncurses5 libelf++0 libelf1 libelf-dev libxml2 libxml2-dev libxml2-utils  libxslt1-dev libxslt1.1 sysprof libpango1.0-dev libpango-1.0-0 libpangocairo-1.0-0 libglib2.0-0 libglib2.0-dev libxkbcommon-dev libxrandr-dev libxrender-dev libxi-dev libxdamage-dev libxfixes-dev libxext-dev libxcursor-dev libfontconfig-dev libx11-dev libwayland-dev libpng-dev libc6-dev libc6 libc6-amd64 libc++-10-dev libc++-dev  libpng++-dev libpng-dev libpng16-16  libjpeg-dev libjpeg62 libjpeg8 libjpeg8-dev libspectre-dev libspectre1 librsvg2-2 librsvg2-dev libpixman-1-0 libpixman-1-dev libxcb-shm0 libxcb-shm0-dev cairo-5c libicu-dev libthai-dev libvulkan-dev libvulkan1 libgdk-pixbuf2.0-0 libgdk-pixbuf2.0-dev
+sudo apt-get install build-essential libglib2.0-dev cmake libffi-dev sassc xsltproc graphene-1.0 libpixman-1-dev python3-pip flex bison ninja-build git libharfbuzz-dev libfontconfig-dev libxkbcommon-dev libcairo-dev libwayland-dev libxrandr-dev libxi-dev libegl-dev
+sudo apt-get -y install libegl1-mesa libegl1-mesa-dev install libgles2-mesa-dev libglfw3-dev libglfw3 install libglew-dev libglew2.1 install ffmpeg libatk1.0-dev libglm-dev iso-codes install libgraphene-1.0-dev libgraphene-1.0-0  install sassc hicolor-icon-theme libglib2.0-0 install libglib2.0-dev pkg-config bison gettext install xsltproc  install libpython3.9 --fix-missing install python3.9-full install python3.9-dev
+
+sudo wget --no-check-certificate https://bootstrap.pypa.io/get-pip.py
+sudo python3 get-pip.py
+sudo python3 -m pip install --upgrade pip
+sudo python3 -m pip install --upgrade setuptools
+sudo python3 -m pip install --upgrade wheel
+sudo python3 -m pip install meson
+sudo python3 -m pip install ninja
+sudo python3 -m pip install cmake
+
+sudo mkdir build
+sudo mkdir build/glib2
+sudo git clone https://github.com/GNOME/glib.git build/glib2
+sudo git --work-tree=build/glib2 --git-dir=build/glib2/.git checkout tags/2.68.3 -b 2.68.3
+sudo mkdir build/glib2/_build
+sudo meson -Dprefix=/usr -Dtests=false build/glib2/_build build/glib2
+sudo ninja -C build/glib2/_build -j 1
+sudo ninja -C build/glib2/_build install
+
+sudo mkdir build/pango
+sudo git clone https://github.com/GNOME/pango.git build/pango
+sudo git --work-tree=build/pango --git-dir=build/pango/.git checkout tags/1.48.7 -b 1.48.7
+sudo mkdir build/pango/_build
+sudo meson -Dprefix=/usr -Dgtk_doc=false build/pango/_build build/pango
+sudo ninja -C build/pango/_build -j 1
+sudo ninja -C build/pango/_build install
+
+sudo mkdir build/gtk4
+sudo git clone https://github.com/GNOME/gtk.git build/gtk4
+sudo git --work-tree=build/gtk4 --git-dir=build/gtk4/.git checkout tags/4.0 -b 4.0
+sudo mkdir build/gtk4/_build
+
+Note: had to remove -Dprint-backends and -Dmedia defines to compile
+sudo meson -Dprefix=/usr -Dvulkan=enabled -Dwayland-backend=false -Dbroadway-backend=false -Dprint-backends=none -Dman-pages=false -Dgtk_doc=false -Ddemos=false -Dmedia=ffmpeg -Dbuild-examples=false -Dbuild-tests=false -Dinstall-tests=false build/gtk4/_build build/gtk4
+sudo ninja -C build/gtk4/_build -j 1
+sudo ninja -C build/gtk4/_build install

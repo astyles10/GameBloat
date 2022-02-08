@@ -57,10 +57,10 @@ static void draw_brush(GtkWidget *widget, double x, double y)
 static double start_x = 0;
 static double start_y = 0;
 
-static void draw_pixel (GtkGestureClick *gesture, int n_press, double x, double y, GtkWidget *area)
+static void draw_pixel(GtkGestureClick *gesture, int n_press, double x, double y, GtkWidget *area)
 {
   draw_brush(area, start_x, start_y);
-  start_x += 2, start_y +=2;
+  start_x += 2, start_y += 2;
   gtk_widget_queue_draw(area);
 }
 
@@ -73,7 +73,7 @@ static void clear(GtkGestureClick *gesture, int n_press, double x, double y, Gtk
 
 static void close_window(void)
 {
-  if(surface)
+  if (surface)
     cairo_surface_destroy(surface);
 }
 
@@ -108,7 +108,6 @@ static void activate(GtkApplication *app, gpointer user_data)
   gtk_widget_add_controller(drawing_area, GTK_EVENT_CONTROLLER(rpress));
 
   g_signal_connect(rpress, "pressed", G_CALLBACK(clear), drawing_area);
-  g_signal_connect(rpress, "keke", G_CALLBACK(draw_pixel), NULL);
 
   gtk_widget_show(window);
 }
