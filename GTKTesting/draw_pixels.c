@@ -1,6 +1,16 @@
 #include <gtk/gtk.h>
 
 // Surface to draw scribbles
+
+struct rgba {
+  unsigned char red;
+  unsigned char green;
+  unsigned char blue;
+  unsigned char alpha;
+};
+
+struct rgba lcdScreen[160*144];
+
 static cairo_surface_t *surface = NULL;
 
 static void clear_surface(void)
@@ -40,13 +50,18 @@ static void draw_cb(GtkDrawingArea *drawing_area, cairo_t *cr, int width, int he
   cairo_paint(cr);
 }
 
+static double red = 0.0;
+static double green = 0.0;
+static double blue = 0.0;
+
 static void draw_brush(GtkWidget *widget, double x, double y)
 {
   cairo_t *cr;
 
   cr = cairo_create(surface);
 
-  cairo_rectangle(cr, x - 1, y - 1, 2, 2);
+  cairo_set_source_rgb(cr, red, green, blue);
+  cairo_rectangle(cr, x - 0.5, y - 0.5, 1, 1);
   cairo_fill(cr);
 
   cairo_destroy(cr);
@@ -59,8 +74,15 @@ static double start_y = 0;
 
 static void draw_pixel(GtkGestureClick *gesture, int n_press, double x, double y, GtkWidget *area)
 {
-  draw_brush(area, start_x, start_y);
-  start_x += 2, start_y += 2;
+  double i = 0;
+  for (i = 0; i < 160; i += 1)
+  {
+    double j;
+    for (j = 0; j < 144; j += 1)
+    {
+      draw_brush(area, i, j);
+    }
+  }
   gtk_widget_queue_draw(area);
 }
 
@@ -90,7 +112,7 @@ static void activate(GtkApplication *app, gpointer user_data)
   gtk_window_set_child(GTK_WINDOW(window), frame);
 
   drawing_area = gtk_drawing_area_new();
-  gtk_widget_set_size_request(drawing_area, 100, 100);
+  gtk_widget_set_size_request(drawing_area, 160, 144);
 
   gtk_frame_set_child(GTK_FRAME(frame), drawing_area);
 
