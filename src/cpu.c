@@ -72,7 +72,7 @@ const unsigned char flagNegative = (1 << 6);
 const unsigned char flagHalfCarry = (1 << 5);
 const unsigned char flagCarry = (1 << 4);
 
-unsigned long tickCounter = 0;
+unsigned int tickCounter = 0;
 
 void setFlag(unsigned char flag)
 {

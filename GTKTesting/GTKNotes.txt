@@ -9,6 +9,32 @@ https://docs.gtk.org/gtk4/input-handling.html
 Will need to handle keyboard events for controlling the game (WASD/Arrow keys, Enter, etc.)
 Will also need to update the graphics on non-input events (game startups, wait screens etc.)
 
+Game Infrastructure Pseudocode
+
+start()
+{
+    tick_timer( 1.0 / FPS );
+    load_all_sprites_etc();
+}
+
+tick()
+{
+    update();
+    game_board.expose(); // game_board is a GTKWidget, preferably a DrawingArea
+}
+
+expose_event()  // connected to game_board
+{
+    drawing_code();
+}
+
+update() 
+{
+    game_physics();
+    game_logic();
+}
+
+
 Preparing GTK4 development environment
 
 Ubuntu 20 doesn't have libgtk4-dev in the APT repository, need to compile from scratch.

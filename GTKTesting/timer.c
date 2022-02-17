@@ -103,6 +103,7 @@ static void activate(GtkApplication *app, gpointer data)
   gtk_widget_show(window);
 
   g_timeout_add_seconds(1, _label_update, label);
+
   continue_timer = TRUE;
   start_timer = TRUE;
 }
