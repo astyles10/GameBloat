@@ -2,14 +2,15 @@
 
 // Surface to draw scribbles
 
-struct rgba {
+struct rgba
+{
   unsigned char red;
   unsigned char green;
   unsigned char blue;
   unsigned char alpha;
 };
 
-struct rgba lcdScreen[160*144];
+struct rgba lcdScreen[160 * 144];
 
 static cairo_surface_t *surface = NULL;
 
@@ -50,9 +51,13 @@ static void draw_cb(GtkDrawingArea *drawing_area, cairo_t *cr, int width, int he
   cairo_paint(cr);
 }
 
-static double red = 0.0;
-static double green = 0.0;
-static double blue = 0.0;
+static int red = 110;
+static int green = 0;
+static int blue = 0;
+
+// static double red = 0.0;
+// static double green = 0.0;
+// static double blue = 0.0;
 
 static void draw_brush(GtkWidget *widget, double x, double y)
 {
@@ -60,10 +65,45 @@ static void draw_brush(GtkWidget *widget, double x, double y)
 
   cr = cairo_create(surface);
 
-  cairo_set_source_rgb(cr, red, green, blue);
-  cairo_rectangle(cr, x - 0.5, y - 0.5, 1, 1);
+  red += 1;
+
+  cairo_set_source_rgba(cr, (red / 255.0), (green / 100.0), (blue / 100.0), 1.0);
+  cairo_rectangle(cr, x, y, 1.0, 1.0);
   cairo_fill(cr);
 
+  cairo_destroy(cr);
+
+  red = (red == 255) ? 110 : red;
+  green = (green == 144) ? 0 : green;
+  blue = (blue == 144) ? 0 : blue;
+
+  gtk_widget_queue_draw(widget);
+}
+
+static int click_number = 0;
+
+static void draw_brush_2(GtkWidget *widget, double x, double y)
+{
+  cairo_t *cr;
+  cr = cairo_create(surface);
+  switch (click_number)
+  {
+  case 0:
+    cairo_set_source_rgba(cr, 0.5, 0, 0, 1.0);
+    click_number++;
+    break;
+  case 1:
+    cairo_set_source_rgba(cr, 0, 0.5, 0, 1.0);
+    click_number++;
+    break;
+  case 2:
+    cairo_set_source_rgba(cr, 0, 0, 0.5, 1.0);
+    click_number = 0;
+    break;
+  }
+
+  cairo_rectangle(cr, x*50.0, y*50.0, 50, 50);
+  cairo_fill(cr);
   cairo_destroy(cr);
 
   gtk_widget_queue_draw(widget);
@@ -75,14 +115,22 @@ static double start_y = 0;
 static void draw_pixel(GtkGestureClick *gesture, int n_press, double x, double y, GtkWidget *area)
 {
   double i = 0;
-  for (i = 0; i < 160; i += 1)
+  for (i = 0; i <= 160; i += 1)
   {
     double j;
-    for (j = 0; j < 144; j += 1)
+    for (j = 0; j <= 144; j += 1)
     {
       draw_brush(area, i, j);
     }
   }
+  // for (i = 0; i < 10; i++)
+  // {
+    // double j;
+    // for (j = 0; j < 10; j++)
+    // {
+      // draw_brush_2(area, i, j);
+    // }
+  // }
   gtk_widget_queue_draw(area);
 }
 

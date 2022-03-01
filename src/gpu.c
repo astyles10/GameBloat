@@ -11,9 +11,26 @@ typedef enum GpuMode
   VRAM_SCANLINE = 3
 } GpuMode;
 
+enum GpuCycles
+{
+  OAM_SCAN_CYCLE = 80,
+  VRAM_SCAN_CYCLE = 172,
+  HBLANK_CYCLE = 204,
+  VBLANK_CYCLE = 456
+};
+
+const unsigned char MAX_LINES = 154;
+
 unsigned char mode = 0;
 unsigned int modeClock = 0;
 unsigned char line = 0;
+
+struct GPU GPU;
+
+void reset()
+{
+
+}
 
 void gpuStep(unsigned char tick)
 {
@@ -22,14 +39,14 @@ void gpuStep(unsigned char tick)
   switch (mode)
   {
   case HBLANK:
-    if (modeClock >= 204)
+    if (modeClock >= HBLANK_CYCLE)
     {
       modeClock = 0;
       line++;
       if (line == 143)
       {
         mode = VBLANK;
-        // Push screen data to drawing area
+        // TODO: Push screen data to drawing area
       }
       else
       {
@@ -38,12 +55,12 @@ void gpuStep(unsigned char tick)
     }
     break;
   case VBLANK:
-    if (modeClock >= 456)
+    if (modeClock >= VBLANK_CYCLE)
     {
       modeClock = 0;
       line++;
 
-      if (line > 153)
+      if (line >= MAX_LINES)
       {
         mode = OAM_SCANLINE;
         line = 0;
@@ -51,14 +68,14 @@ void gpuStep(unsigned char tick)
     }
     break;
   case OAM_SCANLINE:
-    if (modeClock >= 80)
+    if (modeClock >= OAM_SCAN_CYCLE)
     {
       modeClock = 0;
       mode = VRAM_SCANLINE;
     }
     break;
   case VRAM_SCANLINE: // HDraw
-    if (modeClock >= 172)
+    if (modeClock >= VRAM_SCAN_CYCLE)
     {
       modeClock = 0;
       mode = HBLANK;
