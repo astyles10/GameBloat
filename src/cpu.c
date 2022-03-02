@@ -1402,6 +1402,7 @@ void jp_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition)
   if (checkFlag(flag) == condition)
   {
     registers.PC = nn;
+    tickCounter += 4;
   }
 }
 
@@ -1415,6 +1416,7 @@ void jr_cc_e(unsigned char e, unsigned char flag, unsigned char condition)
   if (checkFlag(flag) == condition)
   {
     registers.PC += (char)e;
+    tickCounter += 4;
   }
 }
 
@@ -1440,6 +1442,7 @@ void call_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition)
   if (checkFlag(flag) == condition)
   {
     call_nn(nn);
+    tickCounter += 12;
   }
 }
 
@@ -1482,6 +1485,7 @@ void ret_cc(unsigned char flag, unsigned char condition)
   if (checkFlag(flag) == condition)
   {
     ret();
+    tickCounter += 12;
   }
 }
 
