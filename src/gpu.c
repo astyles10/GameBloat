@@ -27,7 +27,7 @@ unsigned char line = 0;
 
 struct GPU GPU;
 
-void reset()
+void gpuReset()
 {
 
 }

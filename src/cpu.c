@@ -3,6 +3,7 @@
 #include "registers.h"
 #include "memory.h"
 #include "cartridge.h"
+#include "interrupt.h"
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -51,7 +52,7 @@ const unsigned short resetAddresses[] = {
     0xFF22, 0xFF23, 0xFF24, 0xFF25,
     0xFF26, 0xFF40, 0xFF42, 0xFF43,
     0xFF45, 0xFF47, 0xFF48, 0xFF49,
-    0xFF4A, 0xFF4B, 0xFFFF};
+    0xFF4A, 0xFF4B};
 
 const unsigned char resetValues[] = {
     0x00, 0x00, 0x00, 0x80,
@@ -61,7 +62,7 @@ const unsigned char resetValues[] = {
     0x00, 0xBF, 0x77, 0xF3,
     0xF1, 0x91, 0x00, 0x00,
     0x00, 0xFC, 0xFF, 0xFF,
-    0x00, 0x00, 0x00};
+    0x00, 0x00};
 
 void setFlag(unsigned char flag);
 void removeFlag(unsigned char flag);
@@ -110,6 +111,8 @@ void reset(void)
   {
     MMU.writeByte(resetAddresses[i], resetValues[i]);
   }
+
+  interruptRegisters.enable = 0;
 }
 
 int loadROM(const char *cartName)
@@ -840,14 +843,12 @@ void stop(void)
 
 void di(void)
 {
-  // TODO
-  printf("Would DI!\n");
+  interruptRegisters.masterEnable = 0;
 }
 
 void ei(void)
 {
-  // TODO
-  printf("Would EI!\n");
+  interruptRegisters.masterEnable = 1;
 }
 
 // Rotates and Shifts

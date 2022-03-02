@@ -1,6 +1,7 @@
 #include <string.h>
 #include "memory.h"
 #include "cartridge.h"
+#include "interrupt.h"
 
 unsigned char MMU_ReadByte(const unsigned short address);
 unsigned short MMU_ReadShort(const unsigned short address);
@@ -64,6 +65,10 @@ unsigned char MMU_ReadByte(const unsigned short address)
   }
   else if (address <= 0xFF7F)
   {
+    if (address == 0xFF0F)
+    {
+      return interruptRegisters.request;
+    }
     return ioPorts[address - 0xFF7F];
   }
   else if (address <= 0xFFFE)
@@ -72,7 +77,7 @@ unsigned char MMU_ReadByte(const unsigned short address)
   }
   else if (address == 0xFFFF)
   {
-    return interruptEnable;
+    return interruptRegisters.enable;
   }
   else
   {
@@ -126,7 +131,14 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value)
   }
   else if (address <= 0xFF7F)
   {
-    ioPorts[address - 0xFF00] = value;
+    if (address == 0xFF0F)
+    {
+      writeInterrupt(address, value);
+    }
+    else
+    {
+      ioPorts[address - 0xFF00] = value;
+    }
     return 1;
   }
   else if (address <= 0xFFFE)
@@ -136,7 +148,7 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value)
   }
   else if (address == 0xFFFF)
   {
-    interruptEnable = value;
+    writeInterrupt(address, value);
     return 1;
   }
   else

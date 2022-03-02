@@ -1,6 +1,7 @@
 #pragma once
 
 void gpuStep(unsigned char);
+void gpuReset(void);
 
 struct GPU
 {

@@ -32,12 +32,3 @@ struct MMU
   writeByteToMemory writeByte;
   writeShortToMemory writeShort;
 } extern MMU;
-
-enum InterruptAddresses
-{
-  VERT_BLNK_INTR_START = 0x40,
-  LCDC_STATUS_INTR_START = 0x48,
-  TIMER_OVERFLOW_INTR = 0x50,
-  SERIAL_TX_COMPLETION_INTR = 0x58,
-  HIGH_LOW_P10_P13_INTR = 0x60
-};
