@@ -32,7 +32,7 @@ void gpuReset()
 
 }
 
-void gpuStep(unsigned char tick)
+void gpuStep(int tick)
 {
   modeClock += tick;
 

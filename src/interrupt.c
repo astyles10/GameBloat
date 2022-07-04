@@ -1,5 +1,6 @@
 #include "interrupt.h"
 #include "registers.h"
+#include <stdio.h>
 
 enum InterruptAddresses
 {

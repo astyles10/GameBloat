@@ -8,37 +8,71 @@
 #include "opcode.h"
 #include "cartridge.h"
 #include "bios.h"
+#include "gpu.h"
+#include "interrupt.h"
 
 #include <gtk/gtk.h>
 
 int parseArguments(int, char *[], char *);
 
-static void onStartup(GtkApplication *, gconstpointer);
 static void onActivate(GtkApplication *, gconstpointer);
 static void onShutdown(GtkApplication *, gconstpointer);
-static void onClick(GtkWidget *widget, gpointer data);
+static void launchGameCallback(GtkWidget *widget, gpointer data);
+static void runStepCallback(GtkWidget *widget, gpointer data);
+static void updateRegisterText();
 
-static void onClick(GtkWidget *widget, gpointer data)
+GtkWidget *statusbar;
+static bool gameLaunched = false;
+
+static void launchGameCallback(GtkWidget *widget, gpointer data)
 {
   const char *cartName = "./GB_Games/PokemonRed.gb";
   if (validateCart(cartName))
   {
     loadROM(cartName);
-
-    int i;
-    for (i = 0; i < 20; i++)
-    {
-      printf("%d: ", i);
-      cpuCycle();
-    }
+    gameLaunched = true;
   }
-  cpuClose();
+}
+
+static void runStepCallback(GtkWidget *widget, gpointer data)
+{
+  if (gameLaunched)
+  {
+    int ticks = cpuCycle();
+    gpuStep(ticks);
+    interruptStep();
+
+    updateRegisterText();
+  }
+}
+
+static void updateRegisterText()
+{
+  if (!gameLaunched)
+  {
+    return;
+  }
+  gchar *msg;
+
+  msg = g_strdup_printf(
+      "Register AF: 0x%02X\n\
+  Register BC: 0x%02X\n\
+  Register DE: 0x%02X\n\
+  Register HL: 0x%02X\n\
+  Register SP: 0x%02X\n\
+  Register PC: 0x%02X",
+      registers.AF, registers.BC, registers.DE, registers.HL, registers.SP, registers.PC);
+
+  gtk_statusbar_push(GTK_STATUSBAR(statusbar), 0, msg);
+
+  g_free(msg);
 }
 
 static void onActivate(GtkApplication *app, gconstpointer userData)
 {
   GtkWidget *window;
-  GtkWidget *button;
+  GtkWidget *launchButton;
+  GtkWidget *runStepButton;
   GtkWidget *box;
 
   window = gtk_application_window_new(app);
@@ -51,29 +85,19 @@ static void onActivate(GtkApplication *app, gconstpointer userData)
 
   gtk_window_set_child(GTK_WINDOW(window), box);
 
-  button = gtk_button_new_with_label("Launch Game");
+  statusbar = gtk_statusbar_new();
+  // g_signal_connect(statusbar, "changed", G_CALLBACK(updateRegisterText), statusbar);
 
-  g_signal_connect(button, "clicked", G_CALLBACK(onClick), NULL);
-  // g_signal_connect_swapped(button, "clicked", G_CALLBACK(gtk_window_destroy), window);
+  launchButton = gtk_button_new_with_label("Launch Game");
+  g_signal_connect(launchButton, "clicked", G_CALLBACK(launchGameCallback), NULL);
 
-  gtk_box_append(GTK_BOX(box), button);
+  runStepButton = gtk_button_new_with_label("Run Step");
+  g_signal_connect(runStepButton, "clicked", G_CALLBACK(runStepCallback), NULL);
+
+  gtk_box_append(GTK_BOX(box), launchButton);
+  gtk_box_append(GTK_BOX(box), runStepButton);
+  gtk_box_append(GTK_BOX(box), statusbar);
   gtk_widget_show(window);
-}
-
-static void onStartup(GtkApplication *app, gconstpointer userData)
-{
-  const char *cartName = "./GB_Games/PokemonRed.gb";
-  if (validateCart(cartName))
-  {
-    loadROM(cartName);
-
-    int i;
-    for (i = 0; i < 20; i++)
-    {
-      printf("%d: ", i);
-      cpuCycle();
-    }
-  }
 }
 
 static void onShutdown(GtkApplication *app, gconstpointer userData)

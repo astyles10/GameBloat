@@ -1122,7 +1122,7 @@ const opcode baseOpcodeTable[256] = {
     {"DEC D", NO_OPERANDS, dec_D},         // 0x15
     {"LD D,n", OPERAND_CHAR, ld_D_n},      // 0x16
     {"RL A", NO_OPERANDS, rl_A},           // 0x17
-    {"JR n", NO_OPERANDS, jr_e},           // 0x18
+    {"JR n", OPERAND_CHAR, jr_e},           // 0x18
     {"ADD HL,DE", NO_OPERANDS, add_HL_DE}, // 0x19
     {"LD A,(DE)", NO_OPERANDS, ld_A_mDE},  // 0x1A
     {"DEC DE", NO_OPERANDS, dec_DE},       // 0x1B
@@ -1312,7 +1312,7 @@ const opcode baseOpcodeTable[256] = {
     {"RET Z", NO_OPERANDS, ret_Z},             // 0xC8
     {"RET", NO_OPERANDS, ret},                 // 0xC9
     {"JP Z,nn", OPERAND_SHORT, jp_Z_nn},       // 0xCA
-    {"Ext ops", OPERAND_SHORT, extOps},        // 0xCB
+    {"Ext ops", OPERAND_CHAR, extOps},        // 0xCB
     {"CALL Z,nn", OPERAND_SHORT, call_Z_nn},   // 0xCC
     {"CALL nn", OPERAND_SHORT, call_nn},       // 0xCD
     {"ADC A,n", OPERAND_CHAR, adc_A_n},        // 0xCE
@@ -1349,7 +1349,7 @@ const opcode baseOpcodeTable[256] = {
     {"undefined", NO_OPERANDS, undefined}, // 0xEB
     {"undefined", NO_OPERANDS, undefined}, // 0xEC
     {"undefined", NO_OPERANDS, undefined}, // 0xED
-    {"XOR n", NO_OPERANDS, xor_n},         // 0xEE
+    {"XOR n", OPERAND_CHAR, xor_n},         // 0xEE
     {"RST 28", NO_OPERANDS, rst_28},       // 0xEF
 
     {"LDH A,(n)", OPERAND_CHAR, ldh_A_n},    // 0xF0

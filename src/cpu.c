@@ -128,7 +128,7 @@ void cpuClose()
   cartCleanup();
 }
 
-void cpuCycle()
+int cpuCycle()
 {
   // Read instruction from address stored in PC register
   unsigned char instruction = MMU.readByte(registers.PC++);
@@ -138,7 +138,6 @@ void cpuCycle()
   opcode aOpcode;
   if (instruction == 0xCB)
   {
-    instruction = MMU.readByte(registers.PC++);
     aOpcode = CBOpcodeTable[instruction];
   }
   else
@@ -153,20 +152,25 @@ void cpuCycle()
   case (OPERAND_CHAR):
     operand = MMU.readByte(registers.PC);
     ((void (*)(unsigned char))aOpcode.function)(operand);
+    printf("Instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
     break;
   case (OPERAND_SHORT):
     operand = MMU.readShort(registers.PC);
     ((void (*)(unsigned short))aOpcode.function)(operand);
+    printf("Instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
     break;
   case (NO_OPERANDS):
     ((void (*)(void))aOpcode.function)();
+    printf("Instruction = %s\n", aOpcode.asmName);
     break;
   }
-  printf("Instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
 
   registers.PC += aOpcode.operandType;
 
+  int startTicks = tickCounter;
   tickCounter += baseOpcodeTicks[instruction];
+  int ticksUsed = tickCounter - startTicks;
+  return ticksUsed;
 }
 
 // 8-Bit Loads
@@ -1396,6 +1400,7 @@ void res_b_sHL(unsigned char bitPosition)
 void jp_nn(unsigned short nn)
 {
   registers.PC = nn;
+  printf("jp_nn: Registers.PC = 0x%0X\n", registers.PC);
 }
 
 void jp_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition)

@@ -9,7 +9,7 @@ extern const unsigned char flagZero;
 void reset(void);
 void cpuClose(void);
 int loadROM(const char *);
-void cpuCycle(void);
+int cpuCycle(void);
 
 // 8-Bit loads
 void ld_r_s(unsigned char *ptrR, unsigned char n);
