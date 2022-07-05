@@ -2,5 +2,11 @@
     "C_Cpp.default.includePath": [
         "./include",
         "/usr/include"
-    ]
+    ],
+    "files.associations": {
+        "gtk.h": "c",
+        "ws.h": "c",
+        "unistd.h": "c",
+        "time.h": "c"
+    }
 }

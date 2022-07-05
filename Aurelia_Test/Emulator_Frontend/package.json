@@ -9,7 +9,8 @@
   "license": "MIT",
   "dependencies": {
     "aurelia-animator-css": "^1.0.4",
-    "aurelia-bootstrapper": "^2.4.0"
+    "aurelia-bootstrapper": "^2.4.0",
+    "process": "^0.11.10"
   },
   "devDependencies": {
     "@babel/core": "^7.18.0",

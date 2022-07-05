@@ -8,6 +8,9 @@ const { AureliaPlugin } = require('aurelia-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
+// Fix as per https://github.com/PrimeDAO/prime-deals-dapp/pull/138/files#diff-1fb26bc12ac780c7ad7325730ed09fc4c2c3d757c276c3dacc44bfe20faf166f
+const { ProvidePlugin } = require('webpack');
+
 // config helpers:
 const ensureArray = (config) => config && (Array.isArray(config) ? config : [config]) || [];
 const when = (condition, config, negativeConfig) =>
@@ -223,6 +226,9 @@ module.exports = ({ production }, { analyze, hmr, port, host }) => ({
     ]
   },
   plugins: [
+    new ProvidePlugin({
+      process: 'process/browser'
+    }),
     new DuplicatePackageCheckerPlugin(),
     new AureliaPlugin(),
     new HtmlWebpackPlugin({

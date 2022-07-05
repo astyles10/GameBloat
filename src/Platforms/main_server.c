@@ -1,7 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 #include <ws.h>
+
+int millisleep(unsigned int microseconds) {
+  const struct timespec ts = {
+    microseconds / 1000, /* seconds */
+    (microseconds % 1000) * 1000 * 1000 /* nano seconds */
+  };
+  return nanosleep(&ts, NULL);
+}
 
 /**
  * @brief This function is called whenever a new connection is opened.
@@ -34,15 +43,35 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
                int type) {
   char *cli;
   cli = ws_getaddress(client);
-  printf("I receive a message: %s (%zu), from: %s\n", msg, size, cli);
-
-  sleep(2);
-  ws_sendframe_txt(client, "hello");
-  sleep(2);
-  ws_sendframe_txt(client, "world");
+  printf("I received a message: %s (%zu), from: %s\n", msg, size, cli);
+  // static int msg_count = 1;
+  char msg_buffer[100];
+  
+  // snprintf(msg_buffer, 100, "%d", msg_count++);
+  for (int i = 0; i < 100; i++) {
+    snprintf(msg_buffer, 100, "%d", i);
+    millisleep(17);
+    int success = ws_sendframe_txt(client, msg_buffer);
+    switch (success) {
+      case -1:
+        printf("Failed to send data :(\n");
+        break;
+      case 0:
+        printf("Did not send data\n");
+        break;
+      default:
+        printf("Wrote %d bytes\n", success);
+        break;
+    }
+  }
 }
 
-int main(void) {
+int main(int argc, char** argv) {
+  uint16_t port_number = 8087;
+  if (argc > 1) {
+    port_number = strtoul(argv[1], NULL, 10);
+  }
+
   /* Register events. */
   struct ws_events evs;
   evs.onopen = &onopen;
@@ -55,7 +84,7 @@ int main(void) {
    * *If the third argument is != 0, a new thread is created
    * to handle new connections.
    */
-  ws_socket(&evs, 8080, 0, 1000);
+  ws_socket(&evs, port_number, 0, 1000);
 
   return (0);
 }
