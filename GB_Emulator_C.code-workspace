@@ -1,12 +1,9 @@
 {
 	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../Cinoop-master"
-		}
-	],
+    {
+      "path": "."
+    }
+  ],
 	"settings": {
 		"files.associations": {
       "memorymanager.h": "c",
@@ -23,7 +20,8 @@
       "string.h": "c",
       "cstdio": "c",
       "gtk.h": "c",
-      "ws.h": "c"
+      "ws.h": "c",
+      "unistd.h": "c"
     },
 		"C_Cpp.default.cppStandard": "c++17",
 		"C_Cpp.default.cStandard": "c17",

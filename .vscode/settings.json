@@ -8,5 +8,6 @@
         "ws.h": "c",
         "unistd.h": "c",
         "time.h": "c"
-    }
+    },
+    "C_Cpp.default.intelliSenseMode": "linux-gcc-x64"
 }
