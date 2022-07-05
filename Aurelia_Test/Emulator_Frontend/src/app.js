@@ -1,4 +1,5 @@
 import { BindingEngine } from 'aurelia-binding'
+import { ReconnectingWebsocket } from './reconnecting-websocket'
 
 export class App {
   static inject = [BindingEngine]
@@ -7,15 +8,9 @@ export class App {
     this.BindingEngine = BindingEngine
     this.message = 'Hello World!'
     this.messageData = 'Data go here'
+    this.socket = new ReconnectingWebsocket('ws://localhost:8089')
     // Browsers contain their own native websocket code, do not need to import node Websocket module!
-    this.socket = new WebSocket('ws://localhost:8089')
-    this.socket.onopen = () => {
-      console.log('Socket opened!')
-    }
-    this.socket.onmessage = (message) => {
-      this.message = "Hello from: " + message.origin
-      this.messageData = message.data
-    }
+
   }
 
   bind () {
@@ -31,6 +26,5 @@ export class App {
   }
 
   sendMessage() {
-    this.socket.send('From Client')
   }
 }
