@@ -1,0 +1,2 @@
+* socket.io-client CORS errors: could not connect to local web server due to CORS being unconfigured on server side.
+  Either find a new http server library, finish off more of SimpleWebServer or use a different client socket library

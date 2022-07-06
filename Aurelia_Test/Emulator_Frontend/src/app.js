@@ -1,5 +1,6 @@
 import { BindingEngine } from 'aurelia-binding'
 import { ReconnectingWebsocket } from './reconnecting-websocket'
+// import { io } from '../node_modules/socket.io-client/build/esm/index'
 
 export class App {
   static inject = [BindingEngine]
@@ -9,8 +10,15 @@ export class App {
     this.message = 'Hello World!'
     this.messageData = 'Data go here'
     this.socket = new ReconnectingWebsocket('ws://localhost:8089')
-    // Browsers contain their own native websocket code, do not need to import node Websocket module!
-
+    this.socket.setOnOpen((str) => {
+      console.log(str)
+    })
+    this.socket.setOnMessage((messageData) => {
+     this.messageData = messageData
+    })
+    // this.socket = io('ws://127.0.0.1:8089', {
+    //   withCredentials: false
+    // })
   }
 
   bind () {
@@ -26,5 +34,6 @@ export class App {
   }
 
   sendMessage() {
+    this.socket.socket.send('request')
   }
 }
