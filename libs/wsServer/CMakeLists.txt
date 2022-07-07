@@ -35,16 +35,9 @@ else()
 	target_link_libraries(ws pthread)
 endif(WIN32)
 
-add_executable(toyws_test
-    extra/toyws/tws_test.c
-    extra/toyws/toyws.c)
-
 if(WIN32)
     target_link_libraries(toyws_test ws2_32 -static)
 endif(WIN32)
-
-# Examples files
-add_subdirectory(examples)
 
 option(ENABLE_WSSERVER_TEST "Enable wsServer testing (requires Autobahn)" OFF)
 if(ENABLE_WSSERVER_TEST)

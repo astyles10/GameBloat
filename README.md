@@ -5,6 +5,7 @@ TODO:
 Brain/Back-end:
 * Ensure tick counting & timing is correct (M and T Clocks?) - Ticks differ in jump/ret opcodes
 * Finish TODO CPU functions
+* Have GPU fill array of data to send over websocket
 * Begin reading instructions in CPU
 * Handle Interrupts
 * Update MBC3 code to save/load RAM files

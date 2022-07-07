@@ -1,7 +1,10 @@
 <template>
+  <require from="./components/gameboy-canvas"></require>
   <h1>${message}</h1>
   <button click.trigger="sendMessage()">Send Message Over Websocket</button>
   <button click.trigger="colorCanvas()">Fill in canvas</button>
+  <button click.trigger="resizeCanvas()">Resize canvas</button>
+  <button click.trigger="reset()">Reset canvas</button>
   <h1>${messageData}</h1>
-  <canvas id="myCanvas" width="160" height="144" style="border:1px solid #000000" ref="myCanvas"></canvas>
+  <gameboy-canvas view-model.ref="canvas"></gameboy-canvas>
 </template>

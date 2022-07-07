@@ -1,5 +1,6 @@
 import { BindingEngine } from 'aurelia-binding'
 import { ReconnectingWebsocket } from './reconnecting-websocket'
+import { GameboyCanvasCustomElement } from './components/gameboy-canvas'
 // import { io } from '../node_modules/socket.io-client/build/esm/index'
 
 export class App {
@@ -25,12 +26,15 @@ export class App {
   }
 
   colorCanvas() {
-    let thingy = this.myCanvas.getContext('2d')
-    thingy.beginPath()
-    thingy.rect(0, 0, 160, 144)
-    let color = (thingy.fillStyle === '#ff0000' ? 'white' : 'red')
-    thingy.fillStyle = color
-    thingy.fill()
+    this.canvas.redraw()
+  }
+
+  resizeCanvas() {
+    this.canvas.resize()
+  }
+
+  reset() {
+    this.canvas.reset()
   }
 
   sendMessage() {

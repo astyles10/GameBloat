@@ -1,0 +1,6 @@
+Custom elements
+
+Javascript code needs to export a class
+Need to append CustomElement to the class name: e.g. GameboyCanvasCustomElement
+Aurelia template engine will remove the 'CustomElement' from the name and convert InitCaps to dash-case
+GameboyCanvasCustomElement -> gameboy-canvas

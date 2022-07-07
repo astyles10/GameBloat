@@ -3,13 +3,13 @@
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
 // http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-Graphics
 
-typedef enum GpuMode
+enum GpuMode
 {
   HBLANK = 0,
   VBLANK = 1,
   OAM_SCANLINE = 2,
   VRAM_SCANLINE = 3
-} GpuMode;
+};
 
 enum GpuCycles
 {
@@ -27,11 +27,6 @@ unsigned char line = 0;
 
 struct GPU GPU;
 
-void gpuReset()
-{
-
-}
-
 void gpuStep(int tick)
 {
   modeClock += tick;
@@ -47,6 +42,8 @@ void gpuStep(int tick)
       {
         mode = VBLANK;
         // TODO: Push screen data to drawing area
+        // This means sending a frame over the websocket
+        // Data comes from vram ? canvas.putImageData(screen, 0, 0)
       }
       else
       {
@@ -80,6 +77,7 @@ void gpuStep(int tick)
       modeClock = 0;
       mode = HBLANK;
       // TODO: Render scan here
+      // 
     }
     break;
   }

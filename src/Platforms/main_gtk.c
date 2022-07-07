@@ -26,7 +26,7 @@ static bool gameLaunched = false;
 
 static void launchGameCallback(GtkWidget *widget, gpointer data)
 {
-  const char *cartName = "./GB_Games/PokemonRed.gb";
+  const char *cartName = "./GB_Games/Tetris.gb";
   if (validateCart(cartName))
   {
     loadROM(cartName);

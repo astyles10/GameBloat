@@ -51,7 +51,7 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
   for (int i = 0; i < 100; ++i) {
     snprintf(msg_buffer, 100, "%d", i);
     millisleep(17);
-    int success = ws_sendframe_txt(client, msg_buffer);
+    ws_sendframe_txt(client, msg_buffer);
   }
 }
 

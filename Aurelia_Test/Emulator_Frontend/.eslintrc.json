@@ -21,5 +21,6 @@
     "browser": true,
     "node": true,
     "jest": true
-  }
+  },
+  "plugins": ["@babel/plugin-proposal-decorators"]
 }
