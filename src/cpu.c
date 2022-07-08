@@ -119,6 +119,8 @@ int loadROM(const char *cartName)
 {
   initializeMemory();
   reset();
+  printf("loadROM: Register AF = 0x%X F = 0x%x\n", registers.AF, registers.F);
+  printf("loadROM: Register F Zero: %d Negative: %d HalfCarry: %d Carry: %d\n", checkFlag(flagZero), checkFlag(flagNegative), checkFlag(flagHalfCarry), checkFlag(flagCarry));
   loadCartridge(cartName);
   return 0;
 }
@@ -136,36 +138,43 @@ int cpuCycle()
   // Emulator should continue processing opcodes until tick counter reaches 70,224 clock cycles
 
   opcode aOpcode;
-  if (instruction == 0xCB)
-  {
+  if (instruction == 0xCB) {
+    printf("Got instruction from CB Opcode table!\n");
     aOpcode = CBOpcodeTable[instruction];
   }
-  else
-  {
+  else {
     aOpcode = baseOpcodeTable[instruction];
   }
   // Determine number of instruction operands
   unsigned short operand = 0;
+  if (aOpcode.operandType == OPERAND_CHAR) {
+    operand = (unsigned short)MMU.readByte(registers.PC);
+  } else if (aOpcode.operandType == OPERAND_SHORT) {
+    operand = MMU.readShort(registers.PC);
+  }
+  registers.PC += aOpcode.operandType;
 
-  switch (aOpcode.operandType)
-  {
+  switch (aOpcode.operandType) {
   case (OPERAND_CHAR):
-    operand = MMU.readByte(registers.PC);
+    printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
     ((void (*)(unsigned char))aOpcode.function)(operand);
-    printf("Instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
     break;
   case (OPERAND_SHORT):
-    operand = MMU.readShort(registers.PC);
+    printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
     ((void (*)(unsigned short))aOpcode.function)(operand);
-    printf("Instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
     break;
   case (NO_OPERANDS):
+    printf("Executing instruction = %s\n", aOpcode.asmName);
     ((void (*)(void))aOpcode.function)();
-    printf("Instruction = %s\n", aOpcode.asmName);
     break;
   }
 
-  registers.PC += aOpcode.operandType;
+  // Post instruction debug print
+  printf("\n*********************************\n");
+  printf("Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: 0x%02X H: 0x%02X L: 0x%02X\n", registers.A, registers.B, registers.C, registers.D, registers.E, registers.F, registers.H, registers.L);
+  printf("Flags: Z: %d N: %d H: %d C: %d\n", checkFlag(flagZero), checkFlag(flagNegative), checkFlag(flagHalfCarry), checkFlag(flagCarry));
+  printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
+  printf("\n*********************************\n");
 
   int startTicks = tickCounter;
   tickCounter += baseOpcodeTicks[instruction];
@@ -528,11 +537,11 @@ void cmp_s(unsigned char s)
 
   if (registers.A == s)
   {
-    removeFlag(flagZero);
+    setFlag(flagZero);
   }
   else
   {
-    setFlag(flagZero);
+    removeFlag(flagZero);
   }
 }
 
@@ -1423,6 +1432,7 @@ void jr_cc_e(unsigned char e, unsigned char flag, unsigned char condition)
   {
     registers.PC += (char)e;
     tickCounter += 4;
+    printf("jr_cc_e: Registers.PC = 0x%X\n", registers.PC);
   }
 }
 
