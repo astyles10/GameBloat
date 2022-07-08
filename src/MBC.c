@@ -1,18 +1,17 @@
-#include <stdio.h>
-
 #include "MBC.h"
 
-#include "MBC/MBCNone.h"
+#include <stdio.h>
+
 #include "MBC/MBC1.h"
 #include "MBC/MBC2.h"
 #include "MBC/MBC3.h"
 #include "MBC/MBC4.h"
 #include "MBC/MBC5.h"
+#include "MBC/MBCNone.h"
 
 struct MBC MBC;
 
-enum CartridgeTypes
-{
+enum CartridgeTypes {
   ROM_ONLY = 0x00,
   MBC1 = 0x01,
   MBC1_RAM = 0x02,
@@ -44,69 +43,68 @@ enum CartridgeTypes
   HUC1_RAM_BATTERY = 0xFF
 };
 
-int setMBCType(unsigned char cartMBC)
-{
+int setMBCType(unsigned char cartMBC) {
   // Refer to https://mgba-emu.github.io/gbdoc/ for the unsupported MBC types
-  switch (cartMBC)
-  {
-  case ROM_ONLY:
-    MBC.readByte = MBCNone_ReadByte;
-    MBC.writeByte = MBCNone_WriteByte;
-    printf("Cart MBC Rom Only\n");
-    return 1;
-  case MBC1:
-  case MBC1_RAM:
-  case MBC1_RAM_BATTERY:
-    MBC.readByte = MBC1_ReadByte;
-    MBC.writeByte = MBC1_WriteByte;
-    printf("Cart MBC Type 1\n");
-    return 1;
-  case MBC2:
-  case MBC2_BATTERY:
-    MBC.readByte = MBC2_ReadByte;
-    MBC.writeByte = MBC2_WriteByte;
-    printf("Cart MBC Type 2\n");
-    return 1;
-  case ROM_RAM:
-  case ROM_RAM_BATTERY:
-    // "Optionally up to 8KB of RAM coult be connected at A000-BFFF, does not require MBC chip"
-    MBC.readByte = MBCNone_ReadByte;
-    MBC.writeByte = MBCNone_WriteByte;
-    printf("Cart ROM RAM -- Unsupported\n");
-    return 0;
-  case MMM01:
-  case MMM01_RAM:
-  case MMM01_RAM_BATTERY:
-    // TODO
-    printf("Cart MMM01 Type -- Unsupported\n");
-    return 0;
-  case MBC3:
-  case MBC3_RAM:
-  case MBC3_RAM_BATTERY:
-  case MBC3_TIMER_BATTERY:
-  case MBC3_TIMER_RAM_BATTERY:
-    MBC.readByte = MBC3_ReadByte;
-    MBC.writeByte = MBC3_WriteByte;
-    printf("Cart MBC Type 3\n");
-    return 1;
-  case MBC4:
-  case MBC4_RAM:
-  case MBC4_RAM_BATTERY:
-    MBC.readByte = MBC4_ReadByte;
-    MBC.writeByte = MBC4_WriteByte;
-    printf("Cart MBC Type 4\n");
-    return 1;
-  case MBC5_RAM:
-  case MBC5_RAM_BATTERY:
-  case MBC5_RUMBLE:
-  case MBC5_RUMBLE_RAM:
-  case MBC5_RUMBLE_RAM_BATTERY:
-    MBC.readByte = MBC5_ReadByte;
-    MBC.writeByte = MBC5_WriteByte;
-    printf("Cart MBC Type 5\n");
-    return 1;
-  default:
-    printf("MBC type unknown, closing...\n");
-    return 0;
+  switch (cartMBC) {
+    case ROM_ONLY:
+      MBC.readByte = MBCNone_ReadByte;
+      MBC.writeByte = MBCNone_WriteByte;
+      printf("Cart MBC Rom Only\n");
+      return 1;
+    case MBC1:
+    case MBC1_RAM:
+    case MBC1_RAM_BATTERY:
+      MBC.readByte = MBC1_ReadByte;
+      MBC.writeByte = MBC1_WriteByte;
+      printf("Cart MBC Type 1\n");
+      return 1;
+    case MBC2:
+    case MBC2_BATTERY:
+      MBC.readByte = MBC2_ReadByte;
+      MBC.writeByte = MBC2_WriteByte;
+      printf("Cart MBC Type 2\n");
+      return 1;
+    case ROM_RAM:
+    case ROM_RAM_BATTERY:
+      // "Optionally up to 8KB of RAM coult be connected at A000-BFFF, does not
+      // require MBC chip"
+      MBC.readByte = MBCNone_ReadByte;
+      MBC.writeByte = MBCNone_WriteByte;
+      printf("Cart ROM RAM -- Unsupported\n");
+      return 0;
+    case MMM01:
+    case MMM01_RAM:
+    case MMM01_RAM_BATTERY:
+      // TODO
+      printf("Cart MMM01 Type -- Unsupported\n");
+      return 0;
+    case MBC3:
+    case MBC3_RAM:
+    case MBC3_RAM_BATTERY:
+    case MBC3_TIMER_BATTERY:
+    case MBC3_TIMER_RAM_BATTERY:
+      MBC.readByte = MBC3_ReadByte;
+      MBC.writeByte = MBC3_WriteByte;
+      printf("Cart MBC Type 3\n");
+      return 1;
+    case MBC4:
+    case MBC4_RAM:
+    case MBC4_RAM_BATTERY:
+      MBC.readByte = MBC4_ReadByte;
+      MBC.writeByte = MBC4_WriteByte;
+      printf("Cart MBC Type 4\n");
+      return 1;
+    case MBC5_RAM:
+    case MBC5_RAM_BATTERY:
+    case MBC5_RUMBLE:
+    case MBC5_RUMBLE_RAM:
+    case MBC5_RUMBLE_RAM_BATTERY:
+      MBC.readByte = MBC5_ReadByte;
+      MBC.writeByte = MBC5_WriteByte;
+      printf("Cart MBC Type 5\n");
+      return 1;
+    default:
+      printf("MBC type unknown, closing...\n");
+      return 0;
   }
 }

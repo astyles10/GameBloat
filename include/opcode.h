@@ -1,19 +1,8 @@
-enum OperandNumber
-{
-  NO_OPERANDS,
-  OPERAND_CHAR,
-  OPERAND_SHORT
-};
+enum OperandNumber { NO_OPERANDS, OPERAND_CHAR, OPERAND_SHORT };
 
-enum Conditions
-{
-  FLAG_NOT_SET,
-  FLAG_SET,
-  NO_CONDITION
-};
+enum Conditions { FLAG_NOT_SET, FLAG_SET, NO_CONDITION };
 
-typedef struct opcode
-{
+typedef struct opcode {
   char *asmName;
   unsigned char operandType;
   void *function;

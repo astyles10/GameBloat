@@ -1,11 +1,7 @@
-struct registers
-{
-  struct
-  {
-    union
-    {
-      struct
-      {
+struct registers {
+  struct {
+    union {
+      struct {
 #ifdef LITTLE_ENDIAN
         unsigned char F;
         unsigned char A;
@@ -17,12 +13,9 @@ struct registers
       unsigned short AF;
     };
   };
-  struct
-  {
-    union
-    {
-      struct
-      {
+  struct {
+    union {
+      struct {
 #ifdef LITTLE_ENDIAN
         unsigned char C;
         unsigned char B;
@@ -34,12 +27,9 @@ struct registers
       unsigned short BC;
     };
   };
-  struct
-  {
-    union
-    {
-      struct
-      {
+  struct {
+    union {
+      struct {
 #ifdef LITTLE_ENDIAN
         unsigned char E;
         unsigned char D;
@@ -51,12 +41,9 @@ struct registers
       unsigned short DE;
     };
   };
-  struct
-  {
-    union
-    {
-      struct
-      {
+  struct {
+    union {
+      struct {
 #ifdef LITTLE_ENDIAN
         unsigned char L;
         unsigned char H;

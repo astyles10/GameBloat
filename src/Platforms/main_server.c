@@ -6,8 +6,8 @@
 
 int millisleep(unsigned int microseconds) {
   const struct timespec ts = {
-    microseconds / 1000, /* seconds */
-    (microseconds % 1000) * 1000 * 1000 /* nano seconds */
+      microseconds / 1000,                /* seconds */
+      (microseconds % 1000) * 1000 * 1000 /* nano seconds */
   };
   return nanosleep(&ts, NULL);
 }
@@ -46,7 +46,7 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
   printf("I received a message: %s (%zu), from: %s\n", msg, size, cli);
   // static int msg_count = 1;
   char msg_buffer[100];
-  
+
   // snprintf(msg_buffer, 100, "%d", msg_count++);
   for (int i = 0; i < 100; ++i) {
     snprintf(msg_buffer, 100, "%d", i);
@@ -55,7 +55,7 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
   }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   uint16_t port_number = 8087;
   if (argc > 1) {
     port_number = strtoul(argv[1], NULL, 10);

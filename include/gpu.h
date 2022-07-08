@@ -3,16 +3,14 @@
 void gpuStep(int);
 void gpuReset(void);
 
-struct GPU
-{
-  struct gpuRegisters
-  {
+struct GPU {
+  struct gpuRegisters {
     unsigned char scrollX;
     unsigned char scrollY;
   } registers;
 
   // struct vRAM {
-  //   unsigned char 
+  //   unsigned char
   // } vRAM;
 
   /* Region	Usage
