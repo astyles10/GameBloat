@@ -92,6 +92,7 @@ void reset(void) {
   }
 
   interruptRegisters.enable = 0;
+  tickCounter = 0;
 }
 
 int loadROM(const char *cartName) {
@@ -116,7 +117,6 @@ int cpuCycle() {
 
   opcode aOpcode;
   if (instruction == 0xCB) {
-    printf("Got instruction from CB Opcode table!\n");
     aOpcode = CBOpcodeTable[instruction];
   } else {
     aOpcode = baseOpcodeTable[instruction];
@@ -147,6 +147,10 @@ int cpuCycle() {
       break;
   }
 
+  int startTicks = tickCounter;
+  tickCounter += baseOpcodeTicks[instruction];
+  int ticksUsed = tickCounter - startTicks;
+
   // Post instruction debug print
   printf("\n*********************************\n");
   printf(
@@ -158,11 +162,9 @@ int cpuCycle() {
          checkFlag(flagNegative), checkFlag(flagHalfCarry),
          checkFlag(flagCarry));
   printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
+  printf("Total cycles (ticks): %d\n", tickCounter);
   printf("\n*********************************\n");
 
-  int startTicks = tickCounter;
-  tickCounter += baseOpcodeTicks[instruction];
-  int ticksUsed = tickCounter - startTicks;
   return ticksUsed;
 }
 
@@ -1080,7 +1082,6 @@ void jr_cc_e(unsigned char e, unsigned char flag, unsigned char condition) {
   if (checkFlag(flag) == condition) {
     registers.PC += (char)e;
     tickCounter += 4;
-    printf("jr_cc_e: Registers.PC = 0x%X\n", registers.PC);
   }
 }
 
