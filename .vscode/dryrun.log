@@ -11,8 +11,10 @@ mkdir -p "debug"
 gcc -c -o debug/CBOpcodeTable.o src/CBOpcodeTable.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
 mkdir -p "debug"
 gcc -c -o debug/BaseOpcodeTable.o src/BaseOpcodeTable.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
-mkdir -p "debug"
-gcc -c -o debug/main.o src/main.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/Platforms"
+gcc -c -o debug/Platforms/main_gtk.o src/Platforms/main_gtk.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/Platforms"
+gcc -c -o debug/Platforms/main_server.o src/Platforms/main_server.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
 mkdir -p "debug"
 gcc -c -o debug/cpu.o src/cpu.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
 mkdir -p "debug"

@@ -2,6 +2,7 @@
 
 void gpuStep(int);
 void gpuReset(void);
+void updateTile(const unsigned short address, const unsigned char value);
 
 struct GPU {
   struct gpuRegisters {
@@ -22,6 +23,12 @@ struct GPU {
     9C00-9FFF	Tile map #1
     Table 1: VRAM layout
   */
-  unsigned char videoRAM[0x2000];
+  struct vRAM {
+    unsigned char tileSet1[0x800];
+    unsigned char tileSetShared[0x800];
+    unsigned char tileSet0[0x800];
+    unsigned char map1[0x400];
+    unsigned char map2[0x400];
+  } vRAM;
 
 } extern GPU;

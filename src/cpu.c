@@ -108,7 +108,7 @@ int loadROM(const char *cartName) {
 
 void cpuClose() { cartCleanup(); }
 
-int cpuCycle() {
+int cpuStep(void) {
   // Read instruction from address stored in PC register
   unsigned char instruction = MMU.readByte(registers.PC++);
 

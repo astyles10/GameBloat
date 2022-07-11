@@ -27,13 +27,14 @@ static void launchGameCallback(GtkWidget *widget, gpointer data) {
   const char *cartName = "./GB_Games/PokemonRed.gb";
   if (validateCart(cartName)) {
     loadROM(cartName);
+    gpuReset();
     gameLaunched = true;
   }
 }
 
 static void runStepCallback(GtkWidget *widget, gpointer data) {
   if (gameLaunched) {
-    int ticks = cpuCycle();
+    const int ticks = cpuStep();
     gpuStep(ticks);
     interruptStep();
 

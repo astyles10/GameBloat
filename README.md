@@ -5,7 +5,7 @@ TODO:
 Compare my registers etc with https://github.com/DanB91/GBEmu
 
 Current priority issues:
-* Ensure tick counting is correct
+* Ensure tick counting is correct (Done)
 
 Brain/Back-end:
 * Ensure tick counting & timing is correct (M and T Clocks?) - Ticks differ in jump/ret opcodes
@@ -31,3 +31,5 @@ Clean up code:
 
 Nice to haves:
 * Logging system
+* Catch SIGSEGV, SIGKILL, anything that unexpectedly kills the running process and save the current state
+https://stackoverflow.com/questions/10202941/segmentation-fault-handling

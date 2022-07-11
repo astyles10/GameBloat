@@ -1,8 +1,7 @@
 #include "interrupt.h"
+#include "registers.h"
 
 #include <stdio.h>
-
-#include "registers.h"
 
 enum InterruptAddresses {
   VERT_BLNK_INTR_START = 0x40,       // VBlank
@@ -75,4 +74,9 @@ void interruptStep(void) {
       }
     }
   }
+
+  printf("*********************************\n");
+  printf("Master Enable: %d\n", interruptRegisters.masterEnable);
+  printf("Interrupts Enable: %d\n", interruptRegisters.enable);
+  printf("Request: 0x%02X\n", interruptRegisters.request);
 }

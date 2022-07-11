@@ -4,6 +4,7 @@
 
 #include "cartridge.h"
 #include "interrupt.h"
+#include "gpu.h"
 
 unsigned char MMU_ReadByte(const unsigned short address);
 unsigned short MMU_ReadShort(const unsigned short address);
@@ -75,6 +76,7 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value) {
     return cartridge.mbc->writeByte(address, value);
   } else if (address <= 0x9FFF) {
     vRAM[address - 0x8000] = value;
+    updateTile()
     return 1;
   } else if (address <= 0xBFFF) {
     return cartridge.mbc->writeByte(address, value);

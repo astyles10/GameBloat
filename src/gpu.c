@@ -1,7 +1,13 @@
 #include "gpu.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
 // http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-Graphics
+
+unsigned char tiles[384][8][8] = {0};
 
 enum GpuMode { HBLANK = 0, VBLANK = 1, OAM_SCANLINE = 2, VRAM_SCANLINE = 3 };
 
@@ -18,7 +24,30 @@ unsigned char mode = 0;
 unsigned int modeClock = 0;
 unsigned char line = 0;
 
+const char* determineModeClock() {
+  switch (mode) {
+    case HBLANK:
+      return "HBLANK";
+    case VBLANK:
+      return "VBLANK";
+    case OAM_SCANLINE:
+      return "OAM Scanline";
+    case VRAM_SCANLINE:
+      return "VRAM Scanline";
+    default:
+      return "Invalid!";
+  }
+}
+
 struct GPU GPU;
+
+void gpuReset () {
+  mode = 0;
+  modeClock = 0;
+  line = 0;
+  memset(&GPU.vRAM, 0, sizeof(GPU.vRAM));
+  memset(&tiles, 0, sizeof(tiles));
+}
 
 void gpuStep(int tick) {
   modeClock += tick;
@@ -64,4 +93,11 @@ void gpuStep(int tick) {
       }
       break;
   }
+  const char *modeStr = determineModeClock();
+
+  printf("GPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr, line);
+}
+
+void updateTile(const unsigned short addr, const unsigned char val) {
+  
 }
