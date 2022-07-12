@@ -6,6 +6,7 @@ Compare my registers etc with https://github.com/DanB91/GBEmu
 
 Current priority issues:
 * Ensure tick counting is correct (Done)
+* LCD Control Register
 
 Brain/Back-end:
 * Ensure tick counting & timing is correct (M and T Clocks?) - Ticks differ in jump/ret opcodes

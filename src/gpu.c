@@ -7,10 +7,14 @@
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
 // http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-Graphics
 
-unsigned char tiles[384][8][8] = {0};
+void gpuReset(void);
+void gpuStep(int);
+unsigned char readByte(const unsigned short address);
+int writeByte(const unsigned short address, const unsigned char value);
+void updateTile(const unsigned short address, const unsigned char value);
+const char* determineModeClock();
 
 enum GpuMode { HBLANK = 0, VBLANK = 1, OAM_SCANLINE = 2, VRAM_SCANLINE = 3 };
-
 enum GpuCycles {
   OAM_SCAN_CYCLE = 80,
   VRAM_SCAN_CYCLE = 172,
@@ -20,28 +24,19 @@ enum GpuCycles {
 
 const unsigned char MAX_LINES = 154;
 
+unsigned char tiles[384][8][8] = {0};
 unsigned char mode = 0;
 unsigned int modeClock = 0;
 unsigned char line = 0;
 
-const char* determineModeClock() {
-  switch (mode) {
-    case HBLANK:
-      return "HBLANK";
-    case VBLANK:
-      return "VBLANK";
-    case OAM_SCANLINE:
-      return "OAM Scanline";
-    case VRAM_SCANLINE:
-      return "VRAM Scanline";
-    default:
-      return "Invalid!";
-  }
-}
+struct GPU GPU = {.reset = gpuReset,
+                  .step = gpuStep,
+                  .readByte = readByte,
+                  .writeByte = writeByte};
 
-struct GPU GPU;
+// Private
 
-void gpuReset () {
+void gpuReset() {
   mode = 0;
   modeClock = 0;
   line = 0;
@@ -93,11 +88,82 @@ void gpuStep(int tick) {
       }
       break;
   }
-  const char *modeStr = determineModeClock();
+  const char* modeStr = determineModeClock();
 
   printf("GPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr, line);
 }
 
+unsigned char readByte(const unsigned short address) {
+  if (address <= 0x7FF) {
+    return GPU.vRAM.tileSet1[address];
+  } else if (address <= 0xFFF) {
+    return GPU.vRAM.tileSetShared[address];
+  } else if (address <= 0x17FF) {
+    return GPU.vRAM.tileSet0[address];
+  } else if (address <= 0x1BFF) {
+    return GPU.vRAM.map1[address];
+  } else if (address <= 0x1FFF) {
+    return GPU.vRAM.map2[address];
+  }
+  printf("GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
+         address);
+  return 0;
+}
+
+int writeByte(const unsigned short address, const unsigned char value) {
+  if (address <= 0x7FF) {
+    GPU.vRAM.tileSet1[address] = value;
+  } else if (address <= 0xFFF) {
+    GPU.vRAM.tileSetShared[address] = value;
+  } else if (address <= 0x17FF) {
+    GPU.vRAM.tileSet0[address] = value;
+  }
+
+  if (address <= 0x17FF) {
+    updateTile(address, value);
+  }
+  return 1;
+}
+
 void updateTile(const unsigned short addr, const unsigned char val) {
+  // The base address is simply every even address due to GPU accessing two
+  // bytes per row: e.g. First row contains addresses 0x00 && 0x01:
+  //  0x1FFE & 0x00 = 0x00,
+  //  0x1FFE & 0x01 = 0x00
+  // Second row:
+  //  0x1FFE & 0x02 = 0x02
+  //  0x1FFE & 0x03 = 0x02
+  const unsigned short baseAddress = (addr & 0x1FFE);
+
+  // baseAddress is shifted 4 places / 2 bytes i.e. size of tile
+  // 0x1FF is just 0x1FFE >> 4
+  const unsigned short tile = (baseAddress >> 4) & 0x1FF;
+  const unsigned short y = (baseAddress >> 1) & 7;
+
+  unsigned short bitIndex, x;
+  for (x = 0; x < 8; x++) {
+    bitIndex = 1 << (7 - x);
+    unsigned char writeValue = ((GPU.readByte(baseAddress) & bitIndex) ? 1 : 0);
+    writeValue += ((GPU.readByte(baseAddress + 1) & bitIndex) ? 2 : 0);
+    tiles[tile][y][x] = writeValue;
+  }
+}
+
+void renderScan() {
   
+}
+
+const char* determineModeClock() {
+  switch (mode) {
+    case HBLANK:
+      return "HBLANK";
+    case VBLANK:
+      return "VBLANK";
+    case OAM_SCANLINE:
+      return "OAM Scanline";
+    case VRAM_SCANLINE:
+      return "VRAM Scanline";
+    default:
+      return "Invalid!";
+  }
 }
