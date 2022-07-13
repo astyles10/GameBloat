@@ -5,11 +5,18 @@
 typedef void(*resetFunction)(void);
 typedef void(*stepFunction)(int);
 
+typedef struct {
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+} BasicColour;
+
 struct GPU {
   struct gpuRegisters {
     unsigned char lcdControl;
     unsigned char scrollX;
     unsigned char scrollY;
+    const BasicColour palette[4];
   } registers;
 
   /*     Table 1: VRAM layout

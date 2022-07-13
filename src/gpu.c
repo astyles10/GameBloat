@@ -15,13 +15,6 @@ void updateTile(const unsigned short address, const unsigned char value);
 void renderScan(void);
 const char* determineModeClock();
 
-typedef struct {
-  unsigned char r;
-  unsigned char g;
-  unsigned char b;
-  unsigned char a;
-} BasicColour;
-
 enum GpuMode { HBLANK = 0, VBLANK = 1, OAM_SCANLINE = 2, VRAM_SCANLINE = 3 };
 
 enum GpuCycles {
@@ -44,6 +37,8 @@ enum LcdControl {
 
 const unsigned char MAX_LINES = 154;
 
+BasicColour frameBuffer[160 * 144] = {0};
+
 unsigned char tiles[384][8][8] = {0};
 unsigned char mode = 0;
 unsigned int modeClock = 0;
@@ -51,7 +46,13 @@ unsigned int modeClock = 0;
 struct GPU GPU = {.reset = gpuReset,
                   .step = gpuStep,
                   .readByte = readByte,
-                  .writeByte = writeByte};
+                  .writeByte = writeByte,
+                  .registers.palette = {
+                    { 255, 255, 255 },
+                    { 192, 192, 192 },
+                    { 96, 96, 96 },
+                    { 0, 0, 0 }
+                  }};
 
 // Private
 
@@ -59,8 +60,12 @@ void gpuReset() {
   mode = 0;
   modeClock = 0;
   GPU.line = 0;
+  GPU.registers.lcdControl = 0;
+  GPU.registers.scrollX = 0;
+  GPU.registers.scrollY = 0;
   memset(&GPU.vRAM, 0, sizeof(GPU.vRAM));
   memset(&tiles, 0, sizeof(tiles));
+  memset(&frameBuffer, 0, sizeof(frameBuffer));
 }
 
 void gpuStep(int tick) {
