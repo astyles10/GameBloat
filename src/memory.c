@@ -99,6 +99,7 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value) {
     }
     return 1;
   } else if (address <= 0xFFFE) {
+    // 
     hRAM[address - 0xFF80] = value;
     return 1;
   } else if (address == 0xFFFF) {

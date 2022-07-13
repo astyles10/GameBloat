@@ -7,13 +7,10 @@ typedef void(*stepFunction)(int);
 
 struct GPU {
   struct gpuRegisters {
+    unsigned char lcdControl;
     unsigned char scrollX;
     unsigned char scrollY;
   } registers;
-
-  // struct vRAM {
-  //   unsigned char
-  // } vRAM;
 
   /*     Table 1: VRAM layout
     8000-87FF	Tile set #1: tiles 0-127
@@ -33,8 +30,8 @@ struct GPU {
 
   writeByteToMemory writeByte;
   readByteFromMemory readByte;
-
   resetFunction reset;
   stepFunction step;
+  unsigned char line;
 
 } extern GPU;

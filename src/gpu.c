@@ -12,9 +12,18 @@ void gpuStep(int);
 unsigned char readByte(const unsigned short address);
 int writeByte(const unsigned short address, const unsigned char value);
 void updateTile(const unsigned short address, const unsigned char value);
+void renderScan(void);
 const char* determineModeClock();
 
+typedef struct {
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  unsigned char a;
+} BasicColour;
+
 enum GpuMode { HBLANK = 0, VBLANK = 1, OAM_SCANLINE = 2, VRAM_SCANLINE = 3 };
+
 enum GpuCycles {
   OAM_SCAN_CYCLE = 80,
   VRAM_SCAN_CYCLE = 172,
@@ -22,12 +31,22 @@ enum GpuCycles {
   VBLANK_CYCLE = 456
 };
 
+enum LcdControl {
+  LCD_DISPLAY_ENABLE = (1 << 7),
+  WINDOW_TILE_MAP_DISPLAY_SELECT = (1 << 6),
+  WINDOW_DISPLAY_ENABLE = (1 << 5),
+  BG_WINDOW_TILE_DATA_SELECT = (1 << 4),
+  BG_TILE_MAP_DISPLAY_SELECT = (1 << 3),
+  SPRITE_SIZE = (1 << 2),
+  SPRITE_DISPLAY_ENABLE = (1 << 1),
+  BG_DISPLAY = (1 << 0)
+};
+
 const unsigned char MAX_LINES = 154;
 
 unsigned char tiles[384][8][8] = {0};
 unsigned char mode = 0;
 unsigned int modeClock = 0;
-unsigned char line = 0;
 
 struct GPU GPU = {.reset = gpuReset,
                   .step = gpuStep,
@@ -39,7 +58,7 @@ struct GPU GPU = {.reset = gpuReset,
 void gpuReset() {
   mode = 0;
   modeClock = 0;
-  line = 0;
+  GPU.line = 0;
   memset(&GPU.vRAM, 0, sizeof(GPU.vRAM));
   memset(&tiles, 0, sizeof(tiles));
 }
@@ -51,8 +70,8 @@ void gpuStep(int tick) {
     case HBLANK:
       if (modeClock >= HBLANK_CYCLE) {
         modeClock = 0;
-        line++;
-        if (line == 143) {
+        GPU.line++;
+        if (GPU.line == 143) {
           mode = VBLANK;
           // TODO: Push screen data to drawing area
           // This means sending a frame over the websocket
@@ -65,11 +84,11 @@ void gpuStep(int tick) {
     case VBLANK:
       if (modeClock >= VBLANK_CYCLE) {
         modeClock = 0;
-        line++;
+        GPU.line++;
 
-        if (line >= MAX_LINES) {
+        if (GPU.line >= MAX_LINES) {
           mode = OAM_SCANLINE;
-          line = 0;
+          GPU.line = 0;
         }
       }
       break;
@@ -90,7 +109,8 @@ void gpuStep(int tick) {
   }
   const char* modeStr = determineModeClock();
 
-  printf("GPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr, line);
+  printf("GPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
+         GPU.line);
 }
 
 unsigned char readByte(const unsigned short address) {
@@ -150,7 +170,28 @@ void updateTile(const unsigned short addr, const unsigned char val) {
 }
 
 void renderScan() {
-  
+  // Determine whether to use map 0 or 1
+  unsigned short mapOffset =
+      (GPU.registers.lcdControl & BG_TILE_MAP_DISPLAY_SELECT) ? 0x1C00 : 0x1800;
+
+  // Determine line of tiles used for map
+  mapOffset += ((GPU.line + GPU.registers.scrollY) & 0xFF) >> 3;
+
+  // 
+  unsigned char lineOffset = (GPU.registers.scrollX >> 3);
+  unsigned char y = (GPU.line + GPU.registers.scrollY) & 7;
+  unsigned char x = GPU.registers.scrollX & 7;
+  unsigned int canvasOffset = GPU.line * 160 * 4;
+
+  unsigned short tile = (unsigned short)GPU.readByte(mapOffset + lineOffset);
+  if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
+    tile += 256;
+  }
+
+  for (int i = 0; i < 160; ++i) {
+    unsigned char colour = tiles[y][x];
+
+  }
 }
 
 const char* determineModeClock() {
