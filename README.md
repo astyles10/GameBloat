@@ -2,6 +2,11 @@
 
 TODO:
 
+Read these (unrelated):
+http://inside.mines.edu/~coulston/courses/EENG383/lecture/lecture10.html
+https://www.microcontrollertips.com/difference-between-von-neumann-and-harvard-architectures/
+https://blog.acolyer.org/2016/04/26/the-linux-scheduler-a-decade-of-wasted-cores/
+
 Compare my registers etc with https://github.com/DanB91/GBEmu
 
 Current priority issues:
