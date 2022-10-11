@@ -17,6 +17,7 @@ if (NOT IS_BIG_ENDIAN)
   message(STATUS "Setting LITTLE_ENDIAN!")
   add_compile_definitions(LITTLE_ENDIAN)
 endif(NOT IS_BIG_ENDIAN)
+
 include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE BASE_SOURCES ${PROJECT_SOURCE_DIR}/src/*.c)
@@ -43,3 +44,13 @@ list(APPEND SERVER_SOURCES ${BASE_SOURCES})
 add_executable(Server ${SERVER_SOURCES})
 target_include_directories(Server PUBLIC ${PROJECT_SOURCE_DIR}/libs/wsServer/include)
 target_link_libraries(Server ${PROJECT_SOURCE_DIR}/libs/wsServer/libws.a Threads::Threads)
+
+# ##################################################### #
+#                   Debug configuration                 #
+# ##################################################### #
+
+set(DEBUG_SOURCES "src/Platforms/main_debug.c")
+list(APPEND DEBUG_SOURCES ${BASE_SOURCES})
+
+add_executable(Debug ${DEBUG_SOURCES})
+# target_compile_options(Debug PUBLIC)

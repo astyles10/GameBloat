@@ -43,16 +43,13 @@ unsigned char tiles[384][8][8] = {0};
 unsigned char mode = 0;
 unsigned int modeClock = 0;
 
-struct GPU GPU = {.reset = gpuReset,
-                  .step = gpuStep,
-                  .readByte = readByte,
-                  .writeByte = writeByte,
-                  .registers.palette = {
-                    { 255, 255, 255 },
-                    { 192, 192, 192 },
-                    { 96, 96, 96 },
-                    { 0, 0, 0 }
-                  }};
+struct GPU GPU = {
+    .reset = gpuReset,
+    .step = gpuStep,
+    .readByte = readByte,
+    .writeByte = writeByte,
+    .registers.palette = {
+        {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}}};
 
 // Private
 
@@ -107,8 +104,7 @@ void gpuStep(int tick) {
       if (modeClock >= VRAM_SCAN_CYCLE) {
         modeClock = 0;
         mode = HBLANK;
-        // TODO: Render scan here
-        //
+        renderScan();
       }
       break;
   }
@@ -171,6 +167,7 @@ void updateTile(const unsigned short addr, const unsigned char val) {
     unsigned char writeValue = ((GPU.readByte(baseAddress) & bitIndex) ? 1 : 0);
     writeValue += ((GPU.readByte(baseAddress + 1) & bitIndex) ? 2 : 0);
     tiles[tile][y][x] = writeValue;
+    printf("Updated tile %u, row %u with %u\n", tile, y, x);
   }
 }
 

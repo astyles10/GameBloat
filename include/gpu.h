@@ -29,7 +29,7 @@ struct GPU {
   */
   struct vRAM {
     unsigned char tileSet1[0x800];
-    unsigned char tileSetShared[0x800];
+    unsigned char tileSetShared[0x400];
     unsigned char tileSet0[0x800];
     unsigned char map1[0x400];
     unsigned char map2[0x400];

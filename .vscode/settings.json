@@ -7,7 +7,8 @@
         "gtk.h": "c",
         "ws.h": "c",
         "unistd.h": "c",
-        "time.h": "c"
+        "time.h": "c",
+        "gpu.h": "c"
     },
     "C_Cpp.default.intelliSenseMode": "linux-gcc-x64"
 }
