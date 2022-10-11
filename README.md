@@ -10,8 +10,12 @@ https://blog.acolyer.org/2016/04/26/the-linux-scheduler-a-decade-of-wasted-cores
 Compare my registers etc with https://github.com/DanB91/GBEmu
 
 Current priority issues:
-* Ensure tick counting is correct (Done)
-* LCD Control Register
+1. Finish remaning CPU functions
+2. Using https://github.com/DanB91/GBEmu ensure registers and instructions are correct. Register A, F and E were incorrect on last debug session.
+
+Found that at 324 CPU cycles, the correct instruction was 0xCB translating to RES 0,A but GameBloat executes SET 1,A
+
+Could write first x instructions to a file to compare
 
 Brain/Back-end:
 * Ensure tick counting & timing is correct (M and T Clocks?) - Ticks differ in jump/ret opcodes
