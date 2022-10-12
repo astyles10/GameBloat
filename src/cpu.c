@@ -117,6 +117,7 @@ int cpuStep(void) {
 
   opcode aOpcode;
   if (instruction == 0xCB) {
+    instruction = MMU.readByte(registers.PC++);
     aOpcode = CBOpcodeTable[instruction];
   } else {
     aOpcode = baseOpcodeTable[instruction];
@@ -220,7 +221,9 @@ void ldh_n_A(unsigned char n) {
 }
 
 void ldh_A_n(unsigned char n) {
+  printf("ldh_A_n operand = 0x%02X\n", n);
   const unsigned short memLocation = 0xFF00 + n;
+  printf("Mem location = 0x%02X\n", memLocation);
   registers.A = MMU.readByte(memLocation);
 }
 

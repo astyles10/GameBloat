@@ -13,7 +13,7 @@ Current priority issues:
 1. Finish remaning CPU functions
 2. Using https://github.com/DanB91/GBEmu ensure registers and instructions are correct. Register A, F and E were incorrect on last debug session.
 
-Found that at 324 CPU cycles, the correct instruction was 0xCB translating to RES 0,A but GameBloat executes SET 1,A
+GameBloat instruction LD A,($FF44) loads A with 0x31 which does not change. FF44 is an IO Port address.
 
 Could write first x instructions to a file to compare
 

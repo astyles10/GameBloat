@@ -52,6 +52,15 @@ unsigned char MMU_ReadByte(const unsigned short address) {
     if (address == 0xFF0F) {
       return interruptRegisters.request;
     }
+    // IO Ports need to be mapped to their respective hardware, e.g. 0xFF40 maps to the LCD Control Register
+    // IO Port Map
+    // 0xFF40: LCD Control Register
+    // 0xFF41: LCD Status Register
+    // 0xFF42: Scroll Y (R/W)
+    // 0xFF43: Scroll X (R/W)
+    // 0xFF44: LCDC Y-Coordinate (R)
+    // 0xFF45
+    // etc.
     return ioPorts[address - 0xFF7F];
   } else if (address <= 0xFFFE) {
     return hRAM[address - 0xFFFE];
@@ -95,6 +104,7 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value) {
     if (address == 0xFF0F) {
       writeInterrupt(address, value);
     } else {
+      printf("Writing to io port address 0x%02X with value %u", address, (unsigned short)value);
       ioPorts[address - 0xFF00] = value;
     }
     return 1;
