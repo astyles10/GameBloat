@@ -110,7 +110,7 @@ void gpuStep(int tick) {
   }
   const char* modeStr = determineModeClock();
 
-  printf("GPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
+  printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
          GPU.line);
 }
 

@@ -104,7 +104,7 @@ int MMU_WriteByte(const unsigned short address, const unsigned char value) {
     if (address == 0xFF0F) {
       writeInterrupt(address, value);
     } else {
-      printf("Writing to io port address 0x%02X with value %u", address, (unsigned short)value);
+      printf("Writing to io port address 0x%02X with value %u\n", address, (unsigned short)value);
       ioPorts[address - 0xFF00] = value;
     }
     return 1;

@@ -76,6 +76,7 @@ void interruptStep(void) {
   }
 
   printf("*********************************\n");
+  printf("++++ Interrupts ++++\n");
   printf("Master Enable: %d\n", interruptRegisters.masterEnable);
   printf("Interrupts Enable: %d\n", interruptRegisters.enable);
   printf("Request: 0x%02X\n", interruptRegisters.request);

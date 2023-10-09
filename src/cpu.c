@@ -114,13 +114,18 @@ int cpuStep(void) {
 
   // Emulator should continue processing opcodes until tick counter reaches
   // 70,224 clock cycles
+  int ticksUsed = 0;
 
   opcode aOpcode;
   if (instruction == 0xCB) {
     instruction = MMU.readByte(registers.PC++);
     aOpcode = CBOpcodeTable[instruction];
+    ticksUsed = cbOpcodeTicks[instruction];
+    tickCounter += ticksUsed;
   } else {
     aOpcode = baseOpcodeTable[instruction];
+    ticksUsed = baseOpcodeTicks[instruction];
+    tickCounter += ticksUsed;
   }
   // Determine number of instruction operands
   unsigned short operand = 0;
@@ -148,12 +153,9 @@ int cpuStep(void) {
       break;
   }
 
-  int startTicks = tickCounter;
-  tickCounter += baseOpcodeTicks[instruction];
-  int ticksUsed = tickCounter - startTicks;
-
   // Post instruction debug print
   printf("\n*********************************\n");
+  printf("++++ CPU ++++\n");
   printf(
       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: 0x%02X "
       "H: 0x%02X L: 0x%02X\n",
@@ -164,6 +166,19 @@ int cpuStep(void) {
          checkFlag(flagCarry));
   printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
   printf("Total cycles (ticks): %d\n", tickCounter);
+  printf("\n");
+
+  opcode aNextOpcode;
+  unsigned char aNextInstruction = MMU.readByte(registers.PC);
+  if (aNextInstruction == 0xCB) {
+    aNextInstruction = MMU.readByte(registers.PC + 1);
+    aNextOpcode = CBOpcodeTable[aNextInstruction];
+  } else {
+    aNextOpcode = baseOpcodeTable[aNextInstruction];
+  }
+  printf("Next instruction = %s\n", aNextOpcode.asmName);
+  printf("\n");
+
   printf("\n*********************************\n");
 
   return ticksUsed;
@@ -1152,5 +1167,6 @@ void ret_cc(unsigned char flag, unsigned char condition) {
 }
 
 void reti() {
-  // TODO (return then enable interrupt)
+  ret();
+  ei();
 }
