@@ -13,10 +13,17 @@ typedef struct {
 
 struct GPU {
   struct gpuRegisters {
-    unsigned char lcdControl;
-    unsigned char scrollX;
-    unsigned char scrollY;
-    const BasicColour palette[4];
+    unsigned char lcdControl; // 0xFF40
+    unsigned char lcdStatus; // 0xFF41
+    unsigned char scrollX; // 0xFF42
+    unsigned char scrollY; // 0xFF43
+    unsigned char lcdYCoordinate; //0xFF44
+    unsigned char lcdLYCompare; // 0xFF45
+    unsigned char lcdWindowY; // 0xFF4A
+    unsigned char lcdWindowX; // 0xFF4B
+    const BasicColour palette[4]; // 0xFF47 BG palette data (Non CGB)
+    unsigned char objPalette0; // 0xFF48 (OBJ Palette 0 data, non CGB)
+    unsigned char objPalette1; // 0xFF49 (OBJ Palette 1, non CGB)
   } registers;
 
   /*     Table 1: VRAM layout
@@ -39,6 +46,5 @@ struct GPU {
   readByteFromMemory readByte;
   resetFunction reset;
   stepFunction step;
-  unsigned char line;
 
 } extern GPU;

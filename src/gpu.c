@@ -48,15 +48,25 @@ struct GPU GPU = {
     .step = gpuStep,
     .readByte = readByte,
     .writeByte = writeByte,
+    .registers.lcdControl = 0,
+    .registers.lcdLYCompare = 0,
+    .registers.lcdStatus = 0,
+    .registers.lcdWindowX = 0,
+    .registers.lcdWindowY = 0,
+    .registers.lcdYCoordinate = 0,
+    .registers.objPalette0 = 0,
+    .registers.objPalette1 = 0,
+    .registers.scrollX = 0,
+    .registers.scrollY = 0,
     .registers.palette = {
-        {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}}};
+        {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}}}; // TODO: determine if const palette correct?
 
 // Private
 
 void gpuReset() {
   mode = 0;
   modeClock = 0;
-  GPU.line = 0;
+  GPU.registers.lcdYCoordinate = 0;
   GPU.registers.lcdControl = 0;
   GPU.registers.scrollX = 0;
   GPU.registers.scrollY = 0;
@@ -72,8 +82,8 @@ void gpuStep(int tick) {
     case HBLANK:
       if (modeClock >= HBLANK_CYCLE) {
         modeClock = 0;
-        GPU.line++;
-        if (GPU.line == 143) {
+        GPU.registers.lcdYCoordinate++;
+        if (GPU.registers.lcdYCoordinate == 143) {
           mode = VBLANK;
           // TODO: Push screen data to drawing area
           // This means sending a frame over the websocket
@@ -86,11 +96,11 @@ void gpuStep(int tick) {
     case VBLANK:
       if (modeClock >= VBLANK_CYCLE) {
         modeClock = 0;
-        GPU.line++;
+        GPU.registers.lcdYCoordinate++;
 
-        if (GPU.line >= MAX_LINES) {
+        if (GPU.registers.lcdYCoordinate >= MAX_LINES) {
           mode = OAM_SCANLINE;
-          GPU.line = 0;
+          GPU.registers.lcdYCoordinate = 0;
         }
       }
       break;
@@ -111,7 +121,7 @@ void gpuStep(int tick) {
   const char* modeStr = determineModeClock();
 
   printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
-         GPU.line);
+         GPU.registers.lcdYCoordinate);
 }
 
 unsigned char readByte(const unsigned short address) {
@@ -172,18 +182,19 @@ void updateTile(const unsigned short addr, const unsigned char val) {
 }
 
 void renderScan() {
+  // TODO: Complete rendering
   // Determine whether to use map 0 or 1
   unsigned short mapOffset =
       (GPU.registers.lcdControl & BG_TILE_MAP_DISPLAY_SELECT) ? 0x1C00 : 0x1800;
 
   // Determine line of tiles used for map
-  mapOffset += ((GPU.line + GPU.registers.scrollY) & 0xFF) >> 3;
+  mapOffset += ((GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 0xFF) >> 3;
 
   // 
   unsigned char lineOffset = (GPU.registers.scrollX >> 3);
-  unsigned char y = (GPU.line + GPU.registers.scrollY) & 7;
+  unsigned char y = (GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 7;
   unsigned char x = GPU.registers.scrollX & 7;
-  unsigned int canvasOffset = GPU.line * 160 * 4;
+  unsigned int canvasOffset = GPU.registers.lcdYCoordinate * 160 * 4;
 
   unsigned short tile = (unsigned short)GPU.readByte(mapOffset + lineOffset);
   if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {

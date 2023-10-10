@@ -23,3 +23,5 @@ Address 0xFF44 is an I/O port, mapping to the LCD (LCD Y Coordinate) (see https:
 
 LCD Y indicates the current horizontal line. Values are between 0 and 153, with 144 to 153 being VBlank period
 Basically the GPU line variable needs to be mapped to the memory address 0xFF44
+
+Might need to separate IO and LCD into separate source files
