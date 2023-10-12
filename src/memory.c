@@ -34,6 +34,7 @@ unsigned char MMU_ReadByte(const unsigned short address) {
   if (address < 0x8000) {
     return cartridge.mbc->readByte(address);
   } else if (address < 0xA000) {
+    printf("MMU Readbyte called\n");
     return GPU.readByte(address - 0x8000);
   } else if (address < 0xC000) {
     return cartridge.mbc->readByte(address);
@@ -49,31 +50,23 @@ unsigned char MMU_ReadByte(const unsigned short address) {
            (address - 0xFEA0));
     return 0;
   } else if (address < 0xFF80) {
-    if (address == 0xFF0F) {
+    if (address == 0xFF00) {
+      // TODO: Implement joypad
+    } else if (address == 0xFF02 || address == 0xFF02) {
+      // TODO: implement Serial
+    } else if (address >= 0xFF04 && address <= 0xFF07) {
+      // TODO: implement Divider & Timer registers
+    } else if (address == 0xFF0F) {
       return interruptRegisters.request;
+    } else if (address >= 0xFF10 && address <= 0xFF3F) {
+      // TODO: implement Audio
+    } else if (address >= 0xFF40 && address <= 0xFF4B) {
+      return GPU.readRegister(address);
+    } else if (address >= 0xFF4D && address <= 0xFF77) {
+      // TODO: implement CGB registers
     }
-
-    if (address == 0xFF44) {
-      return GPU.registers.lcdYCoordinate;
-    }
-    // IO Ports need to be mapped to their respective hardware, e.g. 0xFF40 maps to the LCD Control Register
-    // IO Port Map
-    // 0xFF00: Joypad Input
-    // 0xFF01 - FF02: Serial Transfer
-    // 0xFF04 - FF07: Timer and divider
-    // 0xFF10 - FF26: Audio
-    // 0xFF30 - FF3F: Wave Pattern
-    // 0xFF40 - FF4B: LCD control, status, position, scrolling, palettes
-    // 0xFF4F: VRAM Bank Select
-    // 0xFF50: Boot ROM toggle
-    // 0xFF51 - FF55: VRAM DMA
-    // 0xFF40: LCD Control Register
-    // 0xFF41: LCD Status Register
-    // 0xFF42: Scroll Y (R/W)
-    // 0xFF43: Scroll X (R/W)
-    // 0xFF44: LCDC Y-Coordinate (line number)
-
-    return ioPorts[address - 0xFF00];
+    printf("ReadByte: reading unimplemented IO address 0x%02X\n", address);
+    return 0;
   } else if (address < 0xFFFF) {
     return hRAM[address - 0xFF80];
   } else if (address == 0xFFFF) {
@@ -91,38 +84,56 @@ unsigned short MMU_ReadShort(const unsigned short address) {
 }
 
 int MMU_WriteByte(const unsigned short address, const unsigned char value) {
-  if (address <= 0x7FFF) {
+  if (address < 0x8000) {
     return cartridge.mbc->writeByte(address, value);
-  } else if (address <= 0x9FFF) {
+  } else if (address < 0xA000) {
+    unsigned short addressValue = address - 0x8000;
+    printf("MMU writebyte called with original address 0x%4X, adjusted to 0x%4X\n", address, addressValue);
     GPU.writeByte(address - 0x8000, value);
     return 1;
-  } else if (address <= 0xBFFF) {
+  } else if (address < 0xC000) {
     return cartridge.mbc->writeByte(address, value);
-  } else if (address <= 0xDFFF) {
+  } else if (address < 0xE000) {
     wRAM[address - 0xC000] = value;
     return 1;
-  } else if (address <= 0xFDFF) {
+  } else if (address < 0xFE00) {
     printf("Warning: MMU_WriteByte wrote to echo wRAM!\n");
     wRAM[address - 0xE000] = value;
     return 1;
-  } else if (address <= 0xFE9F) {
+  } else if (address < 0xFEA0) {
     OAM[address - 0xFE00] = value;
     return 1;
-  } else if (address <= 0xFEFF) {
+  } else if (address < 0xFF00) {
     printf("Illegal read attempt from unusable area: %d!\n",
            (address - 0xFEA0));
     return 0;
-  } else if (address <= 0xFF7F) {
-    if (address == 0xFF0F) {
+  } else if (address < 0xFF80) {
+    if (address == 0xFF00) {
+      // TODO: Implement joypad
+      printf("Writing to Joypad port\n");
+    } else if (address == 0xFF02 || address == 0xFF02) {
+      // TODO: implement Serial
+      printf("Writing to Serial port\n");
+    } else if (address >= 0xFF04 && address <= 0xFF07) {
+      // TODO: implement Divider & Timer registers
+      printf("Writing to Timer/Divider port\n");
+    } else if (address == 0xFF0F) {
       writeInterrupt(address, value);
-    } else {
-      // TODO: Determine what, if any IO ports are writable
-      printf("Writing to io port address 0x%02X with value %u\n", address, (unsigned short)value);
-      ioPorts[address - 0xFF00] = value;
+      return 1;
+    } else if (address >= 0xFF10 && address <= 0xFF3F) {
+      // TODO: implement Audio
+      printf("Writing to Audio port\n");
+    } else if (address >= 0xFF40 && address <= 0xFF4B) {
+      GPU.writeRegister(address, value);
+      return 1;
+    } else if (address >= 0xFF4D && address <= 0xFF77) {
+      // TODO: implement CGB registers
+      printf("Writing to CGB port\n");
     }
+    printf("MMU_WriteByte: Writing to unimplemented io port address 0x%02X with value %u\n", address, (unsigned short)value);
+    ioPorts[address - 0xFF00] = value;
     return 1;
-  } else if (address <= 0xFFFE) {
-    // 
+  } else if (address < 0xFFFF) {
     hRAM[address - 0xFF80] = value;
     return 1;
   } else if (address == 0xFFFF) {

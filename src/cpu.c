@@ -98,10 +98,12 @@ void reset(void) {
 int loadROM(const char *cartName) {
   initializeMemory();
   reset();
+  #ifdef DEBUG_PRINT
   printf("loadROM: Register AF = 0x%X F = 0x%x\n", registers.AF, registers.F);
   printf("loadROM: Register F Zero: %d Negative: %d HalfCarry: %d Carry: %d\n",
          checkFlag(flagZero), checkFlag(flagNegative), checkFlag(flagHalfCarry),
          checkFlag(flagCarry));
+  #endif
   loadCartridge(cartName);
   return 0;
 }
@@ -127,8 +129,21 @@ int cpuStep(void) {
     ticksUsed = baseOpcodeTicks[instruction];
     tickCounter += ticksUsed;
   }
-  // Determine number of instruction operands
   unsigned short operand = 0;
+  switch (aOpcode.operandType) {
+    case (OPERAND_CHAR):
+      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+        operand);
+    break;
+    case (OPERAND_SHORT):
+      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+        operand);
+    break;
+    case (NO_OPERANDS):
+      printf("Executing instruction = %s\n", aOpcode.asmName);
+    break;
+  }
+  // Determine number of instruction operands
   if (aOpcode.operandType == OPERAND_CHAR) {
     operand = (unsigned short)MMU.readByte(registers.PC);
   } else if (aOpcode.operandType == OPERAND_SHORT) {
@@ -138,23 +153,32 @@ int cpuStep(void) {
 
   switch (aOpcode.operandType) {
     case (OPERAND_CHAR):
-      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-             operand);
       ((void (*)(unsigned char))aOpcode.function)(operand);
       break;
     case (OPERAND_SHORT):
-      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-             operand);
       ((void (*)(unsigned short))aOpcode.function)(operand);
       break;
     case (NO_OPERANDS):
-      printf("Executing instruction = %s\n", aOpcode.asmName);
       ((void (*)(void))aOpcode.function)();
       break;
   }
 
   // Post instruction debug print
+  #ifdef DEBUG_PRINT
   printf("\n*********************************\n");
+  switch (aOpcode.operandType) {
+    case (OPERAND_CHAR):
+      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+        operand);
+    break;
+    case (OPERAND_SHORT):
+      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+        operand);
+    break;
+    case (NO_OPERANDS):
+      printf("Executing instruction = %s\n", aOpcode.asmName);
+    break;
+  }
   printf("++++ CPU ++++\n");
   printf(
       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: 0x%02X "
@@ -180,6 +204,7 @@ int cpuStep(void) {
   printf("\n");
 
   printf("\n*********************************\n");
+  #endif
 
   return ticksUsed;
 }
@@ -496,8 +521,10 @@ void inc_sHL(void) {
 
   value++;
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("inc_sHL: Failed to increment source at address %d!\n",
            registers.HL);
+    #endif
   }
 
   if (value) {
@@ -519,7 +546,9 @@ void dec_sHL(void) {
 
   value--;
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("Failed to decrement source at address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -596,7 +625,9 @@ void swap_sHL(void) {
   value = ((value & HIGH_NIBBLE) >> 4) | ((value & LOW_NIBBLE) << 4);
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("swap_sHL: Failed to write to address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -764,7 +795,9 @@ void rlc_sHL(void) {
   value += checkFlag(flagCarry);
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("rlc_sHL: Failed to write byte to %d!", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -804,7 +837,9 @@ void rl_sHL(void) {
 
   value <<= 1;
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("rl_sHL: Failed to write byte to address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -853,7 +888,9 @@ void rrc_sHL(void) {
   }
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("rrc_sHL: Failed to write value at %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -894,7 +931,9 @@ void rr_sHL(void) {
   value >>= 1;
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("rr_sHL: Failed to write to address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -934,7 +973,9 @@ void sla_sHL(void) {
 
   value <<= 1;
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("sla_sHL: Failed to write to address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -975,7 +1016,9 @@ void sra_sHL(void) {
   value = (value >> 1) | (value & 0x80);
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("sra_sHL: Failed to write to address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -1016,7 +1059,9 @@ void srl_sHL(void) {
   value >>= 1;
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("srl_sHL: Failed to write to address %d!\n", registers.HL);
+    #endif
   }
 
   if (value) {
@@ -1061,7 +1106,9 @@ void set_b_sHL(unsigned char bitPosition) {
   value |= (1 << bitPosition);
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("set_b_sHL: Failed to write to address %d!\n", registers.HL);
+    #endif
   }
 }
 
@@ -1074,7 +1121,9 @@ void res_b_sHL(unsigned char bitPosition) {
   value &= ~(1 << bitPosition);
 
   if (!MMU.writeByte(registers.HL, value)) {
+    #ifdef DEBUG_PRINT
     printf("res_b_sHL: Failed to write value to address %d!\n", registers.HL);
+    #endif
   }
 }
 
@@ -1082,7 +1131,9 @@ void res_b_sHL(unsigned char bitPosition) {
 
 void jp_nn(unsigned short nn) {
   registers.PC = nn;
+  #ifdef DEBUG_PRINT
   printf("jp_nn: Registers.PC = 0x%0X\n", registers.PC);
+  #endif
 }
 
 void jp_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition) {

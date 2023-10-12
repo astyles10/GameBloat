@@ -23,12 +23,12 @@ int main (int argc, char **argv) {
     const int aCpuTicks = cpuStep();
     GPU.step(aCpuTicks);
     interruptStep();
-    fgets(aKeyboardInput, 64, stdin);
-    if (aKeyboardInput[0] == 'r') {
-      resetGame(aGameFilename);
-    } else if (aKeyboardInput[0] == 'e') {
-      break;
-    }
+    // fgets(aKeyboardInput, 64, stdin);
+    // if (aKeyboardInput[0] == 'r') {
+    //   resetGame(aGameFilename);
+    // } else if (aKeyboardInput[0] == 'e') {
+    //   break;
+    // }
   }
 
   cpuClose();

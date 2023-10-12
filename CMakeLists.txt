@@ -10,7 +10,7 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-add_definitions("-Wall" "-g")
+add_definitions("-Wall" "-g3")
 include(TestBigEndian)
 TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
 if (NOT IS_BIG_ENDIAN)

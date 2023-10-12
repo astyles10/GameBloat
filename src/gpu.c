@@ -11,6 +11,8 @@ void gpuReset(void);
 void gpuStep(int);
 unsigned char readByte(const unsigned short address);
 int writeByte(const unsigned short address, const unsigned char value);
+unsigned char readRegister(const unsigned short address);
+int writeRegister(const unsigned short address, const unsigned char value);
 void updateTile(const unsigned short address, const unsigned char value);
 void renderScan(void);
 const char* determineModeClock();
@@ -48,6 +50,8 @@ struct GPU GPU = {
     .step = gpuStep,
     .readByte = readByte,
     .writeByte = writeByte,
+    .readRegister = readRegister,
+    .writeRegister = writeRegister,
     .registers.lcdControl = 0,
     .registers.lcdLYCompare = 0,
     .registers.lcdStatus = 0,
@@ -58,8 +62,10 @@ struct GPU GPU = {
     .registers.objPalette1 = 0,
     .registers.scrollX = 0,
     .registers.scrollY = 0,
+    // TODO: determine if const palette correct?
+    // Could write to the registers as intended and apply RGB palette later in the front end
     .registers.palette = {
-        {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}}}; // TODO: determine if const palette correct?
+        {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}}};
 
 // Private
 
@@ -111,6 +117,7 @@ void gpuStep(int tick) {
       }
       break;
     case VRAM_SCANLINE:  // HDraw
+      printf("in case VRAM_SCANLINE\n");
       if (modeClock >= VRAM_SCAN_CYCLE) {
         modeClock = 0;
         mode = HBLANK;
@@ -118,13 +125,15 @@ void gpuStep(int tick) {
       }
       break;
   }
+  #ifdef DEBUG_PRINT
   const char* modeStr = determineModeClock();
-
   printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
          GPU.registers.lcdYCoordinate);
+  #endif
 }
 
 unsigned char readByte(const unsigned short address) {
+  printf("GPU Read byte: address = 0x%4X\n", address);
   if (address <= 0x7FF) {
     return GPU.vRAM.tileSet1[address];
   } else if (address <= 0xFFF) {
@@ -141,7 +150,34 @@ unsigned char readByte(const unsigned short address) {
   return 0;
 }
 
+unsigned char readRegister(const unsigned short address) {
+  if (address == 0xFF40) {
+    return GPU.registers.lcdControl;
+  } else if (address == 0xFF41) {
+    return GPU.registers.lcdStatus;
+  } else if (address == 0xFF42) {
+    return GPU.registers.scrollX;
+  } else if (address == 0xFF43) {
+    return GPU.registers.scrollY;
+  } else if (address == 0xFF44) {
+    return GPU.registers.lcdYCoordinate;
+  } else if (address == 0xFF45) {
+    return GPU.registers.lcdLYCompare;
+  } else if (address == 0xFF48) {
+    return GPU.registers.objPalette0;
+  } else if (address == 0xFF49) {
+    return GPU.registers.objPalette1;
+  } else if (address == 0xFF4A) {
+    return GPU.registers.lcdWindowX;
+  } else if (address == 0xFF4B) {
+    return GPU.registers.lcdWindowY;
+  }
+  printf("readRegister: Unimplemented register address 0x%02X\n", address);
+  return 0;
+}
+
 int writeByte(const unsigned short address, const unsigned char value) {
+  printf("WriteByte: address = 0x%4X, value = %u\n", address, value);
   if (address <= 0x7FF) {
     GPU.vRAM.tileSet1[address] = value;
   } else if (address <= 0xFFF) {
@@ -156,6 +192,34 @@ int writeByte(const unsigned short address, const unsigned char value) {
   return 1;
 }
 
+int writeRegister(const unsigned short address, const unsigned char value) {
+  // TODO: Register values with specific bits require bitwise operations
+  if (address == 0xFF40) {
+    GPU.registers.lcdControl |= value;
+  } else if (address == 0xFF41) {
+    GPU.registers.lcdStatus = value;
+  } else if (address == 0xFF42) {
+    GPU.registers.scrollX = value;
+  } else if (address == 0xFF43) {
+    GPU.registers.scrollY = value;
+  } else if (address == 0xFF44) {
+    printf("writeRegister: 0xFF44 read only\n");
+    return 0;
+  } else if (address == 0xFF45) {
+    GPU.registers.lcdLYCompare = value;
+  } else if (address == 0xFF48) {
+    GPU.registers.objPalette0 = value;
+  } else if (address == 0xFF49) {
+    GPU.registers.objPalette1 = value;
+  } else if (address == 0xFF4A) {
+    GPU.registers.lcdWindowX = value;
+  } else if (address == 0xFF4B) {
+    GPU.registers.lcdWindowY = value;
+  }
+  printf("writeRegister: Unimplemented register address 0x%02X\n", address);
+  return 1;
+}
+
 void updateTile(const unsigned short addr, const unsigned char val) {
   // The base address is simply every even address due to GPU accessing two
   // bytes per row: e.g. First row contains addresses 0x00 && 0x01:
@@ -165,19 +229,28 @@ void updateTile(const unsigned short addr, const unsigned char val) {
   //  0x1FFE & 0x02 = 0x02
   //  0x1FFE & 0x03 = 0x02
   const unsigned short baseAddress = (addr & 0x1FFE);
+  printf("updateTile called\n");
+  printf("Determined baseAddress 0x%4X\n", baseAddress);
 
   // baseAddress is shifted 4 places / 2 bytes i.e. size of tile
   // 0x1FF is just 0x1FFE >> 4
   const unsigned short tile = (baseAddress >> 4) & 0x1FF;
   const unsigned short y = (baseAddress >> 1) & 7;
+  printf("determine tile = %lu, y = %lu\n", tile, y);
 
   unsigned short bitIndex, x;
   for (x = 0; x < 8; x++) {
-    bitIndex = 1 << (7 - x);
-    unsigned char writeValue = ((GPU.readByte(baseAddress) & bitIndex) ? 1 : 0);
-    writeValue += ((GPU.readByte(baseAddress + 1) & bitIndex) ? 2 : 0);
-    tiles[tile][y][x] = writeValue;
-    printf("Updated tile %u, row %u with %u\n", tile, y, x);
+    // bitIndex = (1 << (7 - x));
+    printf("bitindex val = %u\n", bitIndex);
+    // unsigned char aVal1 = GPU.readByte(baseAddress);
+    // printf("got value %u\n", aVal1);
+    // unsigned char writeValue = ((GPU.readByte(baseAddress) & bitIndex) ? 1 : 0);
+    printf("post write value assign value\n");
+    // writeValue += ((GPU.readByte(baseAddress + 1) & bitIndex) ? 2 : 0);
+    printf("post write value increment value\n");
+    printf("Updating tile %u x: %u, %u\n", tile, y, x);
+    // tiles[tile][y][x] = writeValue;
+    // printf("Updated tile %u, row %u with %u\n", tile, y, x);
   }
 }
 
