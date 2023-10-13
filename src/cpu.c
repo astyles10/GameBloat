@@ -141,11 +141,11 @@ int cpuStep(void) {
       LogDebug(logMessage);
     break;
     case (OPERAND_SHORT):
-      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
         operand);
     break;
     case (NO_OPERANDS):
-      printf("Executing instruction = %s\n", aOpcode.asmName);
+      snprintf(logMessage, 80, "Executing instruction = %s\n", aOpcode.asmName);
     break;
   }
   // Determine number of instruction operands

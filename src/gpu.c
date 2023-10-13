@@ -39,7 +39,6 @@ unsigned char tiles[384][8][8] = {0};
 unsigned char mode = 0;
 unsigned int modeClock = 0;
 
-#pragma message "Created GPU"
 struct GPU GPU = {
     // TODO: determine if const palette correct?
     // Could write to the registers as intended and apply RGB palette later in the front end
