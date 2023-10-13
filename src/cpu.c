@@ -2,9 +2,13 @@
 
 #include "cartridge.h"
 #include "interrupt.h"
+#include "logger.h"
 #include "memory.h"
 #include "opcode.h"
 #include "registers.h"
+
+#include <stdlib.h>
+#include <string.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -88,7 +92,7 @@ void reset(void) {
 
   int i;
   for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
-    MMU.writeByte(resetAddresses[i], resetValues[i]);
+    mmuWriteByte(resetAddresses[i], resetValues[i]);
   }
 
   interruptRegisters.enable = 0;
@@ -112,7 +116,7 @@ void cpuClose() { cartCleanup(); }
 
 int cpuStep(void) {
   // Read instruction from address stored in PC register
-  unsigned char instruction = MMU.readByte(registers.PC++);
+  unsigned char instruction = mmuReadByte(registers.PC++);
 
   // Emulator should continue processing opcodes until tick counter reaches
   // 70,224 clock cycles
@@ -120,7 +124,7 @@ int cpuStep(void) {
 
   opcode aOpcode;
   if (instruction == 0xCB) {
-    instruction = MMU.readByte(registers.PC++);
+    instruction = mmuReadByte(registers.PC++);
     aOpcode = CBOpcodeTable[instruction];
     ticksUsed = cbOpcodeTicks[instruction];
     tickCounter += ticksUsed;
@@ -130,10 +134,11 @@ int cpuStep(void) {
     tickCounter += ticksUsed;
   }
   unsigned short operand = 0;
+  char logMessage[80] = {0};
   switch (aOpcode.operandType) {
     case (OPERAND_CHAR):
-      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-        operand);
+      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
+      LogDebug(logMessage);
     break;
     case (OPERAND_SHORT):
       printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
@@ -145,9 +150,9 @@ int cpuStep(void) {
   }
   // Determine number of instruction operands
   if (aOpcode.operandType == OPERAND_CHAR) {
-    operand = (unsigned short)MMU.readByte(registers.PC);
+    operand = (unsigned short)mmuReadByte(registers.PC);
   } else if (aOpcode.operandType == OPERAND_SHORT) {
-    operand = MMU.readShort(registers.PC);
+    operand = mmuReadShort(registers.PC);
   }
   registers.PC += aOpcode.operandType;
 
@@ -193,9 +198,9 @@ int cpuStep(void) {
   printf("\n");
 
   opcode aNextOpcode;
-  unsigned char aNextInstruction = MMU.readByte(registers.PC);
+  unsigned char aNextInstruction = mmuReadByte(registers.PC);
   if (aNextInstruction == 0xCB) {
-    aNextInstruction = MMU.readByte(registers.PC + 1);
+    aNextInstruction = mmuReadByte(registers.PC + 1);
     aNextOpcode = CBOpcodeTable[aNextInstruction];
   } else {
     aNextOpcode = baseOpcodeTable[aNextInstruction];
@@ -206,6 +211,20 @@ int cpuStep(void) {
   printf("\n*********************************\n");
   #endif
 
+  opcode aNextOpcode;
+  unsigned char aNextInstruction = mmuReadByte(registers.PC);
+  if (aNextInstruction == 0xCB) {
+    aNextInstruction = mmuReadByte(registers.PC + 1);
+    aNextOpcode = CBOpcodeTable[aNextInstruction];
+  } else {
+    aNextOpcode = baseOpcodeTable[aNextInstruction];
+  }
+  printf("Next opcode = %s\n", aNextOpcode.asmName);
+  if (!strcmp(aOpcode.asmName, "RST 38") && !strcmp(aNextOpcode.asmName, "RST 38")) {
+    printf("RST 38 loop caught - exiting\n");
+    exit(1);
+  }
+
   return ticksUsed;
 }
 
@@ -213,63 +232,63 @@ int cpuStep(void) {
 
 void ld_r_s(unsigned char *ptrR, unsigned char n) { *ptrR = n; }
 
-void ld_d_r(unsigned char r) { MMU.writeByte(registers.HL, r); }
+void ld_d_r(unsigned char r) { mmuWriteByte(registers.HL, r); }
 
-void ld_d_n(unsigned char n) { MMU.writeByte(registers.HL, n); }
+void ld_d_n(unsigned char n) { mmuWriteByte(registers.HL, n); }
 
 void ld_A_ss(const unsigned short memLocation) {
-  registers.A = MMU.readByte(memLocation);
+  registers.A = mmuReadByte(memLocation);
 }
 
 void ld_dd_A(const unsigned short memLocation) {
-  MMU.writeByte(memLocation, registers.A);
+  mmuWriteByte(memLocation, registers.A);
 }
 
 void ld_A_c(void) {
   const unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-  registers.A = MMU.readByte(memLocation);
+  registers.A = mmuReadByte(memLocation);
 }
 
 void ld_c_A(void) {
   unsigned short memLocation = 0xFF00 + checkFlag(flagCarry);
-  MMU.writeByte(memLocation, registers.A);
+  mmuWriteByte(memLocation, registers.A);
 }
 
 void ldd_A_mHL(void) {
-  registers.A = MMU.readByte(registers.HL);
+  registers.A = mmuReadByte(registers.HL);
   registers.HL -= 1;
 }
 
 void ldd_mHL_A(void) {
-  MMU.writeByte(registers.HL, registers.A);
+  mmuWriteByte(registers.HL, registers.A);
   registers.HL -= 1;
 }
 
 void ldi_A_mHL(void) {
-  registers.A = MMU.readByte(registers.HL);
+  registers.A = mmuReadByte(registers.HL);
   registers.HL += 1;
 }
 
 void ldi_mHL_A(void) {
-  MMU.writeByte(registers.HL, registers.A);
+  mmuWriteByte(registers.HL, registers.A);
   registers.HL += 1;
 }
 
 void ldh_n_A(unsigned char n) {
   unsigned short memLocation = 0xFF00 + n;
-  MMU.writeByte(memLocation, registers.A);
+  mmuWriteByte(memLocation, registers.A);
 }
 
 void ldh_A_n(unsigned char n) {
   const unsigned short memLocation = 0xFF00 + n;
-  registers.A = MMU.readByte(memLocation);
+  registers.A = mmuReadByte(memLocation);
 }
 
 // 16-Bit loads
 
 void ld_dd_nn(unsigned short *ptrDD, unsigned short nn) { *ptrDD = nn; }
 
-void ld_nn_SP(unsigned short nn) { MMU.writeShort(nn, registers.SP); }
+void ld_nn_SP(unsigned short nn) { mmuWriteShort(nn, registers.SP); }
 
 void ld_SP_HL(void) { registers.SP = registers.HL; }
 
@@ -299,16 +318,16 @@ void push_ss(unsigned short ss) {
   unsigned char highSS = (unsigned char)((ss & 0xFF00) >> 8);
 
   registers.SP -= 1;
-  MMU.writeByte(registers.SP, lowSS);
+  mmuWriteByte(registers.SP, lowSS);
   registers.SP -= 1;
-  MMU.writeByte(registers.SP, highSS);
+  mmuWriteByte(registers.SP, highSS);
 }
 
 void pop_dd(unsigned short *ptrDD) {
   unsigned short bytePair;
-  bytePair = ((MMU.readByte(registers.SP)) << 8);
+  bytePair = ((mmuReadByte(registers.SP)) << 8);
   registers.SP += 1;
-  bytePair = MMU.readByte(registers.SP);
+  bytePair = mmuReadByte(registers.SP);
   registers.SP += 1;
 
   *ptrDD = bytePair;
@@ -511,7 +530,7 @@ void dec_s(unsigned char *s) {
 
 void inc_sHL(void) {
   removeFlag(flagNegative);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if ((value & LOW_NIBBLE) == LOW_NIBBLE) {
     setFlag(flagHalfCarry);
@@ -520,7 +539,7 @@ void inc_sHL(void) {
   }
 
   value++;
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("inc_sHL: Failed to increment source at address %d!\n",
            registers.HL);
@@ -536,7 +555,7 @@ void inc_sHL(void) {
 
 void dec_sHL(void) {
   setFlag(flagNegative);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & LOW_NIBBLE) {
     removeFlag(flagHalfCarry);
@@ -545,7 +564,7 @@ void dec_sHL(void) {
   }
 
   value--;
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("Failed to decrement source at address %d!\n", registers.HL);
     #endif
@@ -620,11 +639,11 @@ void swap_s(unsigned char *ptrS) {
 
 void swap_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry | flagCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   value = ((value & HIGH_NIBBLE) >> 4) | ((value & LOW_NIBBLE) << 4);
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("swap_sHL: Failed to write to address %d!\n", registers.HL);
     #endif
@@ -783,7 +802,7 @@ void rlc_s(unsigned char *ptrS) {
 
 void rlc_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x80) {
     setFlag(flagCarry);
@@ -794,7 +813,7 @@ void rlc_sHL(void) {
   value <<= 1;
   value += checkFlag(flagCarry);
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("rlc_sHL: Failed to write byte to %d!", registers.HL);
     #endif
@@ -827,7 +846,7 @@ void rl_s(unsigned char *ptrS) {
 
 void rl_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x80) {
     setFlag(flagCarry);
@@ -836,7 +855,7 @@ void rl_sHL(void) {
   }
 
   value <<= 1;
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("rl_sHL: Failed to write byte to address %d!\n", registers.HL);
     #endif
@@ -873,7 +892,7 @@ void rrc_s(unsigned char *ptrS) {
 
 void rrc_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x01) {
     setFlag(flagCarry);
@@ -887,7 +906,7 @@ void rrc_sHL(void) {
     value |= 0x80;
   }
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("rrc_sHL: Failed to write value at %d!\n", registers.HL);
     #endif
@@ -920,7 +939,7 @@ void rr_s(unsigned char *ptrS) {
 
 void rr_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x01) {
     setFlag(flagCarry);
@@ -930,7 +949,7 @@ void rr_sHL(void) {
 
   value >>= 1;
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("rr_sHL: Failed to write to address %d!\n", registers.HL);
     #endif
@@ -963,7 +982,7 @@ void sla_s(unsigned char *ptrS) {
 
 void sla_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x80) {
     setFlag(flagCarry);
@@ -972,7 +991,7 @@ void sla_sHL(void) {
   }
 
   value <<= 1;
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("sla_sHL: Failed to write to address %d!\n", registers.HL);
     #endif
@@ -1005,7 +1024,7 @@ void sra_s(unsigned char *ptrS) {
 
 void sra_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x01) {
     setFlag(flagCarry);
@@ -1015,7 +1034,7 @@ void sra_sHL(void) {
 
   value = (value >> 1) | (value & 0x80);
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("sra_sHL: Failed to write to address %d!\n", registers.HL);
     #endif
@@ -1048,7 +1067,7 @@ void srl_s(unsigned char *ptrS) {
 
 void srl_sHL(void) {
   removeFlag(flagNegative | flagHalfCarry);
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
 
   if (value & 0x01) {
     setFlag(flagCarry);
@@ -1058,7 +1077,7 @@ void srl_sHL(void) {
 
   value >>= 1;
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("srl_sHL: Failed to write to address %d!\n", registers.HL);
     #endif
@@ -1088,7 +1107,7 @@ void bit_b_sHL(unsigned char bitPosition) {
   removeFlag(flagNegative);
   setFlag(flagHalfCarry);
 
-  unsigned value = MMU.readByte(registers.HL);
+  unsigned value = mmuReadByte(registers.HL);
 
   if (value & (1 << bitPosition)) {
     removeFlag(flagZero);
@@ -1102,10 +1121,10 @@ void set_b_s(unsigned char bitPosition, unsigned char *ptrS) {
 }
 
 void set_b_sHL(unsigned char bitPosition) {
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
   value |= (1 << bitPosition);
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("set_b_sHL: Failed to write to address %d!\n", registers.HL);
     #endif
@@ -1117,10 +1136,10 @@ void res_b_s(unsigned char bitPosition, unsigned char *ptrS) {
 }
 
 void res_b_sHL(unsigned char bitPosition) {
-  unsigned char value = MMU.readByte(registers.HL);
+  unsigned char value = mmuReadByte(registers.HL);
   value &= ~(1 << bitPosition);
 
-  if (!MMU.writeByte(registers.HL, value)) {
+  if (!mmuWriteByte(registers.HL, value)) {
     #ifdef DEBUG_PRINT
     printf("res_b_sHL: Failed to write value to address %d!\n", registers.HL);
     #endif
@@ -1157,12 +1176,12 @@ void jr_cc_e(unsigned char e, unsigned char flag, unsigned char condition) {
 void call_nn(unsigned short nn) {
   unsigned short memLocation = registers.SP - 0x01;
   unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
-  MMU.writeByte(memLocation, PCh);
+  mmuWriteByte(memLocation, PCh);
 
   // (SP-2) = PCl
   memLocation -= 1;
   unsigned char PCl = (unsigned char)(registers.PC & LOW_BYTE);
-  MMU.writeByte(memLocation, PCl);
+  mmuWriteByte(memLocation, PCl);
 
   registers.PC = nn;
   registers.SP = memLocation;
@@ -1182,11 +1201,11 @@ void rst_f(unsigned char f) {
   // (SP-1) = PCh
   unsigned short memLocation = registers.SP - 1;
   unsigned char PCh = ((registers.PC & HIGH_BYTE) >> 8);
-  MMU.writeByte(memLocation, PCh);
+  mmuWriteByte(memLocation, PCh);
 
   unsigned char PCl = (registers.PC & LOW_BYTE);
   memLocation -= 1;
-  MMU.writeByte(memLocation, PCl);
+  mmuWriteByte(memLocation, PCl);
 
   registers.PC = (f & LOW_BYTE);
   registers.SP = memLocation;
@@ -1197,12 +1216,12 @@ void rst_f(unsigned char f) {
 void ret(void) {
   unsigned short memLocation = registers.SP;
 
-  unsigned char valSP = MMU.readByte(memLocation);
+  unsigned char valSP = mmuReadByte(memLocation);
   registers.PC = (valSP & LOW_BYTE);
 
   memLocation += 1;
 
-  valSP = MMU.readByte(memLocation);
+  valSP = mmuReadByte(memLocation);
   registers.PC |= ((valSP & LOW_BYTE) << 8);
 
   registers.SP = (memLocation + 1);

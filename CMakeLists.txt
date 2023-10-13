@@ -4,7 +4,7 @@ project(${PROJECT})
 
 # Replace requirement with disallowing Desktop build
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
+# pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 # Replace requirement with disallowing Server build
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -53,4 +53,5 @@ set(DEBUG_SOURCES "src/Platforms/main_debug.c")
 list(APPEND DEBUG_SOURCES ${BASE_SOURCES})
 
 add_executable(Debug ${DEBUG_SOURCES})
+# target_compile_definitions(Debug PUBLIC "DEBUG_PRINT")
 # target_compile_options(Debug PUBLIC)

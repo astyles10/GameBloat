@@ -11,6 +11,11 @@
   1.3. 
 2. Implement graphics (tiles, palettes etc.)
 
+TODOs:
+
+GUI for debug information
+Logging to file
+
 Executing instruction = CP n, operand = 0x91
 
 Registers

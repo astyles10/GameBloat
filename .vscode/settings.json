@@ -4,11 +4,15 @@
         "/usr/include"
     ],
     "files.associations": {
+        "*.ino": "cpp",
+        "*.append": "jsonc",
         "gtk.h": "c",
         "ws.h": "c",
         "unistd.h": "c",
         "time.h": "c",
-        "gpu.h": "c"
+        "gpu.h": "c",
+        "memory.h": "c",
+        "source_location": "c"
     },
     "C_Cpp.default.intelliSenseMode": "linux-gcc-x64"
 }

@@ -27,9 +27,8 @@ typedef int (*writeByteToMemory)(const unsigned short memAddr,
 typedef int (*writeShortToMemory)(const unsigned short memAddr,
                                   const unsigned short value);
 
-struct MMU {
-  readByteFromMemory readByte;
-  readShortFromMemory readShort;
-  writeByteToMemory writeByte;
-  writeShortToMemory writeShort;
-} extern MMU;
+unsigned char mmuReadByte(const unsigned short address);
+unsigned short mmuReadShort(const unsigned short address);
+int mmuWriteByte(const unsigned short address, const unsigned char value);
+int mmuWriteShort(const unsigned short address, const unsigned short value);
+

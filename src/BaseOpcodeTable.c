@@ -41,7 +41,7 @@ void ld_D_n(unsigned char immediate) { ld_r_s(&registers.D, immediate); }
 
 void add_HL_DE(void) { add_HL_ss(registers.DE); }
 
-void ld_A_mDE(void) { ld_r_s(&registers.A, MMU.readByte(registers.DE)); }
+void ld_A_mDE(void) { ld_r_s(&registers.A, mmuReadByte(registers.DE)); }
 
 void dec_DE(void) { dec_ss(&registers.DE); }
 
@@ -113,7 +113,7 @@ void ld_B_H(void) { ld_r_s(&registers.B, registers.H); }
 
 void ld_B_L(void) { ld_r_s(&registers.B, registers.L); }
 
-void ld_B_mHL(void) { ld_r_s(&registers.B, MMU.readByte(registers.HL)); }
+void ld_B_mHL(void) { ld_r_s(&registers.B, mmuReadByte(registers.HL)); }
 
 void ld_B_A(void) { ld_r_s(&registers.B, registers.A); }
 
@@ -129,7 +129,7 @@ void ld_C_H(void) { ld_r_s(&registers.C, registers.H); }
 
 void ld_C_L(void) { ld_r_s(&registers.C, registers.L); }
 
-void ld_C_mHL(void) { ld_r_s(&registers.C, MMU.readByte(registers.HL)); }
+void ld_C_mHL(void) { ld_r_s(&registers.C, mmuReadByte(registers.HL)); }
 
 void ld_C_A(void) { ld_r_s(&registers.C, registers.A); }
 
@@ -145,7 +145,7 @@ void ld_D_H(void) { ld_r_s(&registers.D, registers.H); }
 
 void ld_D_L(void) { ld_r_s(&registers.D, registers.L); }
 
-void ld_D_mHL(void) { ld_r_s(&registers.D, MMU.readByte(registers.HL)); }
+void ld_D_mHL(void) { ld_r_s(&registers.D, mmuReadByte(registers.HL)); }
 
 void ld_D_A(void) { ld_r_s(&registers.D, registers.A); }
 
@@ -161,7 +161,7 @@ void ld_E_H(void) { ld_r_s(&registers.E, registers.H); }
 
 void ld_E_L(void) { ld_r_s(&registers.E, registers.L); }
 
-void ld_E_mHL(void) { ld_r_s(&registers.E, MMU.readByte(registers.HL)); }
+void ld_E_mHL(void) { ld_r_s(&registers.E, mmuReadByte(registers.HL)); }
 
 void ld_E_A(void) { ld_r_s(&registers.E, registers.A); }
 
@@ -177,7 +177,7 @@ void ld_H_H(void) { ld_r_s(&registers.H, registers.H); }
 
 void ld_H_L(void) { ld_r_s(&registers.H, registers.L); }
 
-void ld_H_mHL(void) { ld_r_s(&registers.H, MMU.readByte(registers.HL)); }
+void ld_H_mHL(void) { ld_r_s(&registers.H, mmuReadByte(registers.HL)); }
 
 void ld_H_A(void) { ld_r_s(&registers.H, registers.A); }
 
@@ -193,7 +193,7 @@ void ld_L_H(void) { ld_r_s(&registers.L, registers.H); }
 
 void ld_L_L(void) { ld_r_s(&registers.L, registers.L); }
 
-void ld_L_mHL(void) { ld_r_s(&registers.L, MMU.readByte(registers.HL)); }
+void ld_L_mHL(void) { ld_r_s(&registers.L, mmuReadByte(registers.HL)); }
 
 void ld_L_A(void) { ld_r_s(&registers.L, registers.A); }
 
@@ -223,7 +223,7 @@ void ld_A_H(void) { ld_r_s(&registers.A, registers.H); }
 
 void ld_A_L(void) { ld_r_s(&registers.A, registers.L); }
 
-void ld_A_mHL(void) { ld_r_s(&registers.A, MMU.readByte(registers.HL)); }
+void ld_A_mHL(void) { ld_r_s(&registers.A, mmuReadByte(registers.HL)); }
 
 void ld_A_A(void) { ld_r_s(&registers.A, registers.A); }
 
@@ -239,7 +239,7 @@ void add_A_H(void) { add_s(registers.H); }
 
 void add_A_L(void) { add_s(registers.L); }
 
-void add_A_mHL(void) { add_s(MMU.readByte(registers.HL)); }
+void add_A_mHL(void) { add_s(mmuReadByte(registers.HL)); }
 
 void add_A_A(void) { add_s(registers.A); }
 
@@ -255,7 +255,7 @@ void adc_A_H(void) { adc_s(registers.H); }
 
 void adc_A_L(void) { adc_s(registers.L); }
 
-void adc_A_mHL(void) { adc_s(MMU.readByte(registers.HL)); }
+void adc_A_mHL(void) { adc_s(mmuReadByte(registers.HL)); }
 
 void adc_A_A(void) { adc_s(registers.A); }
 
@@ -271,7 +271,7 @@ void sub_A_H(void) { sub_s(registers.H); }
 
 void sub_A_L(void) { sub_s(registers.L); }
 
-void sub_A_mHL(void) { sub_s(MMU.readByte(registers.HL)); }
+void sub_A_mHL(void) { sub_s(mmuReadByte(registers.HL)); }
 
 void sub_A_A(void) { sub_s(registers.A); }
 
@@ -287,7 +287,7 @@ void sbc_A_H(void) { sbc_s(registers.H); }
 
 void sbc_A_L(void) { sbc_s(registers.L); }
 
-void sbc_A_mHL(void) { sbc_s(MMU.readByte(registers.HL)); }
+void sbc_A_mHL(void) { sbc_s(mmuReadByte(registers.HL)); }
 
 void sbc_A_A(void) { sbc_s(registers.A); }
 
@@ -303,7 +303,7 @@ void and_H(void) { and_s(registers.H); }
 
 void and_L(void) { and_s(registers.L); }
 
-void and_mHL(void) { and_s(MMU.readByte(registers.HL)); }
+void and_mHL(void) { and_s(mmuReadByte(registers.HL)); }
 
 void and_A(void) { and_s(registers.A); }
 
@@ -319,7 +319,7 @@ void xor_H(void) { xor_s(registers.H); }
 
 void xor_L(void) { xor_s(registers.L); }
 
-void xor_mHL(void) { xor_s(MMU.readByte(registers.HL)); }
+void xor_mHL(void) { xor_s(mmuReadByte(registers.HL)); }
 
 void xor_A(void) { xor_s(registers.A); }
 
@@ -335,7 +335,7 @@ void or_H(void) { or_s(registers.H); }
 
 void or_L(void) { or_s(registers.L); }
 
-void or_mHL(void) { or_s(MMU.readByte(registers.HL)); }
+void or_mHL(void) { or_s(mmuReadByte(registers.HL)); }
 
 void or_A(void) { or_s(registers.A); }
 
@@ -351,7 +351,7 @@ void cmp_H(void) { cmp_s(registers.H); }
 
 void cmp_L(void) { cmp_s(registers.L); }
 
-void cmp_mHL(void) { cmp_s(MMU.readByte(registers.HL)); }
+void cmp_mHL(void) { cmp_s(mmuReadByte(registers.HL)); }
 
 void cmp_A(void) { cmp_s(registers.A); }
 
@@ -434,7 +434,7 @@ void and_n(unsigned char immediate) { and_s(immediate); }
 void rst_20(void) { rst_f(0x20); }
 
 void jp_mHL(void) {
-  unsigned short value = MMU.readShort(registers.HL);
+  unsigned short value = mmuReadShort(registers.HL);
   jp_nn(value);
 }
 

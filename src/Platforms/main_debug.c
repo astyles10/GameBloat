@@ -2,11 +2,12 @@
 #include "cpu.h"
 #include "interrupt.h"
 #include "gpu.h"
+#include "logger.h"
 
 void resetGame(char *inGameFilename) {
   if (validateCart(inGameFilename)) {
     loadROM(inGameFilename);
-    GPU.reset();
+    gpuReset();
   }
 }
 
@@ -15,13 +16,14 @@ int main (int argc, char **argv) {
     printf("Usage: %s <path to game>\n", argv[0]);
     return 1;
   }
+  InitLogFiles(NULL);
   char *aGameFilename = argv[1];
   resetGame(aGameFilename);
 
-  char aKeyboardInput[65];
+  // char aKeyboardInput[65];
   while (1) {
     const int aCpuTicks = cpuStep();
-    GPU.step(aCpuTicks);
+    gpuStep(aCpuTicks);
     interruptStep();
     // fgets(aKeyboardInput, 64, stdin);
     // if (aKeyboardInput[0] == 'r') {
@@ -31,6 +33,7 @@ int main (int argc, char **argv) {
     // }
   }
 
+  CleanupLogFiles();
   cpuClose();
   return 0;
 }

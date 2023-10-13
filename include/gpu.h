@@ -2,9 +2,6 @@
 
 #include "memory.h"
 
-typedef void(*resetFunction)(void);
-typedef void(*stepFunction)(int);
-
 typedef struct {
   unsigned char r;
   unsigned char g;
@@ -44,11 +41,11 @@ struct GPU {
     unsigned char map2[0x400];
   } vRAM;
 
-  readByteFromMemory readByte;
-  writeByteToMemory writeByte;
-  readByteFromMemory readRegister;
-  writeByteToMemory writeRegister;
-  resetFunction reset;
-  stepFunction step;
-
 } extern GPU;
+
+unsigned char gpuReadByte(const unsigned short address);
+void gpuReset(void);
+void gpuStep(int);
+int gpuWriteByte(const unsigned short address, const unsigned char value);
+unsigned char gpuReadRegister(const unsigned short address);
+int gpuWriteRegister(const unsigned short address, const unsigned char value);
