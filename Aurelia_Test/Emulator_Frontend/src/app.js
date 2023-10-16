@@ -10,19 +10,19 @@ export class App {
     this.BindingEngine = BindingEngine
     this.message = 'Hello World!'
     this.messageData = 'Data go here'
-    this.socket = new ReconnectingWebsocket('ws://localhost:8089')
+    this.socket = new ReconnectingWebsocket('ws://localhost:9500')
     this.socket.setOnOpen((str) => {
       console.log(str)
     })
     this.socket.setOnMessage((messageData) => {
-     this.messageData = messageData
+      this.messageData = messageData
     })
     // this.socket = io('ws://127.0.0.1:8089', {
     //   withCredentials: false
     // })
   }
 
-  bind () {
+  bind() {
   }
 
   colorCanvas() {
@@ -37,7 +37,15 @@ export class App {
     this.canvas.reset()
   }
 
-  sendMessage() {
-    this.socket.socket.send('request')
+  step() {
+    this.sendMessage('step')
+  }
+
+  restartGame() {
+    this.sendMessage('reset')
+  }
+
+  sendMessage(message) {
+    this.socket.socket.send(message)
   }
 }

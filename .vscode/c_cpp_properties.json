@@ -6,6 +6,8 @@
                 "${default}",
                 "${workspaceFolder}/libs/wsServer/include",
                 "${workspaceRoot}/libs/wsServer/include",
+                "${workspaceFolder}/libs/cJSON",
+                "${workspaceRoot}/libs/cJSON",
                 "/usr/include",
                 "/usr/include/gtk-4.0",
                 "/usr/include/graphene-1.0",

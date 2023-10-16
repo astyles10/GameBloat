@@ -168,7 +168,6 @@ unsigned char gpuReadRegister(const unsigned short address) {
 }
 
 int gpuWriteByte(const unsigned short address, const unsigned char value) {
-  printf("WriteByte: address = 0x%4X, value = %u\n", address, value);
   if (address <= 0x7FF) {
     GPU.vRAM.tileSet1[address] = value;
   } else if (address <= 0xFFF) {
@@ -194,7 +193,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   } else if (address == 0xFF43) {
     GPU.registers.scrollY = value;
   } else if (address == 0xFF44) {
-    printf("writeRegister: 0xFF44 read only\n");
+    // printf("writeRegister: 0xFF44 read only\n");
     return 0;
   } else if (address == 0xFF45) {
     GPU.registers.lcdLYCompare = value;
@@ -207,7 +206,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   } else if (address == 0xFF4B) {
     GPU.registers.lcdWindowY = value;
   }
-  printf("writeRegister: Unimplemented register address 0x%02X\n", address);
+  // printf("writeRegister: Unimplemented register address 0x%02X\n", address);
   return 1;
 }
 

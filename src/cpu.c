@@ -134,20 +134,22 @@ int cpuStep(void) {
     tickCounter += ticksUsed;
   }
   unsigned short operand = 0;
-  char logMessage[80] = {0};
-  switch (aOpcode.operandType) {
-    case (OPERAND_CHAR):
-      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
-      LogDebug(logMessage);
-    break;
-    case (OPERAND_SHORT):
-      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-        operand);
-    break;
-    case (NO_OPERANDS):
-      snprintf(logMessage, 80, "Executing instruction = %s\n", aOpcode.asmName);
-    break;
-  }
+  // char logMessage[80] = {0};
+  // switch (aOpcode.operandType) {
+  //   case (OPERAND_CHAR):
+  //     snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
+  //     LogDebug(logMessage);
+  //   break;
+  //   case (OPERAND_SHORT):
+  //     snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+  //       operand);
+  //     LogDebug(logMessage);
+  //   break;
+  //   case (NO_OPERANDS):
+  //     snprintf(logMessage, 80, "Executing instruction = %s\n", aOpcode.asmName);
+  //     LogDebug(logMessage);
+  //   break;
+  // }
   // Determine number of instruction operands
   if (aOpcode.operandType == OPERAND_CHAR) {
     operand = (unsigned short)mmuReadByte(registers.PC);
@@ -211,19 +213,17 @@ int cpuStep(void) {
   printf("\n*********************************\n");
   #endif
 
-  opcode aNextOpcode;
-  unsigned char aNextInstruction = mmuReadByte(registers.PC);
-  if (aNextInstruction == 0xCB) {
-    aNextInstruction = mmuReadByte(registers.PC + 1);
-    aNextOpcode = CBOpcodeTable[aNextInstruction];
-  } else {
-    aNextOpcode = baseOpcodeTable[aNextInstruction];
-  }
-  printf("Next opcode = %s\n", aNextOpcode.asmName);
-  if (!strcmp(aOpcode.asmName, "RST 38") && !strcmp(aNextOpcode.asmName, "RST 38")) {
-    printf("RST 38 loop caught - exiting\n");
-    exit(1);
-  }
+  // opcode aNextOpcode;
+  // unsigned char aNextInstruction = mmuReadByte(registers.PC);
+  // if (aNextInstruction == 0xCB) {
+  //   aNextInstruction = mmuReadByte(registers.PC + 1);
+  //   aNextOpcode = CBOpcodeTable[aNextInstruction];
+  // } else {
+  //   aNextOpcode = baseOpcodeTable[aNextInstruction];
+  // }
+  // if (!strcmp(aOpcode.asmName, "RST 38") && !strcmp(aNextOpcode.asmName, "RST 38")) {
+  //   printf("RST 38 loop caught\n");
+  // }
 
   return ticksUsed;
 }

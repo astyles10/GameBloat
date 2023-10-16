@@ -40,9 +40,10 @@ target_include_directories(Desktop PUBLIC ${GTK4_INCLUDE_DIRS})
 
 set(SERVER_SOURCES "src/Platforms/main_server.c")
 list(APPEND SERVER_SOURCES ${BASE_SOURCES})
+list(APPEND SERVER_SOURCES "libs/cJSON/cJSON.c")
 
 add_executable(Server ${SERVER_SOURCES})
-target_include_directories(Server PUBLIC ${PROJECT_SOURCE_DIR}/libs/wsServer/include)
+target_include_directories(Server PUBLIC ${PROJECT_SOURCE_DIR}/libs/wsServer/include ${PROJECT_SOURCE_DIR}/libs/cJSON)
 target_link_libraries(Server ${PROJECT_SOURCE_DIR}/libs/wsServer/libws.a Threads::Threads)
 
 # ##################################################### #

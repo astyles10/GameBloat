@@ -86,9 +86,9 @@ const unsigned int MBC3_ReadByte(const unsigned short memAddr) {
         return readRTCRegister();
       }
     }
-    printf("RAM read attempt before enabled!\n");
+    // printf("RAM read attempt before enabled!\n");
   }
-  printf("MBC3_ReadByte: Invalid memory address [0x%X] received!\n", address);
+  // printf("MBC3_ReadByte: Invalid memory address [0x%X] received!\n", address);
   return 0x00;
 }
 
@@ -118,7 +118,7 @@ const unsigned int MBC3_WriteByte(const unsigned short memAddr,
       RTCRegisterSelect = value;
       RTCAccessMode = RTC_MODE;
     } else {
-      printf("MBC3 WriteByte invalid value: [0x%X]\n", value);
+      // printf("MBC3 WriteByte invalid value: [0x%X]\n", value);
       return 0x00;
     }
   } else if (address <= 0x7FFF) {
@@ -140,10 +140,10 @@ const unsigned int MBC3_WriteByte(const unsigned short memAddr,
         return writeToRTCRegister(value);
       }
     }
-    printf("MBC3_WriteByte: Attempted to write when RAM/RTC disabled!\n");
+    // printf("MBC3_WriteByte: Attempted to write when RAM/RTC disabled!\n");
     return 0x00;
   } else {
-    printf("MBC does not support writing to address %d\n", address);
+    // printf("MBC does not support writing to address %d\n", address);
     return 0x00;
   }
   return 0x01;
@@ -189,8 +189,8 @@ unsigned char writeToRTCRegister(unsigned char value) {
       }
       break;
     default:
-      printf("MBC3 Clock Register : attempt write to invalid register [0x%X]\n",
-             RTCRegisterSelect);
+      // printf("MBC3 Clock Register : attempt write to invalid register [0x%X]\n",
+      //        RTCRegisterSelect);
       return 0x00;
   }
   return 0x01;
@@ -219,7 +219,7 @@ unsigned char readRTCRegister(void) {
     case RTC_DAY_UPPER:
       return Clock.upperDayCounter;
     default:
-      printf("No RTC register has been selected!\n");
+      // printf("No RTC register has been selected!\n");
       return 0x00;
   }
 }

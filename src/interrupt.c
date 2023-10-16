@@ -33,7 +33,7 @@ unsigned char validateInterrupt(unsigned char interruptBit) {
       return 1;
     }
   }
-  printf("requestInterrupt: bit %d is not a valid interrupt!\n", interruptBit);
+  // printf("requestInterrupt: bit %d is not a valid interrupt!\n", interruptBit);
   return 0;
 }
 
