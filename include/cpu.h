@@ -1,4 +1,5 @@
 #pragma once
+#include <cJSON.h>
 #include <stdio.h>
 
 extern const unsigned char flagCarry;
@@ -10,6 +11,7 @@ void reset(void);
 void cpuClose(void);
 int loadROM(const char *);
 int cpuStep(void);
+cJSON* GetCPUDataAsJSON(void);
 
 // 8-Bit loads
 void ld_r_s(unsigned char *ptrR, unsigned char n);

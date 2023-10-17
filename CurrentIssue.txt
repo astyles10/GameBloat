@@ -13,7 +13,6 @@
 
 TODOs:
 
-Investigate potential stack overflow - Gameboy code causes segfaults in websocket thread
 GUI for debug information
 Logging to file
 

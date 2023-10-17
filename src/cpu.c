@@ -65,6 +65,8 @@ const unsigned char flagZero = (1 << 7);
 const unsigned char flagNegative = (1 << 6);
 const unsigned char flagHalfCarry = (1 << 5);
 const unsigned char flagCarry = (1 << 4);
+static char* lastOpcodeName = "";
+static unsigned short lastOperand = 0;
 
 unsigned int tickCounter = 0;
 
@@ -168,6 +170,9 @@ int cpuStep(void) {
       break;
   }
 
+  lastOpcodeName = aOpcode.asmName;
+  lastOperand = operand;
+
   // Post instruction debug print
   #ifdef DEBUG_PRINT
   printf("\n*********************************\n");
@@ -224,6 +229,29 @@ int cpuStep(void) {
   // }
 
   return ticksUsed;
+}
+
+cJSON* GetCPUDataAsJSON(void) {
+  cJSON* cpuJson = cJSON_CreateObject();
+  cJSON* registerJson = cJSON_AddObjectToObject(cpuJson, "Registers");
+  cJSON_AddNumberToObject(registerJson, "A", (double)registers.A);
+  cJSON_AddNumberToObject(registerJson, "F", (double)registers.F);
+  cJSON_AddNumberToObject(registerJson, "B", (double)registers.B);
+  cJSON_AddNumberToObject(registerJson, "C", (double)registers.C);
+  cJSON_AddNumberToObject(registerJson, "D", (double)registers.D);
+  cJSON_AddNumberToObject(registerJson, "E", (double)registers.E);
+  cJSON_AddNumberToObject(registerJson, "H", (double)registers.H);
+  cJSON_AddNumberToObject(registerJson, "L", (double)registers.L);
+  cJSON_AddNumberToObject(registerJson, "AF", (double)registers.AF);
+  cJSON_AddNumberToObject(registerJson, "BC", (double)registers.BC);
+  cJSON_AddNumberToObject(registerJson, "DE", (double)registers.DE);
+  cJSON_AddNumberToObject(registerJson, "HL", (double)registers.HL);
+  cJSON_AddNumberToObject(registerJson, "SP", (double)registers.SP);
+  cJSON_AddNumberToObject(registerJson, "PC", (double)registers.PC);
+  cJSON* opcodeJson = cJSON_AddObjectToObject(cpuJson, "Opcode");
+  cJSON_AddStringToObject(opcodeJson, "Asm", lastOpcodeName);
+  cJSON_AddNumberToObject(opcodeJson, "Operand", (double)lastOperand);
+  return cpuJson;
 }
 
 // 8-Bit Loads

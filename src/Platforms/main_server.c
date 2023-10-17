@@ -55,11 +55,12 @@ void OnMessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
 
   }
 
-  cJSON* test = cJSON_CreateObject();
-  if (cJSON_AddStringToObject(test, "name", "name_value") == NULL) {
-    printf("Failed to add value to object\n");
-    return;
-  }
+  // cJSON* test = cJSON_CreateObject();
+  // if (cJSON_AddStringToObject(test, "name", "name_value") == NULL) {
+  //   printf("Failed to add value to object\n");
+  //   return;
+  // }
+  cJSON* test = GetCPUDataAsJSON();
   char* testString = cJSON_Print(test);
   if (testString == NULL) {
     printf("Failed to print string\n");
@@ -117,10 +118,10 @@ int main(int argc, char **argv) {
     printf("GB file path required!\n");
     exit(1);
   }
-  cJSON_Hooks hooks;
-  hooks.free_fn = free;
-  hooks.malloc_fn = malloc;
-  cJSON_InitHooks(&hooks);
+  // cJSON_Hooks hooks;
+  // hooks.free_fn = free;
+  // hooks.malloc_fn = malloc;
+  // cJSON_InitHooks(&hooks);
   uint16_t portNumber = 9500;
   pthread_t websocketThread, gbThread;
   atomic_init(&wsConnected, false);
