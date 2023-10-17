@@ -15,7 +15,7 @@
 
 void* InitGameboyLoop(void*);
 void* InitWebsocketThread(void*);
-void RunGameboyLoop();
+void RunGameboyLoop(void);
 void ResetGame(char *inGameFilename);
 void OnOpen(ws_cli_conn_t *client);
 void OnClose(ws_cli_conn_t *client);
@@ -26,14 +26,6 @@ pthread_mutex_t connMutex;
 atomic_bool wsConnected;
 atomic_bool restartGame;
 char* gameFileName;
-
-int millisleep(unsigned int microseconds) {
-  const struct timespec ts = {
-      microseconds / 1000,                /* seconds */
-      (microseconds % 1000) * 1000 * 1000 /* nano seconds */
-  };
-  return nanosleep(&ts, NULL);
-}
 
 void OnOpen(ws_cli_conn_t *client) {
   pthread_mutex_lock(&connMutex);
@@ -57,9 +49,9 @@ void OnMessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
   char *cli;
   cli = ws_getaddress(client);
   printf("I received a message: %s (%zu), from: %s\n", msg, size, cli);
-  if (!strcmp(msg, "reset")) {
+  if (!strcmp((const char *)msg, "reset")) {
     atomic_store(&restartGame, true);
-  } else if (!strcmp(msg, "step")) {
+  } else if (!strcmp((const char *)msg, "step")) {
 
   }
 
@@ -104,7 +96,7 @@ void* InitWebsocketThread(void* args) {
   return NULL;
 }
 
-void RunGameboyLoop() {
+void RunGameboyLoop(void) {
   printf("Start GB Loop!\n");
   while (1) {
     if (atomic_load(&restartGame) == true) {
@@ -112,8 +104,8 @@ void RunGameboyLoop() {
       atomic_store(&restartGame, false);
     }
     if (atomic_load(&wsConnected) == true) {
-      // const int aCpuTicks = cpuStep();
-      // gpuStep(aCpuTicks);
+      const int aCpuTicks = cpuStep();
+      gpuStep(aCpuTicks);
       // interruptStep();
     }
   }

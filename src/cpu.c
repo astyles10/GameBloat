@@ -39,14 +39,12 @@ Z 	Zero Flag.
 Functions with register name hard coded are Upper case to suit struct naming
 */
 
-enum ByteSizes {
-  LOW_NIBBLE = 0x000F,
-  HIGH_NIBBLE = 0x00F0,
-  LOW_BYTE = 0x00FF,
-  HIGH_BYTE = 0xFF00,
-  LOW_WORD = 0x0000FFFF,
-  HIGH_WORD = 0xFFFF0000
-};
+static const unsigned char LOW_NIBBLE = 0x000F;
+static const unsigned char HIGH_NIBBLE = 0x00F0;
+static const unsigned short LOW_BYTE = 0x00FF;
+static const unsigned short HIGH_BYTE = 0xFF00;
+static const unsigned short LOW_WORD = 0x0000FFFF;
+static const unsigned int HIGH_WORD = 0xFFFF0000;
 
 const unsigned short resetAddresses[] = {
     0xFF05, 0xFF06, 0xFF07, 0xFF10, 0xFF11, 0xFF12, 0xFF14, 0xFF16,

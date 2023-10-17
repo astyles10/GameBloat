@@ -21,6 +21,8 @@ enum interruptBits {
   JOYPAD_INTERRUPT = (1 << 4)
 };
 
+unsigned char validateInterrupt(unsigned char interruptBit);
+
 const int interruptBits[] = {VBLANK_INTERRUPT, LCD_INTERRUPT, SERIAL_INTERRUPT,
                              TIMER_INTERRUPT, JOYPAD_INTERRUPT};
 

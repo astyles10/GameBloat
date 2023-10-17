@@ -52,7 +52,7 @@ void InitLogFiles(const char* logFilePath) {
 }
 
 char* CreateLogfile(const char* logFileName, const char* dirPath) {
-  char* strPtr = (char *)malloc(strlen(dirPath) + strlen(errorLogfileName) + 1);
+  char* strPtr = (char *)malloc(strlen(dirPath) + strlen(logFileName) + 1);
   strcpy(strPtr, dirPath);
   strcat(strPtr, logFileName);
 

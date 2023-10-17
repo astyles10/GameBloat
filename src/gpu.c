@@ -9,7 +9,8 @@
 
 void updateTile(const unsigned short address, const unsigned char value);
 void renderScan(void);
-const char* determineModeClock();
+void initGPU(void);
+const char* determineModeClock(void);
 
 enum GpuMode { HBLANK = 0, VBLANK = 1, OAM_SCANLINE = 2, VRAM_SCANLINE = 3 };
 
@@ -31,20 +32,25 @@ enum LcdControl {
   BG_DISPLAY = (1 << 0)
 };
 
-const unsigned char MAX_LINES = 154;
+static const unsigned char MAX_LINES = 154;
 
-BasicColour frameBuffer[160 * 144] = {0};
+static BasicColour frameBuffer[160 * 144] = {0};
 
-unsigned char tiles[384][8][8] = {0};
-unsigned char mode = 0;
-unsigned int modeClock = 0;
+static unsigned char tiles[384][8][8] = {0};
+static unsigned char mode = 0;
+static unsigned int modeClock = 0;
 
 struct GPU GPU = {
     // TODO: determine if const palette correct?
     // Could write to the registers as intended and apply RGB palette later in the front end
   .registers.palette = {
       {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}
-  }
+  },
+  .vRAM.map1 = {0},
+  .vRAM.map2 = {0},
+  .vRAM.tileSet0 = {0},
+  .vRAM.tileSet1 = {0},
+  .vRAM.tileSetShared = {0}
 };
 
 void initGPU(void) {
@@ -58,6 +64,8 @@ void initGPU(void) {
     GPU.registers.objPalette1 = 0;
     GPU.registers.scrollX = 0;
     GPU.registers.scrollY = 0;
+    // TODO: Remove this once used
+    (void)frameBuffer;
 }
 
 // Private
@@ -65,13 +73,7 @@ void initGPU(void) {
 void gpuReset() {
   mode = 0;
   modeClock = 0;
-  GPU.registers.lcdYCoordinate = 0;
-  GPU.registers.lcdControl = 0;
-  GPU.registers.scrollX = 0;
-  GPU.registers.scrollY = 0;
-  memset(&GPU.vRAM, 0, sizeof(GPU.vRAM));
-  memset(&tiles, 0, sizeof(tiles));
-  memset(&frameBuffer, 0, sizeof(frameBuffer));
+  initGPU();
 }
 
 void gpuStep(int tick) {
@@ -125,16 +127,16 @@ void gpuStep(int tick) {
 }
 
 unsigned char gpuReadByte(const unsigned short address) {
-  if (address <= 0x7FF) {
+  if (address < 0x800) {
     return GPU.vRAM.tileSet1[address];
-  } else if (address <= 0xFFF) {
-    return GPU.vRAM.tileSetShared[address];
-  } else if (address <= 0x17FF) {
-    return GPU.vRAM.tileSet0[address];
-  } else if (address <= 0x1BFF) {
-    return GPU.vRAM.map1[address];
-  } else if (address <= 0x1FFF) {
-    return GPU.vRAM.map2[address];
+  } else if (address < 0x1000) {
+    return GPU.vRAM.tileSetShared[address - 0x800];
+  } else if (address < 0x1800) {
+    return GPU.vRAM.tileSet0[address - 0x1000];
+  } else if (address < 0x1C00) {
+    return GPU.vRAM.map1[address - 0x1800];
+  } else if (address < 0x2000) {
+    return GPU.vRAM.map2[address - 0x1C00];
   }
   printf("GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
          address);
@@ -168,16 +170,18 @@ unsigned char gpuReadRegister(const unsigned short address) {
 }
 
 int gpuWriteByte(const unsigned short address, const unsigned char value) {
-  if (address <= 0x7FF) {
+  if (address < 0x800) {
     GPU.vRAM.tileSet1[address] = value;
-  } else if (address <= 0xFFF) {
-    GPU.vRAM.tileSetShared[address] = value;
-  } else if (address <= 0x17FF) {
-    GPU.vRAM.tileSet0[address] = value;
+  } else if (address < 0x1000) {
+    GPU.vRAM.tileSetShared[address - 0x800] = value;
+  } else if (address < 0x1800) {
+    GPU.vRAM.tileSet0[address - 0x1000] = value;
   }
 
   if (address <= 0x17FF) {
     updateTile(address, value);
+  } else {
+    // printf("gpuWriteByte: Unprocessed address received %u\n", address);
   }
   return 1;
 }
@@ -260,7 +264,7 @@ void renderScan() {
   }
 }
 
-const char* determineModeClock() {
+const char* determineModeClock(void) {
   switch (mode) {
     case HBLANK:
       return "HBLANK";
