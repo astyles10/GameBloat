@@ -9,23 +9,90 @@
 
 #include "bios.h"
 #include "cpu.h"
-#include "interrupt.h"
 #include "gpu.h"
+#include "interrupt.h"
 #include "logger.h"
 
-void* InitGameboyLoop(void*);
-void* InitWebsocketThread(void*);
-void RunGameboyLoop(void);
-void ResetGame(char *inGameFilename);
+void InitGlobals(char **argv);
+void InitThreads(void);
+void *InitGameboyLoop(void *);
+void *InitWebsocketThread(void *);
 void OnOpen(ws_cli_conn_t *client);
 void OnClose(ws_cli_conn_t *client);
-void OnMessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size, int type);
+void OnMessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
+               int type);
+void ResetGame(char *inGameFilename);
+void RunGameboyLoop(void);
+void LoopCycle(void);
+void SendWebsocketData(void);
 
+pthread_t websocketThread, gbThread;
 pthread_cond_t connSignal;
 pthread_mutex_t connMutex;
+char *gameFileName;
+uint16_t portNumber;
+
 atomic_bool wsConnected;
 atomic_bool restartGame;
-char* gameFileName;
+atomic_bool startGame;
+atomic_bool step;
+
+ws_cli_conn_t *wsClient;
+
+int msleep(long tms) {
+  struct timespec ts;
+  int ret;
+
+  if (tms < 0) {
+    errno = EINVAL;
+    return -1;
+  }
+
+  ts.tv_sec = tms / 1000;
+  ts.tv_nsec = (tms % 1000) * 1000000;
+
+  do {
+    ret = nanosleep(&ts, &ts);
+  } while (ret && errno == EINTR);
+
+  return ret;
+}
+
+void InitGlobals(char **argv) {
+  portNumber = 9500;
+  pthread_cond_init(&connSignal, NULL);
+  pthread_mutex_init(&connMutex, NULL);
+  atomic_init(&wsConnected, false);
+  atomic_init(&restartGame, false);
+  atomic_init(&startGame, false);
+  atomic_init(&step, false);
+  gameFileName = (char *)malloc(strlen(argv[1]) + 1);
+  strcpy(gameFileName, argv[1]);
+}
+
+void InitThreads() {
+  pthread_create(&websocketThread, NULL, InitWebsocketThread,
+                 (void *)&portNumber);
+  pthread_create(&gbThread, NULL, InitGameboyLoop, (void *)gameFileName);
+}
+
+void *InitGameboyLoop(void *args) {
+  pthread_mutex_lock(&connMutex);
+  pthread_cond_wait(&connSignal, &connMutex);
+  pthread_mutex_unlock(&connMutex);
+  RunGameboyLoop();
+  return NULL;
+}
+
+void *InitWebsocketThread(void *args) {
+  struct ws_events evs;
+  evs.onopen = &OnOpen;
+  evs.onclose = &OnClose;
+  evs.onmessage = &OnMessage;
+  // uint16_t *portNumber = (uint16_t *)(args);
+  ws_socket(&evs, portNumber, 0, 1000);
+  return NULL;
+}
 
 void OnOpen(ws_cli_conn_t *client) {
   pthread_mutex_lock(&connMutex);
@@ -34,6 +101,7 @@ void OnOpen(ws_cli_conn_t *client) {
   printf("Connection opened, addr: %s\n", cli);
   pthread_mutex_unlock(&connMutex);
   atomic_store(&wsConnected, true);
+  wsClient = client;
   pthread_cond_signal(&connSignal);
 }
 
@@ -52,23 +120,23 @@ void OnMessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size,
   if (!strcmp((const char *)msg, "reset")) {
     atomic_store(&restartGame, true);
   } else if (!strcmp((const char *)msg, "step")) {
-
+    atomic_store(&step, true);
+  } else if (!strcmp((const char *)msg, "start")) {
+    atomic_store(&startGame, true);
+  } else if (!strcmp((const char *)msg, "stop")) {
+    atomic_store(&startGame, false);
   }
+}
 
-  // cJSON* test = cJSON_CreateObject();
-  // if (cJSON_AddStringToObject(test, "name", "name_value") == NULL) {
-  //   printf("Failed to add value to object\n");
-  //   return;
-  // }
-  cJSON* test = GetCPUDataAsJSON();
-  char* testString = cJSON_Print(test);
-  if (testString == NULL) {
+void SendWebsocketData(void) {
+  cJSON *cpuJson = GetCPUDataAsJSON();
+  char *jsonString = cJSON_Print(cpuJson);
+  if (jsonString == NULL) {
     printf("Failed to print string\n");
     return;
   }
-  printf("Sending string %s\n", testString);
-  ws_sendframe_txt(client, testString);
-  cJSON_Delete(test);
+  ws_sendframe_txt(wsClient, jsonString);
+  cJSON_Delete(cpuJson);
 }
 
 void ResetGame(char *inGameFilename) {
@@ -79,38 +147,35 @@ void ResetGame(char *inGameFilename) {
   }
 }
 
-void* InitGameboyLoop(void* args) {
-  pthread_mutex_lock(&connMutex);
-  pthread_cond_wait(&connSignal, &connMutex);
-  pthread_mutex_unlock(&connMutex);
-  RunGameboyLoop();
-  return NULL;
-}
-
-void* InitWebsocketThread(void* args) {
-  struct ws_events evs;
-  evs.onopen = &OnOpen;
-  evs.onclose = &OnClose;
-  evs.onmessage = &OnMessage;
-  uint16_t* portNumber = (uint16_t*)(args);
-  ws_socket(&evs, *portNumber, 0, 1000);
-  return NULL;
-}
-
 void RunGameboyLoop(void) {
+  // TODO: Experiment with game loop mutex
   printf("Start GB Loop!\n");
   while (1) {
     if (atomic_load(&restartGame) == true) {
       ResetGame(gameFileName);
+      SendWebsocketData();
       atomic_store(&restartGame, false);
+      atomic_store(&startGame, false);
     }
-    if (atomic_load(&wsConnected) == true) {
-      const int aCpuTicks = cpuStep();
-      gpuStep(aCpuTicks);
-      // interruptStep();
+    if (atomic_load(&wsConnected) == true && atomic_load(&step) == true) {
+      LoopCycle();
+      atomic_store(&step, false);
+    } else if (atomic_load(&wsConnected) == true &&
+               atomic_load(&startGame) == true) {
+      // TODO: Figure out throttling technique, websocket messages swamp the
+      // client causing freezes
+      LoopCycle();
+      msleep(100);
     }
   }
   printf("Exiting GB Loop\n");
+}
+
+void LoopCycle(void) {
+  const int aCpuTicks = cpuStep();
+  gpuStep(aCpuTicks);
+  interruptStep();
+  SendWebsocketData();
 }
 
 int main(int argc, char **argv) {
@@ -118,25 +183,11 @@ int main(int argc, char **argv) {
     printf("GB file path required!\n");
     exit(1);
   }
-  // cJSON_Hooks hooks;
-  // hooks.free_fn = free;
-  // hooks.malloc_fn = malloc;
-  // cJSON_InitHooks(&hooks);
-  uint16_t portNumber = 9500;
-  pthread_t websocketThread, gbThread;
-  atomic_init(&wsConnected, false);
-  atomic_init(&restartGame, false);
-  pthread_cond_init(&connSignal, NULL);
-  pthread_mutex_init(&connMutex, NULL);
-  pthread_create(&websocketThread, NULL, InitWebsocketThread, (void*)&portNumber);
 
-  gameFileName = (char *)malloc(strlen(argv[1]) + 1);
-  strcpy(gameFileName, argv[1]);
-  pthread_create(&gbThread, NULL, InitGameboyLoop, (void*)gameFileName);
-
+  InitGlobals(argv);
+  InitThreads();
   InitLogFiles(NULL);
-  char *aGameFilename = argv[1];
-  ResetGame(aGameFilename);
+  ResetGame(gameFileName);
 
   pthread_join(websocketThread, NULL);
   pthread_join(gbThread, NULL);

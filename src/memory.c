@@ -3,8 +3,9 @@
 #include <string.h>
 
 #include "cartridge.h"
-#include "interrupt.h"
 #include "gpu.h"
+#include "interrupt.h"
+#include "logger.h"
 
 unsigned char wRAM[0x2000];   // 0xC000 - 0xDFFF Internal working RAM (0xD000 -
                               // 0xDFFF switchable CGB)
@@ -21,6 +22,8 @@ void initializeMemory(void) {
 }
 
 unsigned char mmuReadByte(const unsigned short address) {
+  static const char baseLogMessage[] = "mmuReadByte: Unimplemented memory address 0x%X (%s)";
+  char logMessage[80];
   if (address < 0x8000) {
     return cartridge.mbc->readByte(address);
   } else if (address < 0xA000) {
@@ -41,18 +44,28 @@ unsigned char mmuReadByte(const unsigned short address) {
   } else if (address < 0xFF80) {
     if (address == 0xFF00) {
       // TODO: Implement joypad
+      snprintf(logMessage, 81, baseLogMessage, address, "Joypad");
+      LogWarning(logMessage);
     } else if (address == 0xFF02 || address == 0xFF02) {
       // TODO: implement Serial
+      snprintf(logMessage, 81, baseLogMessage, address, "Serial");
+      LogWarning(logMessage);
     } else if (address >= 0xFF04 && address <= 0xFF07) {
       // TODO: implement Divider & Timer registers
+      snprintf(logMessage, 81, baseLogMessage, address, "Timer/Divider");
+      LogWarning(logMessage);
     } else if (address == 0xFF0F) {
       return interruptRegisters.request;
     } else if (address >= 0xFF10 && address <= 0xFF3F) {
       // TODO: implement Audio
+      snprintf(logMessage, 81, baseLogMessage, address, "Audio");
+      LogWarning(logMessage);
     } else if (address >= 0xFF40 && address <= 0xFF4B) {
       return gpuReadRegister(address);
     } else if (address >= 0xFF4D && address <= 0xFF77) {
       // TODO: implement CGB registers
+      snprintf(logMessage, 81, baseLogMessage, address, "CGB registers");
+      LogWarning(logMessage);
     }
     // printf("ReadByte: reading unimplemented IO address 0x%02X\n", address);
     return 0;

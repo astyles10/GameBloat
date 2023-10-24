@@ -1,7 +1,6 @@
 import { BindingEngine } from 'aurelia-binding'
 import { ReconnectingWebsocket } from './reconnecting-websocket'
 import { GameboyCanvasCustomElement } from './components/gameboy-canvas'
-// import { io } from '../node_modules/socket.io-client/build/esm/index'
 
 export class App {
   static inject = [BindingEngine]
@@ -17,9 +16,6 @@ export class App {
     this.socket.setOnMessage((messageData) => {
       this.messageData = messageData
     })
-    // this.socket = io('ws://127.0.0.1:8089', {
-    //   withCredentials: false
-    // })
   }
 
   bind() {
@@ -43,6 +39,14 @@ export class App {
 
   restartGame() {
     this.sendMessage('reset')
+  }
+
+  startGame() {
+    this.sendMessage('start')
+  }
+
+  stopGame() {
+    this.sendMessage('stop')
   }
 
   sendMessage(message) {
