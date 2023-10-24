@@ -11,7 +11,8 @@ typedef struct {
 struct GPU {
   // TODO: Determine what these registers are used for
   struct gpuRegisters {
-    unsigned char lcdControl; // 0xFF40
+    // 0xFF40
+    unsigned char lcdControl;
     unsigned char lcdStatus; // 0xFF41
     unsigned char scrollX; // 0xFF42
     unsigned char scrollY; // 0xFF43

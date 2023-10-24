@@ -34,6 +34,7 @@ enum LcdControl {
 
 static const unsigned char MAX_LINES = 154;
 
+// Frame buffer is LCD screen
 static BasicColour frameBuffer[160 * 144] = {0};
 
 static unsigned char tiles[384][8][8] = {0};
@@ -127,6 +128,14 @@ void gpuStep(int tick) {
 }
 
 unsigned char gpuReadByte(const unsigned short address) {
+  if (GPU.registers.lcdControl & 0x8) {
+    // Addressing mode is 0x8800 - access tiles in block 1 & 2
+    // https://gbdev.io/pandocs/Tile_Data.html
+
+  } else {
+    // Addressing mode is 0x8800 - access tiles in block 0 & 1
+
+  }
   if (address < 0x800) {
     return GPU.vRAM.tileSet1[address];
   } else if (address < 0x1000) {
@@ -178,7 +187,7 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
     GPU.vRAM.tileSet0[address - 0x1000] = value;
   }
 
-  if (address <= 0x17FF) {
+  if (address < 0x1800) {
     updateTile(address, value);
   } else {
     // printf("gpuWriteByte: Unprocessed address received %u\n", address);
