@@ -37,6 +37,12 @@ static const unsigned char MAX_LINES = 154;
 // Frame buffer is LCD screen
 static BasicColour frameBuffer[160 * 144] = {0};
 
+/* 
+  Tile data stored in VRAM between 0x8000 and 0x97FF
+  1 tile = 16 bytes;
+    0x1800 == 6144 bytes,
+    6,144 / 16 = 384 tiles
+ */
 static unsigned char tiles[384][8][8] = {0};
 static unsigned char mode = 0;
 static unsigned int modeClock = 0;
@@ -55,16 +61,8 @@ struct GPU GPU = {
 };
 
 void initGPU(void) {
-    GPU.registers.lcdControl = 0;
-    GPU.registers.lcdLYCompare = 0;
-    GPU.registers.lcdStatus = 0;
-    GPU.registers.lcdWindowX = 0;
-    GPU.registers.lcdWindowY = 0;
-    GPU.registers.lcdYCoordinate = 0;
-    GPU.registers.objPalette0 = 0;
-    GPU.registers.objPalette1 = 0;
-    GPU.registers.scrollX = 0;
-    GPU.registers.scrollY = 0;
+    memset(&GPU, 0, sizeof(GPU));
+    memset(tiles, 0, sizeof(tiles));
     // TODO: Remove this once used
     (void)frameBuffer;
 }
@@ -128,23 +126,15 @@ void gpuStep(int tick) {
 }
 
 unsigned char gpuReadByte(const unsigned short address) {
-  if (GPU.registers.lcdControl & 0x8) {
-    // Addressing mode is 0x8800 - access tiles in block 1 & 2
-    // https://gbdev.io/pandocs/Tile_Data.html
-
-  } else {
-    // Addressing mode is 0x8800 - access tiles in block 0 & 1
-
-  }
-  if (address < 0x800) {
+  if (address < 0x800) { // 0x8800
     return GPU.vRAM.tileSet1[address];
-  } else if (address < 0x1000) {
+  } else if (address < 0x1000) { // 0x9000
     return GPU.vRAM.tileSetShared[address - 0x800];
-  } else if (address < 0x1800) {
+  } else if (address < 0x1800) { // 0x9800
     return GPU.vRAM.tileSet0[address - 0x1000];
-  } else if (address < 0x1C00) {
+  } else if (address < 0x1C00) { // 0x9C00
     return GPU.vRAM.map1[address - 0x1800];
-  } else if (address < 0x2000) {
+  } else if (address < 0x2000) { // 0xA000
     return GPU.vRAM.map2[address - 0x1C00];
   }
   printf("GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
@@ -225,7 +215,8 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
 
 void updateTile(const unsigned short addr, const unsigned char val) {
   // The base address is simply every even address due to GPU accessing two
-  // bytes per row: e.g. First row contains addresses 0x00 && 0x01:
+  // bytes per row: E.g.,
+  // First row contains addresses 0x00 && 0x01:
   //  0x1FFE & 0x00 = 0x00,
   //  0x1FFE & 0x01 = 0x00
   // Second row:
@@ -234,16 +225,21 @@ void updateTile(const unsigned short addr, const unsigned char val) {
   const unsigned short baseAddress = (addr & 0x1FFE);
 
   // baseAddress is shifted 4 places / 2 bytes i.e. size of tile
-  // 0x1FF is just 0x1FFE >> 4
+  // basically just chops off the least significant nibble
+  // to determine the tile number
+  /* 
+    Incoming address = 0x1234
+   */
   const unsigned short tile = (baseAddress >> 4) & 0x1FF;
-  const unsigned short y = (baseAddress >> 1) & 7;
+
+  const unsigned short row = (baseAddress >> 1) & 7;
 
   unsigned short bitIndex, x;
   for (x = 0; x < 8; x++) {
     bitIndex = (1 << (7 - x));
     unsigned char writeValue = ((gpuReadByte(baseAddress) & bitIndex) ? 1 : 0);
     writeValue += ((gpuReadByte(baseAddress + 1) & bitIndex) ? 2 : 0);
-    tiles[tile][y][x] = writeValue;
+    tiles[tile][row][x] = writeValue;
   }
 }
 
@@ -256,11 +252,10 @@ void renderScan() {
   // Determine line of tiles used for map
   mapOffset += ((GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 0xFF) >> 3;
 
-  // 
   unsigned char lineOffset = (GPU.registers.scrollX >> 3);
-  // unsigned char y = (GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 7;
-  // unsigned char x = GPU.registers.scrollX & 7;
-  // unsigned int canvasOffset = GPU.registers.lcdYCoordinate * 160 * 4;
+  unsigned char y = (GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 7;
+  unsigned char x = GPU.registers.scrollX & 7;
+  unsigned int canvasOffset = GPU.registers.lcdYCoordinate * 160 * 4;
 
   unsigned short tile = (unsigned short)gpuReadByte(mapOffset + lineOffset);
   if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
