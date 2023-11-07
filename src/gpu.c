@@ -229,6 +229,9 @@ void updateTile(const unsigned short addr, const unsigned char val) {
   // to determine the tile number
   /* 
     Incoming address = 0x1234
+    0x123 = Tile number, thus the shift by 4 bits
+    0x0004 = 0000 0000 0000 0100 | LSB is the Tile Row specifier (zero) | 010 is the sub row identifier
+    thus the right shift by 1 bit
    */
   const unsigned short tile = (baseAddress >> 4) & 0x1FF;
 
