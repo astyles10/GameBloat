@@ -16,7 +16,7 @@ struct GPU {
     unsigned char lcdStatus; // 0xFF41
     unsigned char scrollX; // 0xFF42
     unsigned char scrollY; // 0xFF43
-    unsigned char lcdYCoordinate; //0xFF44
+    unsigned char lcdYCoordinate; //0xFF44 - Line Number
     unsigned char lcdLYCompare; // 0xFF45
     unsigned char oamDMASourceAddress; // 0xFF46
     const BasicColour palette[4]; // 0xFF47 BG palette data (Non CGB)

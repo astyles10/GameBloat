@@ -29,7 +29,7 @@ enum LcdControl {
   BG_TILE_MAP_DISPLAY_SELECT = (1 << 3),
   SPRITE_SIZE = (1 << 2),
   SPRITE_DISPLAY_ENABLE = (1 << 1),
-  BG_DISPLAY = (1 << 0)
+  BG_DISPLAY = (1 << 0) // Non CGB mode only
 };
 
 static const unsigned char MAX_LINES = 154;
@@ -175,12 +175,17 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
     GPU.vRAM.tileSetShared[address - 0x800] = value;
   } else if (address < 0x1800) {
     GPU.vRAM.tileSet0[address - 0x1000] = value;
+  } else if (address < 0x1C00) {
+    GPU.vRAM.map1[address - 0x1800] = value;
+  } else if (address < 0x2000) {
+    GPU.vRAM.map2[address - 0x1C00] = value;
+  } else {
+    printf("Invalid VRAM write address: 0x%04X\n", address);
+    return 0;
   }
 
   if (address < 0x1800) {
     updateTile(address, value);
-  } else {
-    // printf("gpuWriteByte: Unprocessed address received %u\n", address);
   }
   return 1;
 }
@@ -224,25 +229,23 @@ void updateTile(const unsigned short addr, const unsigned char val) {
   //  0x1FFE & 0x03 = 0x02
   const unsigned short baseAddress = (addr & 0x1FFE);
 
-  // baseAddress is shifted 4 places / 2 bytes i.e. size of tile
-  // basically just chops off the least significant nibble
-  // to determine the tile number
   /* 
-    Incoming address = 0x1234
+    E.g. Incoming address = 0x1234
     0x123 = Tile number, thus the shift by 4 bits
     0x0004 = 0000 0000 0000 0100 | LSB is the Tile Row specifier (zero) | 010 is the sub row identifier
-    thus the right shift by 1 bit
+    thus the right shift by 1 bit.
    */
   const unsigned short tile = (baseAddress >> 4) & 0x1FF;
+  const unsigned short subRow = (baseAddress >> 1) & 7;
+  const unsigned char pixelRowLsb = gpuReadByte(baseAddress);
+  const unsigned char pixelRowMsb = gpuReadByte(baseAddress + 1);
 
-  const unsigned short row = (baseAddress >> 1) & 7;
-
-  unsigned short bitIndex, x;
-  for (x = 0; x < 8; x++) {
-    bitIndex = (1 << (7 - x));
-    unsigned char writeValue = ((gpuReadByte(baseAddress) & bitIndex) ? 1 : 0);
-    writeValue += ((gpuReadByte(baseAddress + 1) & bitIndex) ? 2 : 0);
-    tiles[tile][row][x] = writeValue;
+  unsigned short bitIndex, pixel;
+  for (pixel = 0; pixel < 8; pixel++) {
+    bitIndex = (1 << (7 - pixel));
+    unsigned char writeValue = ((pixelRowLsb & bitIndex) ? 1 : 0);
+    writeValue += ((pixelRowMsb & bitIndex) ? 2 : 0);
+    tiles[tile][subRow][pixel] = writeValue;
   }
 }
 
@@ -253,6 +256,8 @@ void renderScan() {
       (GPU.registers.lcdControl & BG_TILE_MAP_DISPLAY_SELECT) ? 0x1C00 : 0x1800;
 
   // Determine line of tiles used for map
+  // TODO: determine why lcdYCoordinate is used for the map offset?
+  // It looks like it should be zero during VRAM scanline mode
   mapOffset += ((GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 0xFF) >> 3;
 
   unsigned char lineOffset = (GPU.registers.scrollX >> 3);
