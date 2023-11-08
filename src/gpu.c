@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "interrupt.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,17 +23,58 @@ enum GpuCycles {
 };
 
 enum LcdControl {
+  // LCD_DISPLAY_ENABLE: Turns LCD on and activates PPU.
+  // When disabled, CPU can access VRAM/OAM etc.
   LCD_DISPLAY_ENABLE = (1 << 7),
+
+  // WINDOW_TILE_MAP_DISPLAY_SELECT: Controls which background map
+  // the Window uses for rendering; 0 = 0x9800, 1 = 0x9C00
   WINDOW_TILE_MAP_DISPLAY_SELECT = (1 << 6),
+
+  // WINDOW_DISPLAY_ENABLE: Toggle window display on/off
+  // Bit is overridden on DMG by bit 0 if clear
+  // Changing mid-frame triggers strange behaviours
   WINDOW_DISPLAY_ENABLE = (1 << 5),
+
+  // BG_WINDOW_TILE_DATA_SELECT: Controls addressing mode the BG and Window
+  // use to pick tiles. Objects unaffected
   BG_WINDOW_TILE_DATA_SELECT = (1 << 4),
+
+  // BG_TILE_MAP_DISPLAY_SELECT: Similar to WINDOW_TILE_MAP_DISPLAY_SELECT
+  // 0 = tilemap 0x9800, 1 = tilemap 0x9C00
   BG_TILE_MAP_DISPLAY_SELECT = (1 << 3),
+
+  // SPRITE_SIZE: Controls the size of all objects/sprites
+  // 0 = 1 tile, 1 = 2 vertical stacked tile
   SPRITE_SIZE = (1 << 2),
+
+  // SPRITE_DISPLAY_ENABLE: Controls whether objects are displayed or not
+  // Can be toggled mid frame (e.g. to avoid objects displaying over a status bar)
   SPRITE_DISPLAY_ENABLE = (1 << 1),
-  BG_DISPLAY = (1 << 0) // Non CGB mode only
+
+  // BG_DISPLAY: Functionality depends on CGB/Non-CGB mode
+  // Non-CGB: background and window become blank (white) & WINDOW_DISPLAY_ENABLE is ignored.
+  // Only objects may still be displayed
+  // CGB: Background and Window lose priority - objects display on top of BG and Window.
+  // When set to zero, pixel priority is restored.
+  BG_DISPLAY = (1 << 0)
+};
+
+enum LcdStatus {
+  STATUS_LYC_INT_SELECT = (1 << 6),
+  STATUS_MODE_2_INT_SELECT = (1 << 5),
+  STATUS_MODE_1_INT_SELECT = (1 << 4),
+  STATUS_MODE_0_INT_SELECT = (1 << 3),
+  STATUS_LYC_EQUALS_LY = (1 << 2),
+  STATUS_PPU_MODE_UPPER = (1 << 1),
+  STATUS_PPU_MODE_LOWER = (1 << 0)
 };
 
 static const unsigned char MAX_LINES = 154;
+
+const BasicColour Palette[4] = {
+  {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}
+};
 
 // Frame buffer is LCD screen
 static BasicColour frameBuffer[160 * 144] = {0};
@@ -84,10 +126,11 @@ void gpuStep(int tick) {
         modeClock = 0;
         GPU.registers.lcdYCoordinate++;
         if (GPU.registers.lcdYCoordinate == 143) {
+          if (GPU.registers.lcdYCoordinate == GPU.registers.lcdLYCompare) {
+            GPU.registers.lcdControl |= STATUS_LYC_EQUALS_LY;
+            writeInterrupt(0xFF0F, VBLANK_INTERRUPT);
+          }
           mode = VBLANK;
-          // TODO: Push screen data to drawing area
-          // This means sending a frame over the websocket
-          // Data comes from vram ? canvas.putImageData(screen, 0, 0)
         } else {
           mode = OAM_SCANLINE;
         }
@@ -195,7 +238,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   if (address == 0xFF40) {
     GPU.registers.lcdControl |= value;
   } else if (address == 0xFF41) {
-    GPU.registers.lcdStatus = value;
+    GPU.registers.lcdStatus |= value;
   } else if (address == 0xFF42) {
     GPU.registers.scrollX = value;
   } else if (address == 0xFF43) {
@@ -245,6 +288,8 @@ void updateTile(const unsigned short addr, const unsigned char val) {
     bitIndex = (1 << (7 - pixel));
     unsigned char writeValue = ((pixelRowLsb & bitIndex) ? 1 : 0);
     writeValue += ((pixelRowMsb & bitIndex) ? 2 : 0);
+    if (writeValue > 0)
+      printf("Writing value tile %u, row %u, pixel %u\n", tile, subRow, pixel);
     tiles[tile][subRow][pixel] = writeValue;
   }
 }
@@ -255,25 +300,68 @@ void renderScan() {
   unsigned short mapOffset =
       (GPU.registers.lcdControl & BG_TILE_MAP_DISPLAY_SELECT) ? 0x1C00 : 0x1800;
 
-  // Determine line of tiles used for map
-  // TODO: determine why lcdYCoordinate is used for the map offset?
-  // It looks like it should be zero during VRAM scanline mode
-  mapOffset += ((GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 0xFF) >> 3;
+  const unsigned char lineStart = GPU.registers.lcdYCoordinate + GPU.registers.scrollY;
 
+  // Determine line of tiles used for map
+  // Why lcdYCoordinate is used for the map offset? It looks like it should be zero during VRAM scanline mode
+  // lcdYCoordinate (i.e. line number) is used because the screen actually renders dot by dot as opposed to a full frame
+  mapOffset += ((lineStart & 0xFF) >> 3);
+
+  // First 3 bits of GPU registers scrollX specify the pixel?
   unsigned char lineOffset = (GPU.registers.scrollX >> 3);
-  unsigned char y = (GPU.registers.lcdYCoordinate + GPU.registers.scrollY) & 7;
   unsigned char x = GPU.registers.scrollX & 7;
-  unsigned int canvasOffset = GPU.registers.lcdYCoordinate * 160 * 4;
+  unsigned char y = lineStart & 7;
+  unsigned int canvasOffset = GPU.registers.lcdYCoordinate * 160;
 
   unsigned short tile = (unsigned short)gpuReadByte(mapOffset + lineOffset);
+
+  // A Window overlays the background. Both the Background and Window share the same tile data table.
+  // TODO: In non CGB mode, BG_WINDOW_TILE_DATA_SELECT is only functional if BG_DISPLAY is set.
+  // Basically going to need a function to toggle the lcdContol register, following rules such as above.
   if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
     tile += 256;
   }
 
-  for (int i = 0; i < 160; ++i) {
-    // unsigned char colour = tiles[y][x];
-
+  if (tile > 383) {
+    printf("Invalid Tile number %u\n", tile);
+    return;
   }
+
+  int tileHasColour = 0;
+  printf("=-=-=-=-=- RenderScan Tile Data =-=-=-=-=-\n");
+  for (int i = 0; i < 160; ++i) {
+    unsigned char colour = tiles[tile][y][x];
+    if (colour > 0) {
+      tileHasColour = 1;
+    }
+    printf("$%02x ", tiles[tile][y][x]);
+    BasicColour rCol = Palette[colour];
+    // plot the data here
+    frameBuffer[canvasOffset].r = rCol.r;
+    frameBuffer[canvasOffset].g = rCol.g;
+    frameBuffer[canvasOffset].b = rCol.b;
+    ++x;
+    ++canvasOffset;
+    if (x == 8) {
+      // if (tileHasColour == 1)
+      printf("\n");
+      x = 0;
+      lineOffset = (lineOffset + 1) & 31;
+      tile = (unsigned short)gpuReadByte(mapOffset + lineOffset);
+      // if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
+      //   tile += 256;
+      //   if (tile > 383) {
+      //     printf("Invalid Tile number %u\n", tile);
+      //     return;
+      //   }
+      // }
+    }
+  }
+  // Maybe "breakpoint" here?
+  if (!tileHasColour)
+    return;
+  char aKeyboardInput[65];
+  fgets(aKeyboardInput, 64, stdin);
 }
 
 const char* determineModeClock(void) {

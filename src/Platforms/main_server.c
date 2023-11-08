@@ -25,6 +25,7 @@ void ResetGame(char *inGameFilename);
 void RunGameboyLoop(void);
 void LoopCycle(void);
 void SendWebsocketData(void);
+int msleep(long tms);
 
 pthread_t websocketThread, gbThread;
 pthread_cond_t connSignal;
@@ -165,7 +166,7 @@ void RunGameboyLoop(void) {
       // TODO: Figure out throttling technique, websocket messages swamp the
       // client causing freezes
       LoopCycle();
-      msleep(100);
+      msleep(1);
     }
   }
   printf("Exiting GB Loop\n");

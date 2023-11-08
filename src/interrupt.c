@@ -11,16 +11,6 @@ enum InterruptAddresses {
   HIGH_LOW_P10_P13_INTR = 0x60       // Joypad
 };
 
-// Note this is also the priority list for interrupts; VBlank being the highest,
-// Joypad being lowest
-enum interruptBits {
-  VBLANK_INTERRUPT = (1 << 0),
-  LCD_INTERRUPT = (1 << 1),
-  SERIAL_INTERRUPT = (1 << 2),
-  TIMER_INTERRUPT = (1 << 3),
-  JOYPAD_INTERRUPT = (1 << 4)
-};
-
 unsigned char validateInterrupt(unsigned char interruptBit);
 
 const int interruptBits[] = {VBLANK_INTERRUPT, LCD_INTERRUPT, SERIAL_INTERRUPT,
@@ -37,6 +27,10 @@ unsigned char validateInterrupt(unsigned char interruptBit) {
   }
   // printf("requestInterrupt: bit %d is not a valid interrupt!\n", interruptBit);
   return 0;
+}
+
+void setInterrupt() {
+  
 }
 
 void writeInterrupt(unsigned short address, unsigned char interruptBit) {
