@@ -32,13 +32,8 @@ struct GPU {
     9800-9BFF	Tile map #0
     9C00-9FFF	Tile map #1
   */
-  struct vRAM {
-    unsigned char tileSet1[0x800];
-    unsigned char tileSetShared[0x800];
-    unsigned char tileSet0[0x800];
-    unsigned char map1[0x400];
-    unsigned char map2[0x400];
-  } vRAM;
+
+  unsigned char VRAM[0x2000];
 
 } extern GPU;
 

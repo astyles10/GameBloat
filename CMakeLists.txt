@@ -10,7 +10,7 @@ find_package(PkgConfig REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-add_definitions("-Wall" "-g3" "-fstack-protector-strong" "-Wpedantic" "-Wshadow" "-Wpointer-arith" "-Wcast-qual" "-Wstrict-prototypes" "-Wmissing-prototypes")
+add_definitions("-Wall" "-g3" "-fstack-protector-strong" "-Wshadow" "-Wpointer-arith" "-Wcast-qual" "-Wstrict-prototypes" "-Wmissing-prototypes")
 
 if (DEFINED DEBUG_MEMORY) 
   add_definitions("-fsanitize=address")
@@ -27,6 +27,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/include)
 
 file(GLOB_RECURSE BASE_SOURCES ${PROJECT_SOURCE_DIR}/src/*.c)
 list(FILTER BASE_SOURCES EXCLUDE REGEX "main_.*\\.c$")
+list(APPEND BASE_SOURCES "libs/cJSON/cJSON.c")
 
 # ##################################################### #
 #         Desktop GTK application configuration         #
@@ -45,7 +46,6 @@ target_include_directories(Desktop PUBLIC ${GTK4_INCLUDE_DIRS})
 
 set(SERVER_SOURCES "src/Platforms/main_server.c")
 list(APPEND SERVER_SOURCES ${BASE_SOURCES})
-list(APPEND SERVER_SOURCES "libs/cJSON/cJSON.c")
 
 add_executable(Server ${SERVER_SOURCES})
 target_include_directories(Server PUBLIC ${PROJECT_SOURCE_DIR}/libs/wsServer/include ${PROJECT_SOURCE_DIR}/libs/cJSON)
@@ -59,5 +59,6 @@ set(DEBUG_SOURCES "src/Platforms/main_debug.c")
 list(APPEND DEBUG_SOURCES ${BASE_SOURCES})
 
 add_executable(Debug ${DEBUG_SOURCES})
+target_include_directories(Debug PUBLIC ${PROJECT_SOURCE_DIR}/libs/cJSON)
 # target_compile_definitions(Debug PUBLIC "DEBUG_PRINT")
 # target_compile_options(Debug PUBLIC)

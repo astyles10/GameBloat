@@ -1,5 +1,6 @@
 #include "gpu.h"
 #include "interrupt.h"
+#include "registers.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,6 +89,14 @@ static BasicColour frameBuffer[160 * 144] = {0};
 static unsigned char tiles[384][8][8] = {0};
 static unsigned char mode = 0;
 static unsigned int modeClock = 0;
+const char* modeString;
+
+const char* modeStrings[] = {
+  "HBlank",
+  "VBlank",
+  "OAM Scanline",
+  "VRAM Scanline"
+};
 
 struct GPU GPU = {
     // TODO: determine if const palette correct?
@@ -95,11 +104,7 @@ struct GPU GPU = {
   .registers.palette = {
       {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}
   },
-  .vRAM.map1 = {0},
-  .vRAM.map2 = {0},
-  .vRAM.tileSet0 = {0},
-  .vRAM.tileSet1 = {0},
-  .vRAM.tileSetShared = {0}
+  .VRAM = {0}
 };
 
 void initGPU(void) {
@@ -123,7 +128,8 @@ void gpuStep(int tick) {
   switch (mode) {
     case HBLANK:
       if (modeClock >= HBLANK_CYCLE) {
-        modeClock = 0;
+        modeClock -= HBLANK_CYCLE;
+        modeString = modeStrings[0];
         GPU.registers.lcdYCoordinate++;
         if (GPU.registers.lcdYCoordinate == 143) {
           if (GPU.registers.lcdYCoordinate == GPU.registers.lcdLYCompare) {
@@ -138,7 +144,8 @@ void gpuStep(int tick) {
       break;
     case VBLANK:
       if (modeClock >= VBLANK_CYCLE) {
-        modeClock = 0;
+        modeClock -= VBLANK_CYCLE;
+        modeString = modeStrings[1];
         GPU.registers.lcdYCoordinate++;
 
         if (GPU.registers.lcdYCoordinate >= MAX_LINES) {
@@ -149,18 +156,25 @@ void gpuStep(int tick) {
       break;
     case OAM_SCANLINE:
       if (modeClock >= OAM_SCAN_CYCLE) {
-        modeClock = 0;
+        modeClock -= OAM_SCAN_CYCLE;
+        modeString = modeStrings[2];
         mode = VRAM_SCANLINE;
       }
       break;
     case VRAM_SCANLINE:  // HDraw
       if (modeClock >= VRAM_SCAN_CYCLE) {
-        modeClock = 0;
+        modeString = modeStrings[3];
+        modeClock -= VRAM_SCAN_CYCLE;
         mode = HBLANK;
         renderScan();
       }
       break;
   }
+  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+  printf("lcdControl register: %u, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  printf("Window Tile Map: %u", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   #ifdef DEBUG_PRINT
   const char* modeStr = determineModeClock();
   printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
@@ -169,16 +183,8 @@ void gpuStep(int tick) {
 }
 
 unsigned char gpuReadByte(const unsigned short address) {
-  if (address < 0x800) { // 0x8800
-    return GPU.vRAM.tileSet1[address];
-  } else if (address < 0x1000) { // 0x9000
-    return GPU.vRAM.tileSetShared[address - 0x800];
-  } else if (address < 0x1800) { // 0x9800
-    return GPU.vRAM.tileSet0[address - 0x1000];
-  } else if (address < 0x1C00) { // 0x9C00
-    return GPU.vRAM.map1[address - 0x1800];
-  } else if (address < 0x2000) { // 0xA000
-    return GPU.vRAM.map2[address - 0x1C00];
+  if (address < 0x2000) {
+    return GPU.VRAM[address];
   }
   printf("GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
          address);
@@ -212,16 +218,8 @@ unsigned char gpuReadRegister(const unsigned short address) {
 }
 
 int gpuWriteByte(const unsigned short address, const unsigned char value) {
-  if (address < 0x800) {
-    GPU.vRAM.tileSet1[address] = value;
-  } else if (address < 0x1000) {
-    GPU.vRAM.tileSetShared[address - 0x800] = value;
-  } else if (address < 0x1800) {
-    GPU.vRAM.tileSet0[address - 0x1000] = value;
-  } else if (address < 0x1C00) {
-    GPU.vRAM.map1[address - 0x1800] = value;
-  } else if (address < 0x2000) {
-    GPU.vRAM.map2[address - 0x1C00] = value;
+  if (address < 0x2000) {
+    GPU.VRAM[address] = value;
   } else {
     printf("Invalid VRAM write address: 0x%04X\n", address);
     return 0;
@@ -236,9 +234,9 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
 int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   // TODO: Register values with specific bits require bitwise operations
   if (address == 0xFF40) {
-    GPU.registers.lcdControl |= value;
+    GPU.registers.lcdControl = value;
   } else if (address == 0xFF41) {
-    GPU.registers.lcdStatus |= value;
+    GPU.registers.lcdStatus = value;
   } else if (address == 0xFF42) {
     GPU.registers.scrollX = value;
   } else if (address == 0xFF43) {
@@ -262,6 +260,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
 }
 
 void updateTile(const unsigned short addr, const unsigned char val) {
+  printf("UpdateTile: registers.PC = %02X\n", registers.PC);
   // The base address is simply every even address due to GPU accessing two
   // bytes per row: E.g.,
   // First row contains addresses 0x00 && 0x01:
@@ -292,6 +291,8 @@ void updateTile(const unsigned short addr, const unsigned char val) {
       printf("Writing value tile %u, row %u, pixel %u\n", tile, subRow, pixel);
     tiles[tile][subRow][pixel] = writeValue;
   }
+  // char aKeyboardInput[65];
+  // fgets(aKeyboardInput, 64, stdin);
 }
 
 void renderScan() {
@@ -328,13 +329,13 @@ void renderScan() {
   }
 
   int tileHasColour = 0;
-  printf("=-=-=-=-=- RenderScan Tile Data =-=-=-=-=-\n");
+  // printf("=-=-=-=-=- RenderScan Tile Data =-=-=-=-=-\n");
   for (int i = 0; i < 160; ++i) {
     unsigned char colour = tiles[tile][y][x];
     if (colour > 0) {
       tileHasColour = 1;
     }
-    printf("$%02x ", tiles[tile][y][x]);
+    // printf("$%02x ", tiles[tile][y][x]);
     BasicColour rCol = Palette[colour];
     // plot the data here
     frameBuffer[canvasOffset].r = rCol.r;
@@ -344,7 +345,7 @@ void renderScan() {
     ++canvasOffset;
     if (x == 8) {
       // if (tileHasColour == 1)
-      printf("\n");
+      // printf("\n");
       x = 0;
       lineOffset = (lineOffset + 1) & 31;
       tile = (unsigned short)gpuReadByte(mapOffset + lineOffset);
@@ -360,8 +361,8 @@ void renderScan() {
   // Maybe "breakpoint" here?
   if (!tileHasColour)
     return;
-  char aKeyboardInput[65];
-  fgets(aKeyboardInput, 64, stdin);
+  // char aKeyboardInput[65];
+  // fgets(aKeyboardInput, 64, stdin);
 }
 
 const char* determineModeClock(void) {

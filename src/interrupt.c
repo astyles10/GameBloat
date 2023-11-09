@@ -29,10 +29,6 @@ unsigned char validateInterrupt(unsigned char interruptBit) {
   return 0;
 }
 
-void setInterrupt() {
-  
-}
-
 void writeInterrupt(unsigned short address, unsigned char interruptBit) {
   if (validateInterrupt(interruptBit)) {
     switch (address) {

@@ -13,8 +13,15 @@
 
 TODOs:
 
+Debugging: attempt to mash Gamebloat, Cinoop and optionally GBEmu together to compare registers, GPU registers, etc.
+https://github.com/DanB91/GBEmu.git
+
 GUI for debug information
 Logging to file
+
+Implement OAM
+Implement LCD control measures: https://gbdev.io/pandocs/LCDC.html#lcdc7--lcd-enable
+gpu.c implements LCD control enum but not all values are used
 
 Executing instruction = CP n, operand = 0x91
 

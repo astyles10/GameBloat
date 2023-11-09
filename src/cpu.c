@@ -69,6 +69,7 @@ static char* lastOpcodeName = "";
 static unsigned short lastOperand = 0;
 
 unsigned int tickCounter = 0;
+unsigned char stopped = 0;
 
 void setFlag(unsigned char flag) { registers.F |= flag; }
 
@@ -117,39 +118,23 @@ void cpuClose() { cartCleanup(); }
 int cpuStep(void) {
   // Read instruction from address stored in PC register
   unsigned char instruction = mmuReadByte(registers.PC++);
+  static int cycles = 0;
 
-  // Emulator should continue processing opcodes until tick counter reaches
-  // 70,224 clock cycles
-  int ticksUsed = 0;
+  int tickStart = tickCounter;
 
   opcode aOpcode;
   if (instruction == 0xCB) {
+    printf("Entering CB opcode table\n");
     instruction = mmuReadByte(registers.PC++);
     aOpcode = CBOpcodeTable[instruction];
-    ticksUsed = cbOpcodeTicks[instruction];
-    tickCounter += ticksUsed;
+    tickCounter += cbOpcodeTicks[instruction];
   } else {
     aOpcode = baseOpcodeTable[instruction];
-    ticksUsed = baseOpcodeTicks[instruction];
-    tickCounter += ticksUsed;
+    tickCounter += baseOpcodeTicks[instruction];
   }
   unsigned short operand = 0;
-  // char logMessage[80] = {0};
-  // switch (aOpcode.operandType) {
-  //   case (OPERAND_CHAR):
-  //     snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
-  //     LogDebug(logMessage);
-  //   break;
-  //   case (OPERAND_SHORT):
-  //     snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-  //       operand);
-  //     LogDebug(logMessage);
-  //   break;
-  //   case (NO_OPERANDS):
-  //     snprintf(logMessage, 80, "Executing instruction = %s\n", aOpcode.asmName);
-  //     LogDebug(logMessage);
-  //   break;
-  // }
+  printf("registers.pc = 0x%X\n", registers.PC);
+
   // Determine number of instruction operands
   if (aOpcode.operandType == OPERAND_CHAR) {
     operand = (unsigned short)mmuReadByte(registers.PC);
@@ -157,6 +142,23 @@ int cpuStep(void) {
     operand = mmuReadShort(registers.PC);
   }
   registers.PC += aOpcode.operandType;
+
+  char logMessage[80] = {0};
+  switch (aOpcode.operandType) {
+    case (OPERAND_CHAR):
+      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
+      LogDebug(logMessage);
+    break;
+    case (OPERAND_SHORT):
+      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
+        operand);
+      LogDebug(logMessage);
+    break;
+    case (NO_OPERANDS):
+      snprintf(logMessage, 80, "Executing instruction = %s\n", aOpcode.asmName);
+      LogDebug(logMessage);
+    break;
+  }
 
   switch (aOpcode.operandType) {
     case (OPERAND_CHAR):
@@ -215,6 +217,29 @@ int cpuStep(void) {
 
   printf("\n*********************************\n");
   #endif
+  int ticksUsed = tickCounter - tickStart;
+  printf("Ticks used = %d\n", ticksUsed);
+  char c = getchar();
+
+  // if (cycles >= 15000) {
+    // if (1) {
+    printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+    printf(
+        "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: "
+        "0x%02X "
+        "H: 0x%02X L: 0x%02X\n",
+        registers.A, registers.B, registers.C, registers.D, registers.E,
+        registers.F, registers.H, registers.L);
+    printf("Flags: Z: %d N: %d H: %d C: %d\n", checkFlag(flagZero),
+           checkFlag(flagNegative), checkFlag(flagHalfCarry),
+           checkFlag(flagCarry));
+    printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
+    printf("Total cycles (ticks): %d\n", tickCounter);
+    printf("\n");
+    // char c = getchar();
+  // }
+
+  ++cycles;
 
   // opcode aNextOpcode;
   // unsigned char aNextInstruction = mmuReadByte(registers.PC);
@@ -226,7 +251,12 @@ int cpuStep(void) {
   // }
   // if (!strcmp(aOpcode.asmName, "RST 38") && !strcmp(aNextOpcode.asmName, "RST 38")) {
   //   printf("RST 38 loop caught\n");
+  //   while (1) {
+  //     char aCrap[10];
+  //     fgets(aCrap, 9, stdin);
+  //   }
   // }
+
 
   return ticksUsed;
 }
@@ -308,6 +338,9 @@ void ldh_n_A(unsigned char n) {
 void ldh_A_n(unsigned char n) {
   const unsigned short memLocation = 0xFF00 + n;
   registers.A = mmuReadByte(memLocation);
+  if (memLocation == 0xFF44) {
+    printf("ldh_A_n: set register A to %u\n", registers.A);
+  }
 }
 
 // 16-Bit loads
@@ -739,13 +772,16 @@ void nop(void) {}
 void undefined(void) {}
 
 void halt(void) {
-  // TODO
-  printf("Would halt!\n");
+  if (interruptRegisters.masterEnable) {
+    // TODO: Determine how to perform a halt
+    printf("Would halt!\n");
+  } else {
+    registers.PC++;
+  }
 }
 
 void stop(void) {
-  // TODO
-  printf("Would stop!\n");
+  stopped = 1;
 }
 
 void di(void) { interruptRegisters.masterEnable = 0; }

@@ -73,18 +73,18 @@ void CleanupLogFiles(void) {
 }
 
 void LogError(const char* message) {
-  fprintf(errorLogFile, "%s\n", message);
-  // printf("%s\n", message);
+  // fprintf(errorLogFile, "%s\n", message);
+  printf("Error: %s\n", message);
 }
 
 void LogWarning(const char* message) {
-  fprintf(warningLogFile, "%s\n", message);
-  // printf("%s\n", message);
+  // fprintf(warningLogFile, "%s\n", message);
+  printf("Warning: %s\n", message);
 }
 
 void LogDebug(const char* message) {
-  fprintf(debugLogFile, "%s", message);
-  // printf("%s\n", message);
+  // fprintf(debugLogFile, "%s", message);
+  printf("Debug: %s\n", message);
 }
 
 void Log(LogLevel logLevel, const char* message) {

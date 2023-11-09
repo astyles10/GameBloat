@@ -12,7 +12,6 @@ unsigned char wRAM[0x2000];   // 0xC000 - 0xDFFF Internal working RAM (0xD000 -
 unsigned char OAM[0xA0];      // Object Attribute Memory
 unsigned char ioPorts[0x80];  // Hardware I/O Registers
 unsigned char hRAM[0x7F];     // High RAM / Zero Page
-unsigned char interruptEnable;
 
 void initializeMemory(void) {
   memset(wRAM, 0x00, sizeof(wRAM));
@@ -33,8 +32,7 @@ unsigned char mmuReadByte(const unsigned short address) {
   } else if (address < 0xE000) {
     return wRAM[(address - 0xC000)];
   } else if (address < 0xFE00) {
-    // printf("Warning: mmuReadByte accessed echo wRAM!\n");
-    return wRAM[address];
+    return wRAM[address - 0xE000];
   } else if (address < 0xFEA0) {
     return OAM[address - 0xFE00];
   } else if (address < 0xFF00) {
@@ -89,8 +87,7 @@ int mmuWriteByte(const unsigned short address, const unsigned char value) {
   if (address < 0x8000) {
     return cartridge.mbc->writeByte(address, value);
   } else if (address < 0xA000) {
-    gpuWriteByte(address - 0x8000, value);
-    return 1;
+    return gpuWriteByte(address - 0x8000, value);
   } else if (address < 0xC000) {
     return cartridge.mbc->writeByte(address, value);
   } else if (address < 0xE000) {
