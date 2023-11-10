@@ -8,6 +8,7 @@
                 "${workspaceRoot}/libs/wsServer/include",
                 "${workspaceFolder}/libs/cJSON",
                 "${workspaceRoot}/libs/cJSON",
+                "${workspaceRoot}/Testing/Cinoop/include",
                 "/usr/include",
                 "/usr/include/gtk-4.0",
                 "/usr/include/graphene-1.0",
@@ -34,7 +35,7 @@
                 "/usr/lib/x86_64-linux-gnu/glib-2.0/include",
                 "/usr/lib/x86_64-linux-gnu/graphene-1.0/include"
             ],
-            "defines": ["${default}"],
+            "defines": ["${default}", "__USE_POSIX199309=1"],
             "compilerPath": "/usr/bin/gcc"
         }
     ],

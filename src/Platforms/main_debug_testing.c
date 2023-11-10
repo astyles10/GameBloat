@@ -4,6 +4,12 @@
 #include "gpu.h"
 #include "logger.h"
 
+#include "cin_cpu.h"
+#include "cin_gpu.h"
+#include "interrupt.h"
+
+// #include 
+
 #define __USE_POSIX 1
 #define __USE_POSIX199309 1
 
@@ -58,6 +64,11 @@ int main (int argc, char **argv) {
     const int aCpuTicks = cpuStep();
     gpuStep(aCpuTicks);
     interruptStep();
+
+    cin_cpuStep();
+    cin_gpuStep();
+    cin_interruptStep();
+    // interruptStep()
     // fgets(aKeyboardInput, 64, stdin);
     // if (aKeyboardInput[0] == 'r') {
     //   resetGame(aGameFilename);
