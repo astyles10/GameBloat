@@ -1,0 +1,9 @@
+* socket.io-client CORS errors: could not connect to local web server due to CORS being unconfigured on server side.
+  Either find a new http server library, finish off more of SimpleWebServer or use a different client socket library
+
+Hook up gameboy canvas screen data to websocket connection data
+Allow resizing of gameboy screen
+
+https://gist.github.com/davismj/cc632f6e8960c9c212d1e4ce08ef5749
+https://aurelia.io/docs/templating/custom-elements#bindable-properties
+http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings

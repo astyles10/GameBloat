@@ -1,0 +1,419 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+make: *** No rule to make target 'all'.  Stop.
+
+# GNU Make 4.3
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Wed Jul  6 05:55:59 2022
+
+# Variables
+
+# environment
+GDK_BACKEND = x11
+# environment
+LC_ALL = C
+# environment
+NO_AT_BRIDGE = 1
+# environment
+GTK_RC_FILES = /etc/gtk/gtkrc:/home/beefmince/.gtkrc:/home/beefmince/.config/gtkrc
+# environment
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-379f2e0e-d3e7-4e94-99b9-267d4e27ba8a.sock
+# makefile (from 'Makefile', line 8)
+CFILES := src/bios.c src/memory.c src/MBC.c src/CBOpcodeTable.c src/BaseOpcodeTable.c src/Platforms/main_gtk.c src/Platforms/main_server.c src/cpu.c src/cartridge.c src/registers.c src/interrupt.c src/MBC/MBC5.c src/MBC/MBCNone.c src/MBC/MBC3.c src/MBC/MBC2.c src/MBC/MBC1.c src/MBC/MBC4.c src/gpu.c
+# environment
+VSCODE_CWD = /home/beefmince/dev_tools/VSCode-linux-x64
+# default
+MAKE_COMMAND := make
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+PWD = /home/beefmince/Projects/GB_Emulator_Stuff/GBC_Emulator_C
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+MAIL = /var/spool/mail/beefmince
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+VSCODE_LOG_STACK = false
+# automatic
+%F = $(notdir $%)
+# environment
+VSCODE_CODE_CACHE_PATH = /home/beefmince/.config/Code/CachedData/c3511e6c69bb39013c4a4b7b9566ec1ca73fc4d5
+# environment
+XDG_SESSION_PATH = /org/freedesktop/DisplayManager/Session1
+# environment
+LANG = C
+# environment
+XAUTHORITY = /home/beefmince/.Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# makefile
+MAKEFLAGS = pqrR
+# makefile
+CURDIR := /home/beefmince/Projects/GB_Emulator_Stuff/GBC_Emulator_C
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# makefile (from 'Makefile', line 7)
+MODULES := MBC
+# environment
+PAM_KWALLET5_LOGIN = /run/user/1000/kwallet5.socket
+# environment
+MFLAGS = -pqrR
+# default
+.SHELLFLAGS := -c
+# environment
+XDG_CONFIG_DIRS = /home/beefmince/.config/kdedefaults:/etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# makefile (from 'Makefile', line 6)
+ODIR := debug
+# environment
+XCURSOR_THEME = Sweet-cursors
+# environment
+XDG_SESSION_DESKTOP = KDE
+# makefile (from 'Makefile', line 1)
+MAKEFILE_LIST := Makefile
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+VSCODE_PID = 3045
+# environment
+XDG_SESSION_TYPE = x11
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+SESSION_MANAGER = local/archbtw:@/tmp/.ICE-unix/1075,unix/archbtw:/tmp/.ICE-unix/1075
+# automatic
+*F = $(notdir $*)
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1000/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-gb","availableLanguages":{},"_languagePackSupport":true}
+# makefile (from 'Makefile', line 3)
+IDIR := -Iinclude
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# makefile (from 'Makefile', line 9)
+OBJS :=  debug/bios.o  debug/memory.o  debug/MBC.o  debug/CBOpcodeTable.o  debug/BaseOpcodeTable.o  debug/Platforms/main_gtk.o  debug/Platforms/main_server.o  debug/cpu.o  debug/cartridge.o  debug/registers.o  debug/interrupt.o  debug/MBC/MBC5.o  debug/MBC/MBCNone.o  debug/MBC/MBC3.o  debug/MBC/MBC2.o  debug/MBC/MBC1.o  debug/MBC/MBC4.o  debug/gpu.o
+# makefile
+SHELL = /bin/sh
+# default
+MAKECMDGOALS := all
+# environment
+DOTNET_BUNDLE_EXTRACT_BASE_DIR = /home/beefmince/.cache/dotnet_bundle_extract
+# environment
+SHLVL = 0
+# makefile (from 'Makefile', line 2)
+SDIR := src
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+PATH = /home/beefmince/anaconda3/bin:/home/beefmince/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/home/beefmince/.dotnet/tools:/usr/lib/jvm/default/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl:/usr/lib/jvm/default/bin
+# default
+MAKEFILES := 
+# environment
+MOTD_SHOWN = pam
+# automatic
+^F = $(notdir $^)
+# environment
+INVOCATION_ID = 14c2cad3c9c443e5b5207d64811d116b
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?F = $(notdir $?)
+# environment
+KDE_APPLICATIONS_AS_SCOPE = 1
+# environment
+XDG_SEAT = seat0
+# environment
+XDG_CURRENT_DESKTOP = KDE
+# automatic
++F = $(notdir $+)
+# environment
+XDG_SEAT_PATH = /org/freedesktop/DisplayManager/Seat0
+# environment
+DESKTOP_SESSION = plasma
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = KDE
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+LOGNAME = beefmince
+# environment
+XDG_VTNR = 1
+# makefile
+.DEFAULT_GOAL := emulator
+# environment
+SYSTEMD_EXEC_PID = 1111
+# environment
+DISPLAY = :0
+# environment
+GTK_MODULES = canberra-gtk-module
+# environment
+USER = beefmince
+# default
+MAKE_VERSION := 4.3
+# environment
+KDE_SESSION_UID = 1000
+# 'override' directive
+.SHELLSTATUS := 0
+# environment
+MANAGERPID = 1024
+# environment
+_ = /usr/bin/make
+# environment
+XDG_RUNTIME_DIR = /run/user/1000
+# makefile (from 'Makefile', line 4)
+CFLAGS := -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+# environment
+JOURNAL_STREAM = 8:32815
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+GTK2_RC_FILES = /etc/gtk-2.0/gtkrc:/home/beefmince/.gtkrc-2.0:/home/beefmince/.config/gtkrc-2.0
+# environment
+HOME = /home/beefmince
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1000/vscode-8b9bcc11-1.67.2-main.sock
+# environment
+XDG_SESSION_ID = 2
+# environment
+XCURSOR_SIZE = 24
+# default
+.RECIPEPREFIX := 
+# automatic
+<F = $(notdir $<)
+# default
+SUFFIXES := 
+# environment
+QT_AUTO_SCREEN_SCALE_FACTOR = 0
+# environment
+KDE_SESSION_VERSION = 5
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink guile load
+# makefile (from 'Makefile', line 1)
+CC := gcc
+# makefile (from 'Makefile', line 5)
+LFLAGS := -lm `pkg-config --libs gtk4`
+# environment
+KDE_FULL_SESSION = true
+# environment
+DOTNET_ROOT = /usr/share/dotnet
+# variable set hash-table stats:
+# Load=107/1024=10%, Rehash=0, Collisions=7/150=5%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# src (device 66309, inode 5908481): No files, no impossibilities so far.
+# . (device 66309, inode 5908457): 19 files, no impossibilities.
+
+# 19 files, no impossibilities in 2 directories.
+
+# Implicit Rules
+
+debug/%.o: src/%.c
+#  recipe to execute (from 'Makefile', line 15):
+	@mkdir -p "$(@D)"
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+# 1 implicit rules, 0 (0.0%) terminal.
+# Files
+
+# Not a target:
+debug/gpu.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/bios.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/CBOpcodeTable.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+debug:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 19):
+	@mkdir $@
+
+# Not a target:
+debug/cartridge.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-31 07:36:33.125268563
+#  File has been updated.
+#  Successfully updated.
+
+ 
+# Not a target:
+debug/Platforms/main_gtk.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/registers.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/memory.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+clean:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 22):
+	@rm $(OBJS)
+
+# Not a target:
+debug/MBC/MBC1.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/cpu.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/MBC/MBC3.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/MBC/MBC5.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/interrupt.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+# Not a target:
+debug/MBC/MBC4.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/MBC/MBCNone.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/Platforms/main_server.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/BaseOpcodeTable.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+emulator: debug debug/bios.o debug/memory.o debug/MBC.o debug/CBOpcodeTable.o debug/BaseOpcodeTable.o debug/Platforms/main_gtk.o debug/Platforms/main_server.o debug/cpu.o debug/cartridge.o debug/registers.o debug/interrupt.o debug/MBC/MBC5.o debug/MBC/MBCNone.o debug/MBC/MBC3.o debug/MBC/MBC2.o debug/MBC/MBC1.o debug/MBC/MBC4.o debug/gpu.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'Makefile', line 12):
+	$(CC) $(ODIR)/*.o $(ODIR)/$(MODULES)/*.o -o $@ $(LFLAGS)
+
+# Not a target:
+debug/MBC.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+debug/MBC/MBC2.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# files hash-table stats:
+# Load=25/1024=2%, Rehash=0, Collisions=1/55=2%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 46 / storage = 590 B / avg = 12 B
+# current buf: size = 8162 B / used = 590 B / count = 46 / avg = 12 B
+
+# strcache performance: lookups = 56 / hit rate = 17%
+# hash-table stats:
+# Load=46/8192=1%, Rehash=0, Collisions=0/56=0%
+# Finished Make data base on Wed Jul  6 05:55:59 2022
+
+ 

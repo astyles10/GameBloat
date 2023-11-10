@@ -1,8 +1,8 @@
 CC		:=	gcc
 SDIR	:=	src
 IDIR	:=	-Iinclude
-CFLAGS	:=	$(IDIR) -g -Wall -DLIN -DLITTLE_ENDIAN
-LFLAGS	:=	-lm
+CFLAGS	:=	$(IDIR) -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+LFLAGS	:=	-lm `pkg-config --libs gtk4`
 ODIR	:=	debug
 MODULES	:=	MBC
 CFILES	:=	$(shell find $(SDIR) -name "*.c")

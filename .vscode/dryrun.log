@@ -1,0 +1,42 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/home/beefmince/Projects/GB_Emulator_Stuff/GBC_Emulator_C'
+mkdir debug
+mkdir -p "debug"
+gcc -c -o debug/bios.o src/bios.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/memory.o src/memory.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/MBC.o src/MBC.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/CBOpcodeTable.o src/CBOpcodeTable.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/BaseOpcodeTable.o src/BaseOpcodeTable.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/Platforms"
+gcc -c -o debug/Platforms/main_gtk.o src/Platforms/main_gtk.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/Platforms"
+gcc -c -o debug/Platforms/main_server.o src/Platforms/main_server.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/cpu.o src/cpu.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/cartridge.o src/cartridge.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/registers.o src/registers.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/interrupt.o src/interrupt.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/MBC"
+gcc -c -o debug/MBC/MBC5.o src/MBC/MBC5.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/MBC"
+gcc -c -o debug/MBC/MBCNone.o src/MBC/MBCNone.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/MBC"
+gcc -c -o debug/MBC/MBC3.o src/MBC/MBC3.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/MBC"
+gcc -c -o debug/MBC/MBC2.o src/MBC/MBC2.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/MBC"
+gcc -c -o debug/MBC/MBC1.o src/MBC/MBC1.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug/MBC"
+gcc -c -o debug/MBC/MBC4.o src/MBC/MBC4.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+mkdir -p "debug"
+gcc -c -o debug/gpu.o src/gpu.c -Iinclude -g -Wall -DLIN -DLITTLE_ENDIAN `pkg-config --cflags gtk4`
+gcc debug/*.o debug/MBC/*.o -o emulator -lm `pkg-config --libs gtk4`
+make: Leaving directory '/home/beefmince/Projects/GB_Emulator_Stuff/GBC_Emulator_C'
+ 

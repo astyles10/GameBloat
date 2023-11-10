@@ -1,31 +1,22 @@
 #pragma once
+#include <cJSON.h>
 #include <stdio.h>
 
-#define LOW_NIBBLE 0x000F
-#define HIGH_NIBBLE 0x00F0
-#define LOW_BYTE 0x00FF
-#define HIGH_BYTE 0xFF00
-#define LOW_WORD 0x0000FFFF
-#define HIGH_WORD 0xFFFF0000
-
-extern unsigned char flagCarry;
-extern unsigned char flagHalfCarry;
-extern unsigned char flagNegative;
-extern unsigned char flagZero;
-extern unsigned long tickCounter;
-
-void setFlag(unsigned char flag);
-void removeFlag(unsigned char flag);
-unsigned char checkFlag(unsigned char flag);
+extern const unsigned char flagCarry;
+extern const unsigned char flagHalfCarry;
+extern const unsigned char flagNegative;
+extern const unsigned char flagZero;
 
 void reset(void);
-void close(void);
+void cpuClose(void);
 int loadROM(const char *);
+int cpuStep(void);
+cJSON* GetCPUDataAsJSON(void);
 
 // 8-Bit loads
 void ld_r_s(unsigned char *ptrR, unsigned char n);
 void ld_d_r(unsigned char r);
-void ld_d_n(unsigned char *ptrD, unsigned char n);
+void ld_d_n(unsigned char n);
 void ld_A_ss(const unsigned short ss);
 void ld_dd_A(const unsigned short memLocation);
 void ld_A_c(void);

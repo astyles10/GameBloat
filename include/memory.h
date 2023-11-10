@@ -1,3 +1,5 @@
+#pragma once
+
 /*
     Memory Map
 
@@ -16,27 +18,17 @@
       INTERRUPT_ENR            0xFFFF
 */
 
-/*
-    Interrupt Addresses
- */
-
-#define VERT_BLNK_INTR_START 0x40
-#define LCDC_STATUS_INTR_START 0x48
-#define TIMER_OVERFLOW_INTR 0x50
-#define SERIAL_TX_COMPLETION_INTR 0x58
-#define HIGH_LOW_P10_P13_INTR 0x60
-
 void initializeMemory(void);
 
 typedef unsigned char (*readByteFromMemory)(const unsigned short memAddr);
 typedef unsigned short (*readShortFromMemory)(const unsigned short memAddr);
-typedef int (*writeByteToMemory)(const unsigned short memAddr, const unsigned char value);
-typedef int (*writeShortToMemory)(const unsigned short memAddr, const unsigned short value);
+typedef int (*writeByteToMemory)(const unsigned short memAddr,
+                                 const unsigned char value);
+typedef int (*writeShortToMemory)(const unsigned short memAddr,
+                                  const unsigned short value);
 
-struct MMU
-{
-  readByteFromMemory readByte;
-  readShortFromMemory readShort;
-  writeByteToMemory writeByte;
-  writeShortToMemory writeShort;
-} extern MMU;
+unsigned char mmuReadByte(const unsigned short address);
+unsigned short mmuReadShort(const unsigned short address);
+int mmuWriteByte(const unsigned short address, const unsigned char value);
+int mmuWriteShort(const unsigned short address, const unsigned short value);
+
