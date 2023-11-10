@@ -22,7 +22,7 @@ void initializeMemory(void) {
 
 unsigned char mmuReadByte(const unsigned short address) {
   static const char baseLogMessage[] = "mmuReadByte: Unimplemented memory address 0x%X (%s)";
-  char logMessage[80];
+  char logMessage[81];
   if (address < 0x8000) {
     return cartridge.mbc->readByte(address);
   } else if (address < 0xA000) {

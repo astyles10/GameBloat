@@ -108,10 +108,22 @@ struct GPU GPU = {
 };
 
 void initGPU(void) {
-    memset(&GPU, 0, sizeof(GPU));
-    memset(tiles, 0, sizeof(tiles));
-    // TODO: Remove this once used
-    (void)frameBuffer;
+  // memset(&GPU, 0, sizeof(GPU));
+  GPU.registers.lcdControl = 0;
+  GPU.registers.lcdStatus = 0;
+  GPU.registers.scrollX = 0;
+  GPU.registers.scrollY = 0;
+  GPU.registers.lcdYCoordinate = 0;
+  GPU.registers.lcdLYCompare = 0;
+  GPU.registers.oamDMASourceAddress = 0;
+  GPU.registers.objPalette0 = 0;
+  GPU.registers.objPalette1 = 0;
+  GPU.registers.lcdWindowY = 0;
+  GPU.registers.lcdWindowX = 0;
+  memset(GPU.VRAM, 0, sizeof(GPU.VRAM));
+  memset(tiles, 0, sizeof(tiles));
+  // TODO: Remove this once used
+  (void)frameBuffer;
 }
 
 // Private
@@ -133,7 +145,7 @@ void gpuStep(int tick) {
         GPU.registers.lcdYCoordinate++;
         if (GPU.registers.lcdYCoordinate == 143) {
           if (GPU.registers.lcdYCoordinate == GPU.registers.lcdLYCompare) {
-            GPU.registers.lcdControl |= STATUS_LYC_EQUALS_LY;
+            GPU.registers.lcdStatus |= STATUS_LYC_EQUALS_LY;
             writeInterrupt(0xFF0F, VBLANK_INTERRUPT);
           }
           mode = VBLANK;
@@ -170,11 +182,11 @@ void gpuStep(int tick) {
       }
       break;
   }
-  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-  printf("lcdControl register: %u, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-  printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-  printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-  printf("Window Tile Map: %u", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+  // int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+  // printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  // printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  // printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  // printf("Window Tile Map: %u", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   #ifdef DEBUG_PRINT
   const char* modeStr = determineModeClock();
   printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
@@ -233,8 +245,10 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
 
 int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   // TODO: Register values with specific bits require bitwise operations
+  printf("gpuWriteRegister: address 0x%X, value 0x%X\n", address, value);
   if (address == 0xFF40) {
     GPU.registers.lcdControl = value;
+    printf("GPU ptr: %p, lcdControl: 0x%X\n", &GPU, GPU.registers.lcdControl);
   } else if (address == 0xFF41) {
     GPU.registers.lcdStatus = value;
   } else if (address == 0xFF42) {

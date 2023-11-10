@@ -94,6 +94,7 @@ void reset(void) {
   int i;
   for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
     mmuWriteByte(resetAddresses[i], resetValues[i]);
+    printf("%d Init: writing address 0x%X with value 0x%X\n", i, resetAddresses[i], resetValues[i]);
   }
 
   interruptRegisters.enable = 0;
@@ -219,9 +220,10 @@ int cpuStep(void) {
   #endif
   int ticksUsed = tickCounter - tickStart;
   printf("Ticks used = %d\n", ticksUsed);
-  char c = getchar();
+  printf("Cycles: %d\n", cycles);
+  // char c = getchar();
 
-  // if (cycles >= 15000) {
+  if (cycles >= 12375) {
     // if (1) {
     printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
     printf(
@@ -236,8 +238,8 @@ int cpuStep(void) {
     printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
     printf("Total cycles (ticks): %d\n", tickCounter);
     printf("\n");
-    // char c = getchar();
-  // }
+    char c = getchar();
+  }
 
   ++cycles;
 

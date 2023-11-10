@@ -12,7 +12,12 @@
         "time.h": "c",
         "gpu.h": "c",
         "memory.h": "c",
-        "source_location": "c"
+        "source_location": "c",
+        "*.ipp": "c",
+        "thread": "c",
+        "signal.h": "c",
+        "siginfo_t.h": "c",
+        "logger.h": "c"
     },
     "C_Cpp.default.intelliSenseMode": "linux-gcc-x64"
 }
