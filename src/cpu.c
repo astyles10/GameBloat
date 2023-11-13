@@ -94,7 +94,7 @@ void reset(void) {
   int i;
   for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
     mmuWriteByte(resetAddresses[i], resetValues[i]);
-    printf("%d Init: writing address 0x%X with value 0x%X\n", i, resetAddresses[i], resetValues[i]);
+    // printf("%d Init: writing address 0x%X with value 0x%X\n", i, resetAddresses[i], resetValues[i]);
   }
 
   interruptRegisters.enable = 0;
@@ -134,7 +134,7 @@ int cpuStep(void) {
     tickCounter += baseOpcodeTicks[instruction];
   }
   unsigned short operand = 0;
-  printf("registers.pc = 0x%X\n", registers.PC);
+  printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
 
   // Determine number of instruction operands
   if (aOpcode.operandType == OPERAND_CHAR) {
@@ -177,7 +177,7 @@ int cpuStep(void) {
   lastOperand = operand;
 
   // Post instruction debug print
-  #ifdef DEBUG_PRINT
+  // #ifdef DEBUG_PRINT
   printf("\n*********************************\n");
   switch (aOpcode.operandType) {
     case (OPERAND_CHAR):
@@ -216,30 +216,30 @@ int cpuStep(void) {
   printf("Next instruction = %s\n", aNextOpcode.asmName);
   printf("\n");
 
-  printf("\n*********************************\n");
-  #endif
-  int ticksUsed = tickCounter - tickStart;
-  printf("Ticks used = %d\n", ticksUsed);
   printf("Cycles: %d\n", cycles);
+  printf("\n*********************************\n");
+  // #endif
+  int ticksUsed = tickCounter - tickStart;
+  // printf("Ticks used = %d\n", ticksUsed);
   // char c = getchar();
 
-  if (cycles >= 12375) {
-    // if (1) {
-    printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-    printf(
-        "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: "
-        "0x%02X "
-        "H: 0x%02X L: 0x%02X\n",
-        registers.A, registers.B, registers.C, registers.D, registers.E,
-        registers.F, registers.H, registers.L);
-    printf("Flags: Z: %d N: %d H: %d C: %d\n", checkFlag(flagZero),
-           checkFlag(flagNegative), checkFlag(flagHalfCarry),
-           checkFlag(flagCarry));
-    printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
-    printf("Total cycles (ticks): %d\n", tickCounter);
-    printf("\n");
-    char c = getchar();
-  }
+  // if (cycles >= 12375) {
+  //   // if (1) {
+  //   printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+  //   printf(
+  //       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: "
+  //       "0x%02X "
+  //       "H: 0x%02X L: 0x%02X\n",
+  //       registers.A, registers.B, registers.C, registers.D, registers.E,
+  //       registers.F, registers.H, registers.L);
+  //   printf("Flags: Z: %d N: %d H: %d C: %d\n", checkFlag(flagZero),
+  //          checkFlag(flagNegative), checkFlag(flagHalfCarry),
+  //          checkFlag(flagCarry));
+  //   printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
+  //   printf("Total cycles (ticks): %d\n", tickCounter);
+  //   printf("\n");
+  //   char c = getchar();
+  // }
 
   ++cycles;
 
@@ -341,7 +341,7 @@ void ldh_A_n(unsigned char n) {
   const unsigned short memLocation = 0xFF00 + n;
   registers.A = mmuReadByte(memLocation);
   if (memLocation == 0xFF44) {
-    printf("ldh_A_n: set register A to %u\n", registers.A);
+    printf("ldh_A_n: set register A to 0x%X\n", registers.A);
   }
 }
 

@@ -38,8 +38,8 @@ struct GPU {
 } extern GPU;
 
 unsigned char gpuReadByte(const unsigned short address);
-void gpuReset(void);
-void gpuStep(int);
 int gpuWriteByte(const unsigned short address, const unsigned char value);
 unsigned char gpuReadRegister(const unsigned short address);
 int gpuWriteRegister(const unsigned short address, const unsigned char value);
+void gpuReset(void);
+void gpuStep(int inTicks);

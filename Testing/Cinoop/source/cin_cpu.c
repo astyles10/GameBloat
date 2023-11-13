@@ -445,8 +445,8 @@ void cin_cpuStep(void) {
 	if(realtimeDebugEnable) realtimeDebug();
 	
 	instruction = readByte(cin_registers.pc++);
-	printf("cin_registers.pc = 0x%X\n", cin_registers.pc);
-	int tickStart = ticks;
+	// printf("cin_registers.pc = 0x%X\n", cin_registers.pc);
+	// int tickStart = ticks;
 	
 	if(instructions[instruction].operandLength == 1) operand = (unsigned short)readByte(cin_registers.pc);
 	if(instructions[instruction].operandLength == 2) operand = readShort(cin_registers.pc);
@@ -471,27 +471,27 @@ void cin_cpuStep(void) {
 	}
 	
 	ticks += instructionTicks[instruction];
-	int tickEnd = ticks - tickStart;
-	printf("Ticks used = %d\n", tickEnd);
+	// int tickEnd = ticks - tickStart;
+	// printf("Ticks used = %d\n", tickEnd);
 	// char c = getchar();
 
 	// if (!(cycles % 10)) {
-	if (cycles >= 12375) {
-		printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
-    printf("\n*********************************\n");
-    printf(
-        "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: "
-        "0x%02X F: 0x%02X "
-        "H: 0x%02X L: 0x%02X\n",
-        cin_registers.a, cin_registers.b, cin_registers.c, cin_registers.d,
-        cin_registers.e, cin_registers.f, cin_registers.h, cin_registers.l);
-    printf("Flags: Z: %d N: %d H: %d C: %d\n", FLAGS_ISZERO,
-           FLAGS_ISNEGATIVE, FLAGS_ISHALFCARRY, FLAGS_ISCARRY);
-    printf("PC: 0x%02X SP: 0x%02X\n", cin_registers.pc, cin_registers.sp);
-    printf("Total cycles (ticks): %lu\n", ticks);
-    printf("\n*********************************\n");
-    char c = getchar();
-	}
+	// if (cycles >= 12375) {
+	// 	printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+  //   printf("\n*********************************\n");
+  //   printf(
+  //       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: "
+  //       "0x%02X F: 0x%02X "
+  //       "H: 0x%02X L: 0x%02X\n",
+  //       cin_registers.a, cin_registers.b, cin_registers.c, cin_registers.d,
+  //       cin_registers.e, cin_registers.f, cin_registers.h, cin_registers.l);
+  //   printf("Flags: Z: %d N: %d H: %d C: %d\n", FLAGS_ISZERO,
+  //          FLAGS_ISNEGATIVE, FLAGS_ISHALFCARRY, FLAGS_ISCARRY);
+  //   printf("PC: 0x%02X SP: 0x%02X\n", cin_registers.pc, cin_registers.sp);
+  //   printf("Total cycles (ticks): %lu\n", ticks);
+  //   printf("\n*********************************\n");
+  //   char c = getchar();
+	// }
 	++cycles;
 }
 

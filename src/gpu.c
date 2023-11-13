@@ -9,6 +9,8 @@
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
 // http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-Graphics
 
+void NextScanline(void);
+void HandleLCDModeChange(const int inMode);
 void updateTile(const unsigned short address, const unsigned char value);
 void renderScan(void);
 void initGPU(void);
@@ -71,7 +73,8 @@ enum LcdStatus {
   STATUS_PPU_MODE_LOWER = (1 << 0)
 };
 
-static const unsigned char MAX_LINES = 154;
+static const unsigned char MAX_LINES = 153;
+static const unsigned char MAX_Y = 144;
 
 const BasicColour Palette[4] = {
   {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}
@@ -134,6 +137,51 @@ void gpuReset() {
   initGPU();
 }
 
+void NextScanline() {
+  if (GPU.registers.lcdYCoordinate == MAX_Y) {
+    GPU.registers.lcdYCoordinate = 0;
+  } else {
+    ++GPU.registers.lcdYCoordinate;
+  }
+  if (GPU.registers.lcdYCoordinate == GPU.registers.lcdLYCompare) {
+    GPU.registers.lcdStatus |= STATUS_LYC_EQUALS_LY;
+    if (GPU.registers.lcdStatus & STATUS_LYC_INT_SELECT) {
+      writeInterrupt(0xFF0F, LCD_INTERRUPT);
+    }
+  } else {
+    GPU.registers.lcdStatus &= ~(STATUS_LYC_EQUALS_LY);
+  }
+}
+
+void HandleLCDModeChange(const int inMode) {
+  mode = inMode;
+  GPU.registers.lcdStatus &= 0xFC;
+  GPU.registers.lcdStatus |= (unsigned char)inMode;
+  switch (mode) {
+    case OAM_SCANLINE:
+      if (GPU.registers.lcdStatus & STATUS_MODE_2_INT_SELECT) {
+        // Interrupt set bit LCD requested
+        writeInterrupt(0xFF0F, LCD_INTERRUPT);
+      }
+      break;
+    case HBLANK:
+      if (GPU.registers.lcdStatus & STATUS_MODE_1_INT_SELECT) {
+        // Interrupt set bit LCD requested
+        writeInterrupt(0xFF0F, LCD_INTERRUPT);
+      }
+      break;
+    case VBLANK:
+      if (GPU.registers.lcdStatus & STATUS_MODE_0_INT_SELECT) {
+        // Interrupt set bit LCD requested
+        writeInterrupt(0xFF0F, LCD_INTERRUPT);
+      }
+      writeInterrupt(0xFF0F, VBLANK_INTERRUPT);
+      break;
+    default:
+      break;
+  }
+}
+
 void gpuStep(int tick) {
   modeClock += tick;
 
@@ -142,15 +190,11 @@ void gpuStep(int tick) {
       if (modeClock >= HBLANK_CYCLE) {
         modeClock -= HBLANK_CYCLE;
         modeString = modeStrings[0];
-        GPU.registers.lcdYCoordinate++;
-        if (GPU.registers.lcdYCoordinate == 143) {
-          if (GPU.registers.lcdYCoordinate == GPU.registers.lcdLYCompare) {
-            GPU.registers.lcdStatus |= STATUS_LYC_EQUALS_LY;
-            writeInterrupt(0xFF0F, VBLANK_INTERRUPT);
-          }
-          mode = VBLANK;
+        NextScanline();
+        if (GPU.registers.lcdYCoordinate == 144) {
+          HandleLCDModeChange(VBLANK);
         } else {
-          mode = OAM_SCANLINE;
+          HandleLCDModeChange(OAM_SCANLINE);
         }
       }
       break;
@@ -158,10 +202,10 @@ void gpuStep(int tick) {
       if (modeClock >= VBLANK_CYCLE) {
         modeClock -= VBLANK_CYCLE;
         modeString = modeStrings[1];
-        GPU.registers.lcdYCoordinate++;
+        NextScanline();
 
         if (GPU.registers.lcdYCoordinate >= MAX_LINES) {
-          mode = OAM_SCANLINE;
+          HandleLCDModeChange(OAM_SCANLINE);
           GPU.registers.lcdYCoordinate = 0;
         }
       }
@@ -170,23 +214,23 @@ void gpuStep(int tick) {
       if (modeClock >= OAM_SCAN_CYCLE) {
         modeClock -= OAM_SCAN_CYCLE;
         modeString = modeStrings[2];
-        mode = VRAM_SCANLINE;
+        HandleLCDModeChange(VRAM_SCANLINE);
       }
       break;
     case VRAM_SCANLINE:  // HDraw
       if (modeClock >= VRAM_SCAN_CYCLE) {
         modeString = modeStrings[3];
         modeClock -= VRAM_SCAN_CYCLE;
-        mode = HBLANK;
         renderScan();
+        HandleLCDModeChange(HBLANK);
       }
       break;
   }
-  // int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-  // printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-  // printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-  // printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-  // printf("Window Tile Map: %u", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+  printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   #ifdef DEBUG_PRINT
   const char* modeStr = determineModeClock();
   printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
@@ -305,12 +349,10 @@ void updateTile(const unsigned short addr, const unsigned char val) {
       printf("Writing value tile %u, row %u, pixel %u\n", tile, subRow, pixel);
     tiles[tile][subRow][pixel] = writeValue;
   }
-  // char aKeyboardInput[65];
-  // fgets(aKeyboardInput, 64, stdin);
 }
 
 void renderScan() {
-  // TODO: Complete rendering
+  // RenderScan is the point where pixels are drawn to the screen
   // Determine whether to use map 0 or 1
   unsigned short mapOffset =
       (GPU.registers.lcdControl & BG_TILE_MAP_DISPLAY_SELECT) ? 0x1C00 : 0x1800;

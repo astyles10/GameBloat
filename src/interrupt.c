@@ -1,3 +1,5 @@
+#include "cpu.h"
+#include "memory.h"
 #include "interrupt.h"
 #include "registers.h"
 
@@ -42,6 +44,12 @@ void writeInterrupt(unsigned short address, unsigned char interruptBit) {
   }
 }
 
+void HandleInterrupt(const int inInterrupt, const int inInterruptAddress) {
+  registers.PC = inInterruptAddress;
+  interruptRegisters.request &= ~inInterrupt;
+  tickCounter += 20;
+}
+
 void interruptStep(void) {
   if (interruptRegisters.masterEnable == 1) {
     unsigned char flags =
@@ -49,20 +57,17 @@ void interruptStep(void) {
     if (flags > 0) {
       interruptRegisters.masterEnable = 0;
       if (flags & VBLANK_INTERRUPT) {
-        registers.PC = VERT_BLNK_INTR_START;
-        interruptRegisters.request &= VBLANK_INTERRUPT;
+        HandleInterrupt(VBLANK_INTERRUPT, VERT_BLNK_INTR_START);
       } else if (flags & LCD_INTERRUPT) {
-        registers.PC = LCDC_STATUS_INTR_START;
-        interruptRegisters.request &= ~LCD_INTERRUPT;
+        HandleInterrupt(LCD_INTERRUPT, LCDC_STATUS_INTR_START);
       } else if (flags & TIMER_INTERRUPT) {
         registers.PC = TIMER_OVERFLOW_INTR;
         interruptRegisters.request &= ~TIMER_INTERRUPT;
+        HandleInterrupt(TIMER_INTERRUPT, TIMER_OVERFLOW_INTR);
       } else if (flags & SERIAL_INTERRUPT) {
-        registers.PC = SERIAL_TX_COMPLETION_INTR;
-        interruptRegisters.request &= ~SERIAL_INTERRUPT;
+        HandleInterrupt(SERIAL_INTERRUPT, SERIAL_TX_COMPLETION_INTR);
       } else if (flags & JOYPAD_INTERRUPT) {
-        registers.PC = HIGH_LOW_P10_P13_INTR;
-        interruptRegisters.request &= ~JOYPAD_INTERRUPT;
+        HandleInterrupt(JOYPAD_INTERRUPT, HIGH_LOW_P10_P13_INTR);
       }
     }
   }

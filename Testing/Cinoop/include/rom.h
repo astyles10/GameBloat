@@ -40,5 +40,5 @@ enum romType {
 
 extern const char *romTypeString[256];
 
-unsigned char loadROM(char *filename);
+unsigned char cin_loadROM(char *filename);
 void unloadROM(void);
