@@ -45,7 +45,7 @@ void writeInterrupt(unsigned short address, unsigned char interruptBit) {
 }
 
 void HandleInterrupt(const int inInterrupt, const int inInterruptAddress) {
-  registers.PC = inInterruptAddress;
+  call_nn((unsigned short)inInterrupt);
   interruptRegisters.request &= ~inInterrupt;
   tickCounter += 20;
 }
