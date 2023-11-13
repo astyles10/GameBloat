@@ -106,7 +106,7 @@ void DebugStep(void) {
   }
   if (aValuesNotEqual) {
     DebugPrint();
-    getchar();
+    // getchar();
   }
 }
 
@@ -132,7 +132,8 @@ int main (int argc, char **argv) {
     gpuStep(aCpuTicks);
     interruptStep();
     printf("GameBloat tick counter: %d\n", tickCounter);
-    if (registers.PC > 0x217) {
+    //Breakpoints: 0x237 + 
+    if (registers.PC == 0x237) {
       getchar();
     }
 

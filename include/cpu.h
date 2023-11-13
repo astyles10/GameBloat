@@ -6,7 +6,7 @@ extern const unsigned char flagCarry;
 extern const unsigned char flagHalfCarry;
 extern const unsigned char flagNegative;
 extern const unsigned char flagZero;
-extern unsigned int tickCounter;
+extern unsigned long int tickCounter;
 
 void reset(void);
 void cpuClose(void);
