@@ -19,5 +19,6 @@ enum interruptBits {
 
 extern struct interruptRegisters interruptRegisters;
 
+void handleInterrupt(const int inInterrupt, const int inInterruptAddress);
 void writeInterrupt(unsigned short address, unsigned char interruptBit);
 void interruptStep(void);

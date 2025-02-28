@@ -391,7 +391,6 @@ void renderScan() {
     if (colour > 0) {
       tileHasColour = 1;
     }
-    // printf("$%02x ", tiles[tile][y][x]);
     BasicColour rCol = Palette[colour];
     // plot the data here
     frameBuffer[canvasOffset].r = rCol.r;
@@ -400,25 +399,19 @@ void renderScan() {
     ++x;
     ++canvasOffset;
     if (x == 8) {
-      // if (tileHasColour == 1)
-      // printf("\n");
       x = 0;
       lineOffset = (lineOffset + 1) & 31;
       tile = (unsigned short)gpuReadByte(mapOffset + lineOffset);
-      // if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
-      //   tile += 256;
-      //   if (tile > 383) {
-      //     printf("Invalid Tile number %u\n", tile);
-      //     return;
-      //   }
-      // }
+      if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
+        tile += 256;
+        if (tile > 383) {
+          printf("Invalid Tile number %u\n", tile);
+          return;
+        }
+      }
     }
   }
-  // Maybe "breakpoint" here?
-  if (!tileHasColour)
-    return;
-  // char aKeyboardInput[65];
-  // fgets(aKeyboardInput, 64, stdin);
+  // Send pixels to screen at this point?
 }
 
 const char* determineModeClock(void) {

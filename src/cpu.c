@@ -176,8 +176,7 @@ int cpuStep(void) {
   lastOpcodeName = aOpcode.asmName;
   lastOperand = operand;
 
-  // Post instruction debug print
-  // #ifdef DEBUG_PRINT
+#ifdef DEBUG
   printf("\n*********************************\n");
   switch (aOpcode.operandType) {
     case (OPERAND_CHAR):
@@ -218,10 +217,9 @@ int cpuStep(void) {
 
   printf("Cycles: %d\n", cycles);
   printf("\n*********************************\n");
-  // #endif
+#endif
+
   int ticksUsed = tickCounter - tickStart;
-
-
   ++cycles;
 
   return ticksUsed;

@@ -44,10 +44,12 @@ void writeInterrupt(unsigned short address, unsigned char interruptBit) {
   }
 }
 
-void HandleInterrupt(const int inInterrupt, const int inInterruptAddress) {
+void handleInterrupt(const int inInterrupt, const int inInterruptAddress) {
   call_nn((unsigned short)inInterrupt);
   interruptRegisters.request &= ~inInterrupt;
   tickCounter += 20;
+  // This should be reworked, either the cpu step needs to check for interrupts or we handle interrupts separately after the GPU step
+  // Also need to remember to call RST after handling an interrupt
 }
 
 void interruptStep(void) {
@@ -57,17 +59,17 @@ void interruptStep(void) {
     if (flags > 0) {
       interruptRegisters.masterEnable = 0;
       if (flags & VBLANK_INTERRUPT) {
-        HandleInterrupt(VBLANK_INTERRUPT, VERT_BLNK_INTR_START);
+        handleInterrupt(VBLANK_INTERRUPT, VERT_BLNK_INTR_START);
       } else if (flags & LCD_INTERRUPT) {
-        HandleInterrupt(LCD_INTERRUPT, LCDC_STATUS_INTR_START);
+        handleInterrupt(LCD_INTERRUPT, LCDC_STATUS_INTR_START);
       } else if (flags & TIMER_INTERRUPT) {
         registers.PC = TIMER_OVERFLOW_INTR;
         interruptRegisters.request &= ~TIMER_INTERRUPT;
-        HandleInterrupt(TIMER_INTERRUPT, TIMER_OVERFLOW_INTR);
+        handleInterrupt(TIMER_INTERRUPT, TIMER_OVERFLOW_INTR);
       } else if (flags & SERIAL_INTERRUPT) {
-        HandleInterrupt(SERIAL_INTERRUPT, SERIAL_TX_COMPLETION_INTR);
+        handleInterrupt(SERIAL_INTERRUPT, SERIAL_TX_COMPLETION_INTR);
       } else if (flags & JOYPAD_INTERRUPT) {
-        HandleInterrupt(JOYPAD_INTERRUPT, HIGH_LOW_P10_P13_INTR);
+        handleInterrupt(JOYPAD_INTERRUPT, HIGH_LOW_P10_P13_INTR);
       }
     }
   }

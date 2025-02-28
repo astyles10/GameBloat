@@ -12,6 +12,7 @@
 
 void InitSignalHandlers(void);
 void SigTermHandler(int signum, siginfo_t* info, void* ptr);
+void resetGame(char *inGameFilename);
 
 #define SIG_HANDLE_MESSAGE "Process dying - SigTermHandler called\n"
 
@@ -33,8 +34,6 @@ void InitSignalHandlers() {
   sigaction(SIGKILL, &_sigact, NULL);
   sigaction(SIGSEGV, &_sigact, NULL);
 }
-
-void resetGame(char *inGameFilename);
 
 void resetGame(char *inGameFilename) {
   if (validateCart(inGameFilename)) {
