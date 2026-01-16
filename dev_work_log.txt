@@ -4,3 +4,13 @@ Running Tetris.gb
 Almost immediately gets stuck in a loop between instructions 0x234, 0x236, 0x238
 Moved CPU logging into separate functions
 Thinking PC register should be incremented later, might not be incremented correctly with 0xCB instruction
+
+LCD Y Coordinate read issue: getting 71 (0x47) instead of 0x3D
+mmuReadByte(0xFF44) -> gpuReadByte(0xFF44) -> return GPU.registers.lcdYCoordinate
+The Mode is VBLANK when it should be HBlank.
+Fixed: issue was the lcdYCoordinate being incorrectly set to 0 before checking its value to change GPU modes
+
+Current issues:
+On instruction 0x279F/0x27a1 (roughly 449768 cycles), the GPU mode is incorrectly set to VRAM Scanline mode, clock 152, line number 61
+Compared to GBEmu, the mode is HBlank, clock 0 and ly is 0
+This is probably because the gpu steps are running even when the LCD is disabled.

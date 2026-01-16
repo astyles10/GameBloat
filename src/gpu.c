@@ -90,8 +90,8 @@ static BasicColour frameBuffer[160 * 144] = {0};
     6,144 / 16 = 384 tiles
  */
 static unsigned char tiles[384][8][8] = {0};
-static unsigned char mode = 0;
-static unsigned int modeClock = 0;
+static unsigned char mode = VBLANK;
+static unsigned int modeClock = 116;
 const char* modeString;
 
 const char* modeStrings[] = {
@@ -116,7 +116,7 @@ void initGPU(void) {
   GPU.registers.lcdStatus = 0;
   GPU.registers.scrollX = 0;
   GPU.registers.scrollY = 0;
-  GPU.registers.lcdYCoordinate = 0;
+  GPU.registers.lcdYCoordinate = 153;
   GPU.registers.lcdLYCompare = 0;
   GPU.registers.oamDMASourceAddress = 0;
   GPU.registers.objPalette0 = 0;
@@ -132,13 +132,13 @@ void initGPU(void) {
 // Private
 
 void gpuReset() {
-  mode = 0;
-  modeClock = 0;
+  mode = VBLANK;
+  modeClock = 116;
   initGPU();
 }
 
 void NextScanline() {
-  if (GPU.registers.lcdYCoordinate == MAX_Y) {
+  if (GPU.registers.lcdYCoordinate == MAX_LINES) {
     GPU.registers.lcdYCoordinate = 0;
   } else {
     ++GPU.registers.lcdYCoordinate;
@@ -204,9 +204,8 @@ void gpuStep(int tick) {
         modeString = modeStrings[1];
         NextScanline();
 
-        if (GPU.registers.lcdYCoordinate >= MAX_LINES) {
+        if (GPU.registers.lcdYCoordinate == 0) {
           HandleLCDModeChange(OAM_SCANLINE);
-          GPU.registers.lcdYCoordinate = 0;
         }
       }
       break;
@@ -226,11 +225,11 @@ void gpuStep(int tick) {
       }
       break;
   }
-  // int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-  // printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-  // printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-  // printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-  // printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+  printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   #ifdef DEBUG_PRINT
   // const char* modeStr = determineModeClock();
   // printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,

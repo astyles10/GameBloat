@@ -60,6 +60,9 @@ const unsigned char resetValues[] = {
     0xF1, 0x91, 0x00, 0x00, 0x00, 0xFC, 0xFF, 0xFF, 0x00, 0x00
 };
 
+opcode DetermineOpcode(void);
+unsigned short DetermineOperand(opcode inOpcode);
+void ExecuteOpcode(const opcode inOpcode, const unsigned short inOperand);
 void DebugPrintCpuState(void);
 void DebugPrintInstruction(opcode, unsigned short);
 
@@ -131,65 +134,67 @@ void cpuClose() {
 int cpuStep(void) {
   // Read instruction from address stored in PC register
   // if (registers.PC == 0x282a) {
-  if (registers.PC == 0x234) {
+  // if (registers.PC == 0x233) {
+  if (registers.PC == 0x27a1) {
     // gpuWriteVramToFile();
     int i = 0;
     i++;
   }
-  // Dont forget to increment later
-  unsigned char instruction = mmuReadByte(registers.PC);
-  unsigned char aCbIncrement = 0;
+  printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
 
   int tickStart = tickCounter;
 
-  opcode aOpcode;
-  if (instruction == 0xCB) {
-    instruction = mmuReadByte(registers.PC + 1);
-    aOpcode = CBOpcodeTable[instruction];
-    tickCounter += cbOpcodeTicks[instruction];
-    aCbIncrement = 1;
-  } else {
-    aOpcode = baseOpcodeTable[instruction];
-    tickCounter += baseOpcodeTicks[instruction];
-  }
-  unsigned short operand = 0;
-  printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
-
-  // Determine number of instruction operands
-  if (aOpcode.operandType == OPERAND_CHAR) {
-    operand = (unsigned short)mmuReadByte(registers.PC);
-  } else if (aOpcode.operandType == OPERAND_SHORT) {
-    operand = mmuReadShort(registers.PC);
-  }
-  // Is this correct? No it segfaults lol
-  registers.PC += (1 +  aCbIncrement);
-  registers.PC += aOpcode.operandType;
-
-#ifdef DEBUG
-  DebugPrintInstruction(aOpcode, operand);
-#endif
-
-  switch (aOpcode.operandType) {
-    case (OPERAND_CHAR):
-      ((void (*)(unsigned char))aOpcode.function)(operand);
-      break;
-    case (OPERAND_SHORT):
-      ((void (*)(unsigned short))aOpcode.function)(operand);
-      break;
-    case (NO_OPERANDS):
-      ((void (*)(void))aOpcode.function)();
-      break;
-  }
+  const opcode aOpcode = DetermineOpcode();
+  const unsigned short aOperand = DetermineOperand(aOpcode);
+  ExecuteOpcode(aOpcode, aOperand);
 
   lastOpcodeName = aOpcode.asmName;
-  lastOperand = operand;
-
-#ifdef DEBUG
+  lastOperand = aOperand;
+  DebugPrintInstruction(aOpcode, aOperand);
   DebugPrintCpuState();
-#endif
 
   int ticksUsed = tickCounter - tickStart;
+  printf("CPU ticks = %d\n", ticksUsed);
   return ticksUsed;
+}
+
+opcode DetermineOpcode(void) {
+  unsigned char aInstruction = mmuReadByte(registers.PC++);
+  opcode aOpcode;
+  if (aInstruction == 0xCB) {
+    aInstruction = mmuReadByte(registers.PC++);
+    aOpcode = CBOpcodeTable[aInstruction];
+    tickCounter += cbOpcodeTicks[aInstruction];
+  } else {
+    aOpcode = baseOpcodeTable[aInstruction];
+    tickCounter += baseOpcodeTicks[aInstruction];
+  }
+  return aOpcode;
+}
+
+unsigned short DetermineOperand(opcode inOpcode) {
+  unsigned short aOperand = 0;
+  if (inOpcode.operandType == OPERAND_CHAR) {
+    aOperand = (unsigned short)mmuReadByte(registers.PC);
+  } else if (inOpcode.operandType == OPERAND_SHORT) {
+    aOperand = mmuReadShort(registers.PC);
+  }
+  registers.PC += inOpcode.operandType;
+  return aOperand;
+}
+
+void ExecuteOpcode(const opcode inOpcode, const unsigned short inOperand) {
+  switch (inOpcode.operandType) {
+    case (OPERAND_CHAR):
+      ((void (*)(unsigned char))inOpcode.function)(inOperand);
+      break;
+    case (OPERAND_SHORT):
+      ((void (*)(unsigned short))inOpcode.function)(inOperand);
+      break;
+    case (NO_OPERANDS):
+      ((void (*)(void))inOpcode.function)();
+      break;
+  }
 }
 
 void DebugPrintInstruction(opcode inOpcode, unsigned short inOperand) {
@@ -211,7 +216,6 @@ void DebugPrintInstruction(opcode inOpcode, unsigned short inOperand) {
 void DebugPrintCpuState(void) {
   static int cycles = 0;
   printf("\n*********************************\n");
-
   printf("++++ CPU ++++\n");
   printf(
       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: 0x%02X "
@@ -233,10 +237,16 @@ void DebugPrintCpuState(void) {
   } else {
     aNextOpcode = baseOpcodeTable[aNextInstruction];
   }
-  printf("Next instruction = %s\n", aNextOpcode.asmName);
+  unsigned short aNextOperand = 0;
+  if (aNextOpcode.operandType == OPERAND_CHAR) {
+    aNextOperand = (unsigned short)mmuReadByte(registers.PC + 1);
+  } else if (aNextOpcode.operandType == OPERAND_SHORT) {
+    aNextOperand = mmuReadShort(registers.PC + 1);
+  }
+  printf("Next instruction = 0x%02X (%s 0x%02X)\n", aNextInstruction, aNextOpcode.asmName, aNextOperand);
   printf("\n");
 
-  printf("Cycles: %d\n", cycles);
+  printf("Cycles: %ld\n", tickCounter);
   printf("\n*********************************\n");
 
   ++cycles;
@@ -319,9 +329,9 @@ void ldh_n_A(unsigned char n) {
 void ldh_A_n(unsigned char n) {
   const unsigned short memLocation = 0xFF00 + n;
   registers.A = mmuReadByte(memLocation);
-  // if (memLocation == 0xFF44) {
-  //   printf("ldh_A_n: set register A to 0x%X\n", registers.A);
-  // }
+  if (memLocation == 0xFF44) {
+    printf("ldh_A_n: set register A to 0x%X\n", registers.A);
+  }
 }
 
 // 16-Bit loads
