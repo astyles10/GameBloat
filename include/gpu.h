@@ -43,3 +43,5 @@ unsigned char gpuReadRegister(const unsigned short address);
 int gpuWriteRegister(const unsigned short address, const unsigned char value);
 void gpuReset(void);
 void gpuStep(int inTicks);
+
+void gpuWriteVramToFile(void);

@@ -226,15 +226,15 @@ void gpuStep(int tick) {
       }
       break;
   }
-  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-  printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-  printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-  printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-  printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+  // int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+  // printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  // printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  // printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  // printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   #ifdef DEBUG_PRINT
-  const char* modeStr = determineModeClock();
-  printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
-         GPU.registers.lcdYCoordinate);
+  // const char* modeStr = determineModeClock();
+  // printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
+        //  GPU.registers.lcdYCoordinate);
   #endif
 }
 
@@ -245,6 +245,12 @@ unsigned char gpuReadByte(const unsigned short address) {
   printf("GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
          address);
   return 0;
+}
+
+void gpuWriteVramToFile () {
+  FILE *f = fopen("tile0.bin", "wb");
+  fwrite(GPU.VRAM, 16, 1, f);
+  fclose(f);
 }
 
 unsigned char gpuReadRegister(const unsigned short address) {

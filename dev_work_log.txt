@@ -1,0 +1,6 @@
+Make sure https://github.com/DanB91/GBEmu.git is downloaded
+Running Tetris.gb
+
+Almost immediately gets stuck in a loop between instructions 0x234, 0x236, 0x238
+Moved CPU logging into separate functions
+Thinking PC register should be incremented later, might not be incremented correctly with 0xCB instruction

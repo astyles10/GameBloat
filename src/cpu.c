@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "gpu.h"
 
 #include "cartridge.h"
 #include "interrupt.h"
@@ -50,12 +51,17 @@ const unsigned short resetAddresses[] = {
     0xFF05, 0xFF06, 0xFF07, 0xFF10, 0xFF11, 0xFF12, 0xFF14, 0xFF16,
     0xFF17, 0xFF19, 0xFF1A, 0xFF1B, 0xFF1C, 0xFF1E, 0xFF20, 0xFF21,
     0xFF22, 0xFF23, 0xFF24, 0xFF25, 0xFF26, 0xFF40, 0xFF42, 0xFF43,
-    0xFF45, 0xFF47, 0xFF48, 0xFF49, 0xFF4A, 0xFF4B};
+    0xFF45, 0xFF47, 0xFF48, 0xFF49, 0xFF4A, 0xFF4B
+};
 
 const unsigned char resetValues[] = {
     0x00, 0x00, 0x00, 0x80, 0xBF, 0xF3, 0xBF, 0x3F, 0x00, 0xBF,
     0x7F, 0xFF, 0x9F, 0xBF, 0xFF, 0x00, 0x00, 0xBF, 0x77, 0xF3,
-    0xF1, 0x91, 0x00, 0x00, 0x00, 0xFC, 0xFF, 0xFF, 0x00, 0x00};
+    0xF1, 0x91, 0x00, 0x00, 0x00, 0xFC, 0xFF, 0xFF, 0x00, 0x00
+};
+
+void DebugPrintCpuState(void);
+void DebugPrintInstruction(opcode, unsigned short);
 
 void setFlag(unsigned char flag);
 void removeFlag(unsigned char flag);
@@ -71,9 +77,13 @@ static unsigned short lastOperand = 0;
 unsigned long int tickCounter = 0;
 unsigned char stopped = 0;
 
-void setFlag(unsigned char flag) { registers.F |= flag; }
+void setFlag(unsigned char flag) {
+  registers.F |= flag;
+}
 
-void removeFlag(unsigned char flag) { registers.F &= ~(flag); }
+void removeFlag(unsigned char flag) {
+  registers.F &= ~(flag);
+}
 
 unsigned char checkFlag(unsigned char flag) {
   if (registers.F & flag) {
@@ -114,21 +124,30 @@ int loadROM(const char *cartName) {
   return 0;
 }
 
-void cpuClose() { cartCleanup(); }
+void cpuClose() { 
+  cartCleanup();
+}
 
 int cpuStep(void) {
   // Read instruction from address stored in PC register
-  unsigned char instruction = mmuReadByte(registers.PC++);
-  static int cycles = 0;
+  // if (registers.PC == 0x282a) {
+  if (registers.PC == 0x234) {
+    // gpuWriteVramToFile();
+    int i = 0;
+    i++;
+  }
+  // Dont forget to increment later
+  unsigned char instruction = mmuReadByte(registers.PC);
+  unsigned char aCbIncrement = 0;
 
   int tickStart = tickCounter;
 
   opcode aOpcode;
   if (instruction == 0xCB) {
-    printf("Entering CB opcode table\n");
-    instruction = mmuReadByte(registers.PC++);
+    instruction = mmuReadByte(registers.PC + 1);
     aOpcode = CBOpcodeTable[instruction];
     tickCounter += cbOpcodeTicks[instruction];
+    aCbIncrement = 1;
   } else {
     aOpcode = baseOpcodeTable[instruction];
     tickCounter += baseOpcodeTicks[instruction];
@@ -142,24 +161,13 @@ int cpuStep(void) {
   } else if (aOpcode.operandType == OPERAND_SHORT) {
     operand = mmuReadShort(registers.PC);
   }
+  // Is this correct? No it segfaults lol
+  registers.PC += (1 +  aCbIncrement);
   registers.PC += aOpcode.operandType;
 
-  char logMessage[80] = {0};
-  switch (aOpcode.operandType) {
-    case (OPERAND_CHAR):
-      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName, operand);
-      LogDebug(logMessage);
-    break;
-    case (OPERAND_SHORT):
-      snprintf(logMessage, 80, "Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-        operand);
-      LogDebug(logMessage);
-    break;
-    case (NO_OPERANDS):
-      snprintf(logMessage, 80, "Executing instruction = %s\n", aOpcode.asmName);
-      LogDebug(logMessage);
-    break;
-  }
+#ifdef DEBUG
+  DebugPrintInstruction(aOpcode, operand);
+#endif
 
   switch (aOpcode.operandType) {
     case (OPERAND_CHAR):
@@ -177,20 +185,33 @@ int cpuStep(void) {
   lastOperand = operand;
 
 #ifdef DEBUG
-  printf("\n*********************************\n");
-  switch (aOpcode.operandType) {
+  DebugPrintCpuState();
+#endif
+
+  int ticksUsed = tickCounter - tickStart;
+  return ticksUsed;
+}
+
+void DebugPrintInstruction(opcode inOpcode, unsigned short inOperand) {
+  switch (inOpcode.operandType) {
     case (OPERAND_CHAR):
-      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-        operand);
+      printf("Executing instruction = %s, operand = 0x%X\n", inOpcode.asmName,
+        inOperand);
     break;
     case (OPERAND_SHORT):
-      printf("Executing instruction = %s, operand = 0x%X\n", aOpcode.asmName,
-        operand);
+      printf("Executing instruction = %s, operand = 0x%X\n", inOpcode.asmName,
+        inOperand);
     break;
     case (NO_OPERANDS):
-      printf("Executing instruction = %s\n", aOpcode.asmName);
+      printf("Executing instruction = %s\n", inOpcode.asmName);
     break;
   }
+}
+
+void DebugPrintCpuState(void) {
+  static int cycles = 0;
+  printf("\n*********************************\n");
+
   printf("++++ CPU ++++\n");
   printf(
       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: 0x%02X "
@@ -201,7 +222,7 @@ int cpuStep(void) {
          checkFlag(flagNegative), checkFlag(flagHalfCarry),
          checkFlag(flagCarry));
   printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
-  printf("Total cycles (ticks): %d\n", tickCounter);
+  printf("Total cycles (ticks): %lu\n", tickCounter);
   printf("\n");
 
   opcode aNextOpcode;
@@ -217,12 +238,8 @@ int cpuStep(void) {
 
   printf("Cycles: %d\n", cycles);
   printf("\n*********************************\n");
-#endif
 
-  int ticksUsed = tickCounter - tickStart;
   ++cycles;
-
-  return ticksUsed;
 }
 
 cJSON* GetCPUDataAsJSON(void) {
@@ -302,9 +319,9 @@ void ldh_n_A(unsigned char n) {
 void ldh_A_n(unsigned char n) {
   const unsigned short memLocation = 0xFF00 + n;
   registers.A = mmuReadByte(memLocation);
-  if (memLocation == 0xFF44) {
-    printf("ldh_A_n: set register A to 0x%X\n", registers.A);
-  }
+  // if (memLocation == 0xFF44) {
+  //   printf("ldh_A_n: set register A to 0x%X\n", registers.A);
+  // }
 }
 
 // 16-Bit loads
