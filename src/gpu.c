@@ -12,6 +12,7 @@
 void NextScanline(void);
 void HandleLCDModeChange(const int inMode);
 void updateTile(const unsigned short address, const unsigned char value);
+void UpdateLcdControlRegister(const unsigned char value);
 void renderScan(void);
 void initGPU(void);
 const char* determineModeClock(void);
@@ -158,6 +159,9 @@ void HandleLCDModeChange(const int inMode) {
   GPU.registers.lcdStatus &= 0xFC;
   GPU.registers.lcdStatus |= (unsigned char)inMode;
   switch (mode) {
+    // https://gbdev.io/pandocs/STAT.html#ff41--stat-lcd-status
+    // https://gbdev.io/pandocs/Interrupt_Sources.html#int-48--stat-interrupt
+    // These interrupts must only be triggered when corresponding LCD status bits are set to 1
     case OAM_SCANLINE:
       if (GPU.registers.lcdStatus & STATUS_MODE_2_INT_SELECT) {
         // Interrupt set bit LCD requested
@@ -183,6 +187,14 @@ void HandleLCDModeChange(const int inMode) {
 }
 
 void gpuStep(int tick) {
+  if (!(GPU.registers.lcdControl & LCD_DISPLAY_ENABLE)) {
+    int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+    printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+    printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+    printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+    printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+    return;
+  }
   modeClock += tick;
 
   switch (mode) {
@@ -217,6 +229,7 @@ void gpuStep(int tick) {
       }
       break;
     case VRAM_SCANLINE:  // HDraw
+    // TODO: During VRAM_SCANLINE, VRAM is inaccessible by the CPU, need to add logic to gatekeep access
       if (modeClock >= VRAM_SCAN_CYCLE) {
         modeString = modeStrings[3];
         modeClock -= VRAM_SCAN_CYCLE;
@@ -225,6 +238,10 @@ void gpuStep(int tick) {
       }
       break;
   }
+  // LCD Enable bit - turns on LCD and sets PPU active
+  // PPU is Pixel Processing Unit - turns VRAM data into pixels on screen
+  // Interchangable with GPU
+  // 
   int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
   printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
   printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
@@ -296,6 +313,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   // TODO: Register values with specific bits require bitwise operations
   printf("gpuWriteRegister: address 0x%X, value 0x%X\n", address, value);
   if (address == 0xFF40) {
+    UpdateLcdControlRegister(value);
     GPU.registers.lcdControl = value;
     printf("GPU ptr: %p, lcdControl: 0x%X\n", &GPU, GPU.registers.lcdControl);
   } else if (address == 0xFF41) {
@@ -306,6 +324,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
     GPU.registers.scrollY = value;
   } else if (address == 0xFF44) {
     // printf("writeRegister: 0xFF44 read only\n");
+    // TODO: Is writing to 0xFF44 supposed to reset lyCoordinate?
     return 0;
   } else if (address == 0xFF45) {
     GPU.registers.lcdLYCompare = value;
@@ -320,6 +339,20 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   }
   // printf("writeRegister: Unimplemented register address 0x%02X\n", address);
   return 1;
+}
+
+void UpdateLcdControlRegister(const unsigned char value) {
+  if (!(value & LCD_DISPLAY_ENABLE)) {
+    GPU.registers.lcdControl &= ~(LCD_DISPLAY_ENABLE);
+    GPU.registers.lcdYCoordinate = 0;
+    modeClock = 0;
+    mode = HBLANK; // Might not be correct
+    GPU.registers.lcdStatus &= 0xF8; // Just clears the lower 3 bits from LCD Status.. LYC compare and PPU mode
+  } else {
+    GPU.registers.lcdControl |= LCD_DISPLAY_ENABLE;
+    GPU.registers.lcdStatus = (GPU.registers.lcdStatus & 0xF8) | mode;
+  }
+
 }
 
 void updateTile(const unsigned short addr, const unsigned char val) {
