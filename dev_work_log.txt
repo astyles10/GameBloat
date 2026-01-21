@@ -14,3 +14,6 @@ Current issues:
 On instruction 0x279F/0x27a1 (roughly 449768 cycles), the GPU mode is incorrectly set to VRAM Scanline mode, clock 152, line number 61
 Compared to GBEmu, the mode is HBlank, clock 0 and ly is 0
 This is probably because the gpu steps are running even when the LCD is disabled.
+
+Once emulator is working, implement serial and create a USB serial to GB serial cable through microcontroller for trading, GameShark codes etc.
+Allow serial between separate sessions

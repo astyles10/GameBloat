@@ -1,6 +1,7 @@
 #include "gpu.h"
 #include "interrupt.h"
 #include "registers.h"
+#include "utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +14,7 @@ void NextScanline(void);
 void HandleLCDModeChange(const int inMode);
 void updateTile(const unsigned short address, const unsigned char value);
 void UpdateLcdControlRegister(const unsigned char value);
+void UpdateLcdStatusRegister(const unsigned char value);
 void renderScan(void);
 void initGPU(void);
 const char* determineModeClock(void);
@@ -342,16 +344,27 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
 }
 
 void UpdateLcdControlRegister(const unsigned char value) {
-  if (!(value & LCD_DISPLAY_ENABLE)) {
-    GPU.registers.lcdControl &= ~(LCD_DISPLAY_ENABLE);
+  UpdateBit(&GPU.registers.lcdControl, LCD_DISPLAY_ENABLE, (value & LCD_DISPLAY_ENABLE));
+  if (!(GPU.registers.lcdControl & LCD_DISPLAY_ENABLE)) {
     GPU.registers.lcdYCoordinate = 0;
     modeClock = 0;
     mode = HBLANK; // Might not be correct
     GPU.registers.lcdStatus &= 0xF8; // Just clears the lower 3 bits from LCD Status.. LYC compare and PPU mode
   } else {
-    GPU.registers.lcdControl |= LCD_DISPLAY_ENABLE;
-    GPU.registers.lcdStatus = (GPU.registers.lcdStatus & 0xF8) | mode;
+    // The current GPU mode (values 0 to 3) is used to set the PPU mode bits (0 and 1, so disabled on HBLANK in current state)
+    // The PPU should be enabled during OAM and VRAM scanlines and VBlank?
+    GPU.registers.lcdStatus = ((GPU.registers.lcdStatus & 0xF8) | mode);
   }
+  UpdateBit(&GPU.registers.lcdControl, WINDOW_TILE_MAP_DISPLAY_SELECT, (value & WINDOW_TILE_MAP_DISPLAY_SELECT));
+  UpdateBit(&GPU.registers.lcdControl, WINDOW_DISPLAY_ENABLE, (value & WINDOW_DISPLAY_ENABLE));
+  UpdateBit(&GPU.registers.lcdControl, BG_WINDOW_TILE_DATA_SELECT, (value & BG_WINDOW_TILE_DATA_SELECT));
+  UpdateBit(&GPU.registers.lcdControl, BG_TILE_MAP_DISPLAY_SELECT, (value & BG_TILE_MAP_DISPLAY_SELECT));
+  UpdateBit(&GPU.registers.lcdControl, SPRITE_SIZE, (value & SPRITE_SIZE));
+  UpdateBit(&GPU.registers.lcdControl, SPRITE_DISPLAY_ENABLE, (value & SPRITE_DISPLAY_ENABLE));
+  UpdateBit(&GPU.registers.lcdControl, BG_DISPLAY, (value & BG_DISPLAY));
+}
+
+void UpdateLcdStatusRegister(const unsigned char value) {
 
 }
 
