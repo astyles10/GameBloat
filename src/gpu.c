@@ -365,7 +365,13 @@ void UpdateLcdControlRegister(const unsigned char value) {
 }
 
 void UpdateLcdStatusRegister(const unsigned char value) {
-
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_LYC_INT_SELECT, (value & STATUS_LYC_INT_SELECT));
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_MODE_2_INT_SELECT, (value & STATUS_MODE_2_INT_SELECT));
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_MODE_1_INT_SELECT, (value & STATUS_MODE_1_INT_SELECT));
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_MODE_0_INT_SELECT, (value & STATUS_MODE_0_INT_SELECT));
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_LYC_EQUALS_LY, (value & STATUS_LYC_EQUALS_LY));
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_PPU_MODE_UPPER, (value & STATUS_PPU_MODE_UPPER));
+  UpdateBit(&GPU.registers.lcdStatus, STATUS_PPU_MODE_LOWER, (value & STATUS_PPU_MODE_LOWER));
 }
 
 void updateTile(const unsigned short addr, const unsigned char val) {
