@@ -321,9 +321,9 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   } else if (address == 0xFF41) {
     GPU.registers.lcdStatus = value;
   } else if (address == 0xFF42) {
-    GPU.registers.scrollX = value;
-  } else if (address == 0xFF43) {
     GPU.registers.scrollY = value;
+  } else if (address == 0xFF43) {
+    GPU.registers.scrollX = value;
   } else if (address == 0xFF44) {
     // printf("writeRegister: 0xFF44 read only\n");
     // TODO: Is writing to 0xFF44 supposed to reset lyCoordinate?
