@@ -105,16 +105,11 @@ const char* modeStrings[] = {
 };
 
 struct GPU GPU = {
-    // TODO: determine if const palette correct?
-    // Could write to the registers as intended and apply RGB palette later in the front end
-  .registers.palette = {
-      {255, 255, 255}, {192, 192, 192}, {96, 96, 96}, {0, 0, 0}
-  },
+  .registers.backgroundPalette = 0b11100100,
   .VRAM = {0}
 };
 
 void initGPU(void) {
-  // memset(&GPU, 0, sizeof(GPU));
   GPU.registers.lcdControl = 0;
   GPU.registers.lcdStatus = 0;
   GPU.registers.scrollX = 0;
@@ -284,14 +279,17 @@ unsigned char gpuReadRegister(const unsigned short address) {
     return GPU.registers.lcdYCoordinate;
   } else if (address == 0xFF45) {
     return GPU.registers.lcdLYCompare;
+  } else if (address == 0xFF47) {
+    // BG Palette Register - assigns grey shadres to the color indices of BG and Window tiles
+    // GPU.registers.palette = ;
   } else if (address == 0xFF48) {
     return GPU.registers.objPalette0;
   } else if (address == 0xFF49) {
     return GPU.registers.objPalette1;
   } else if (address == 0xFF4A) {
-    return GPU.registers.lcdWindowX;
-  } else if (address == 0xFF4B) {
     return GPU.registers.lcdWindowY;
+  } else if (address == 0xFF4B) {
+    return GPU.registers.lcdWindowX;
   }
   printf("readRegister: Unimplemented register address 0x%02X\n", address);
   return 0;
@@ -325,9 +323,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   } else if (address == 0xFF43) {
     GPU.registers.scrollX = value;
   } else if (address == 0xFF44) {
-    // printf("writeRegister: 0xFF44 read only\n");
-    // TODO: Is writing to 0xFF44 supposed to reset lyCoordinate?
-    return 0;
+    GPU.registers.lcdYCoordinate = 0;
   } else if (address == 0xFF45) {
     GPU.registers.lcdLYCompare = value;
   } else if (address == 0xFF48) {

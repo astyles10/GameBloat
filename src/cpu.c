@@ -139,6 +139,7 @@ int cpuStep(void) {
     // gpuWriteVramToFile();
     int i = 0;
     i++;
+    (void)i;
   }
   printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
 
@@ -214,7 +215,7 @@ void DebugPrintInstruction(opcode inOpcode, unsigned short inOperand) {
 }
 
 void DebugPrintCpuState(void) {
-  static int cycles = 0;
+  // static int cycles = 0;
   printf("\n*********************************\n");
   printf("++++ CPU ++++\n");
   printf(

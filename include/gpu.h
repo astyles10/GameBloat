@@ -8,6 +8,13 @@ typedef struct {
   unsigned char b;
 } BasicColour;
 
+const BasicColour MonoPalette[4] = {
+  { .r = 255, .g = 255, .b = 255 },
+  { .r = 192, .g = 192, .b = 192 },
+  { .r = 96, .g = 96, .b = 96 },
+  { .r = 0, .g = 0, .b = 0 }
+};
+
 struct GPU {
   struct gpuRegisters {
     unsigned char lcdControl; // 0xFF40
@@ -17,7 +24,8 @@ struct GPU {
     unsigned char lcdYCoordinate; //0xFF44 - Line Number
     unsigned char lcdLYCompare; // 0xFF45
     unsigned char oamDMASourceAddress; // 0xFF46
-    const BasicColour palette[4]; // 0xFF47 BG palette data (Non CGB)
+    // BasicColour palette[4]; // 0xFF47 BG palette data (Non CGB)
+    unsigned char backgroundPalette;
     unsigned char objPalette0; // 0xFF48 (OBJ Palette 0 data, non CGB)
     unsigned char objPalette1; // 0xFF49 (OBJ Palette 1, non CGB)
     unsigned char lcdWindowY; // 0xFF4A

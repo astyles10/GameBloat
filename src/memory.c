@@ -7,6 +7,7 @@
 #include "interrupt.h"
 #include "logger.h"
 
+// TODO: wRAM is 32K for Color Gameboy
 unsigned char wRAM[0x2000];   // 0xC000 - 0xDFFF Internal working RAM (0xD000 -
                               // 0xDFFF switchable CGB)
 unsigned char OAM[0xA0];      // Object Attribute Memory
@@ -24,22 +25,33 @@ unsigned char mmuReadByte(const unsigned short address) {
   static const char baseLogMessage[] = "mmuReadByte: Unimplemented memory address 0x%X (%s)";
   char logMessage[81];
   if (address < 0x8000) {
+    // 0x0000 - 0x3FFF / 0x4000-0x7FFF: from cartridge
+    // 0x4000-0x7FFF is switchable bank in cartridge (handled in mbc 'constructor' from cart type.)
     return cartridge.mbc->readByte(address);
   } else if (address < 0xA000) {
+    // 0x8000 - 0x9FFF: Read from VRAM
     return gpuReadByte(address - 0x8000);
   } else if (address < 0xC000) {
+    // 0xA000 - 0xBFFF: Cartridge external RAM
     return cartridge.mbc->readByte(address);
   } else if (address < 0xE000) {
+    // 0xC000 - 0xE000: 4 KiB Work RAM
     return wRAM[(address - 0xC000)];
   } else if (address < 0xFE00) {
+    // Echo RAM (mirror of 0xC000 - 0xDDFF); prohibited
+    printf("Illegal read attempt from unusable area: %d!\n",
+           (address - 0xFE00));
     return wRAM[address - 0xE000];
   } else if (address < 0xFEA0) {
+    // 0xFE00 - 0xFE9F: Object Attribute Memory (OAM)
     return OAM[address - 0xFE00];
   } else if (address < 0xFF00) {
-    // printf("Illegal read attempt from unusable area: %d!\n",
-          //  (address - 0xFEA0));
+    // 0xFEA0 - 0xFEFF Unusable
+    printf("Illegal read attempt from unusable area: %d!\n",
+           (address - 0xFEA0));
     return 0;
   } else if (address < 0xFF80) {
+    // TODO: When implementing serial & I/O, move this code into separate serial.c file
     if (address == 0xFF00) {
       // TODO: Implement joypad
       snprintf(logMessage, 81, baseLogMessage, address, "Joypad");
@@ -68,6 +80,7 @@ unsigned char mmuReadByte(const unsigned short address) {
     // printf("ReadByte: reading unimplemented IO address 0x%02X\n", address);
     return 0;
   } else if (address < 0xFFFF) {
+    // 0xFF80 - 0xFFFE: High RAM
     return hRAM[address - 0xFF80];
   } else if (address == 0xFFFF) {
     return interruptRegisters.enable;

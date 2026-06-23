@@ -17,7 +17,6 @@ enum HeaderLocations {
 
 int checkLogo(FILE *);
 int checkHeaderValues(FILE *);
-int parseHeader(void);
 
 int validateCart(const char *fileName) {
   int cartValid = 1;
