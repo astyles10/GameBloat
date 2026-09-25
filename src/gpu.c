@@ -296,6 +296,7 @@ unsigned char gpuReadRegister(const unsigned short address) {
 }
 
 int gpuWriteByte(const unsigned short address, const unsigned char value) {
+  unsigned short modifiedAddress = address - 0x8000;
   if (address < 0x2000) {
     GPU.VRAM[address] = value;
   } else {
@@ -306,6 +307,7 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
   if (address < 0x1800) {
     updateTile(address, value);
   }
+  // What goes in 0x9800-0x9FFF? Background map
   return 1;
 }
 
@@ -371,6 +373,7 @@ void UpdateLcdStatusRegister(const unsigned char value) {
 }
 
 void updateTile(const unsigned short addr, const unsigned char val) {
+  printf("Size of tiles = %d\n", sizeof(tiles));
   printf("UpdateTile: registers.PC = %02X\n", registers.PC);
   // The base address is simply every even address due to GPU accessing two
   // bytes per row: E.g.,

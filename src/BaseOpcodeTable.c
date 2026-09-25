@@ -2,6 +2,7 @@
 #include "memory.h"
 #include "opcode.h"
 #include "registers.h"
+#include <stdio.h>
 
 // Function declarations
 

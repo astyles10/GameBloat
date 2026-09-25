@@ -30,7 +30,7 @@ unsigned char mmuReadByte(const unsigned short address) {
     return cartridge.mbc->readByte(address);
   } else if (address < 0xA000) {
     // 0x8000 - 0x9FFF: Read from VRAM
-    return gpuReadByte(address - 0x8000);
+    return gpuReadByte(address);
   } else if (address < 0xC000) {
     // 0xA000 - 0xBFFF: Cartridge external RAM
     return cartridge.mbc->readByte(address);
@@ -100,7 +100,7 @@ int mmuWriteByte(const unsigned short address, const unsigned char value) {
   if (address < 0x8000) {
     return cartridge.mbc->writeByte(address, value);
   } else if (address < 0xA000) {
-    return gpuWriteByte(address - 0x8000, value);
+    return gpuWriteByte(address, value);
   } else if (address < 0xC000) {
     return cartridge.mbc->writeByte(address, value);
   } else if (address < 0xE000) {

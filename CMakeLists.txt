@@ -62,3 +62,4 @@ add_executable(Debug ${DEBUG_SOURCES})
 target_include_directories(Debug PUBLIC ${PROJECT_SOURCE_DIR}/libs/cJSON)
 # target_compile_definitions(Debug PUBLIC "DEBUG_PRINT")
 target_compile_options(Debug PUBLIC)
+

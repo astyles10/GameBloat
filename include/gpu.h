@@ -8,7 +8,7 @@ typedef struct {
   unsigned char b;
 } BasicColour;
 
-const BasicColour MonoPalette[4] = {
+const static BasicColour MonoPalette[4] = {
   { .r = 255, .g = 255, .b = 255 },
   { .r = 192, .g = 192, .b = 192 },
   { .r = 96, .g = 96, .b = 96 },

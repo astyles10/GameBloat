@@ -1,6 +1,5 @@
 #pragma once
 #include <cJSON.h>
-#include <stdio.h>
 
 extern const unsigned char flagCarry;
 extern const unsigned char flagHalfCarry;

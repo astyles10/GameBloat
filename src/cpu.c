@@ -8,6 +8,7 @@
 #include "opcode.h"
 #include "registers.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -215,7 +216,7 @@ void DebugPrintInstruction(opcode inOpcode, unsigned short inOperand) {
 }
 
 void DebugPrintCpuState(void) {
-  // static int cycles = 0;
+  static int cycles = 0;
   printf("\n*********************************\n");
   printf("++++ CPU ++++\n");
   printf(

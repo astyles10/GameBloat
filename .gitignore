@@ -56,4 +56,8 @@ emulator
 
 # Other
 GB_Games/
+Games
 build
+.cache
+*.swp
+tags
