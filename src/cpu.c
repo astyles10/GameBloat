@@ -3,14 +3,11 @@
 
 #include "cartridge.h"
 #include "interrupt.h"
-#include "logger.h"
 #include "memory.h"
 #include "opcode.h"
 #include "registers.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -128,7 +125,7 @@ int loadROM(const char *cartName) {
   return 0;
 }
 
-void cpuClose() { 
+void cpuClose(void) {
   cartCleanup();
 }
 
@@ -136,13 +133,13 @@ int cpuStep(void) {
   // Read instruction from address stored in PC register
   // if (registers.PC == 0x282a) {
   // if (registers.PC == 0x233) {
-  if (registers.PC == 0x27a1) {
-    // gpuWriteVramToFile();
+  if (registers.PC == 0x282a) {
+    gpuWriteVramToFile();
     int i = 0;
     i++;
     (void)i;
   }
-  printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
+  //printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
 
   int tickStart = tickCounter;
 
@@ -152,11 +149,11 @@ int cpuStep(void) {
 
   lastOpcodeName = aOpcode.asmName;
   lastOperand = aOperand;
-  DebugPrintInstruction(aOpcode, aOperand);
-  DebugPrintCpuState();
+//  DebugPrintInstruction(aOpcode, aOperand);
+//  DebugPrintCpuState();
 
   int ticksUsed = tickCounter - tickStart;
-  printf("CPU ticks = %d\n", ticksUsed);
+  //printf("CPU ticks = %d\n", ticksUsed);
   return ticksUsed;
 }
 
@@ -1289,7 +1286,7 @@ void ret_cc(unsigned char flag, unsigned char condition) {
   }
 }
 
-void reti() {
+void reti(void) {
   ret();
   ei();
 }

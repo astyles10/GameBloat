@@ -1,9 +1,6 @@
 #include "cpu.h"
-#include "memory.h"
 #include "interrupt.h"
 #include "registers.h"
-
-#include <stdio.h>
 
 enum InterruptAddresses {
   VERT_BLNK_INTR_START = 0x40,       // VBlank

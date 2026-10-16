@@ -24,7 +24,7 @@ void SigTermHandler(int signum, siginfo_t* info, void* ptr) {
   exit(info->si_code+128);
 }
 
-void InitSignalHandlers() {
+void InitSignalHandlers(void) {
   static struct sigaction _sigact;
   memset(&_sigact, 0, sizeof(_sigact));
   _sigact.sa_sigaction = SigTermHandler;

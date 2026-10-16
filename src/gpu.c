@@ -4,7 +4,6 @@
 #include "utils.h"
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 // http://www.codeslinger.co.uk/pages/projects/gameboy/graphics.html
@@ -18,6 +17,8 @@ void UpdateLcdStatusRegister(const unsigned char value);
 void renderScan(void);
 void initGPU(void);
 const char* determineModeClock(void);
+
+// Debug functions
 
 enum GpuMode { HBLANK = 0, VBLANK = 1, OAM_SCANLINE = 2, VRAM_SCANLINE = 3 };
 
@@ -86,7 +87,7 @@ const BasicColour Palette[4] = {
 // Frame buffer is LCD screen
 static BasicColour frameBuffer[160 * 144] = {0};
 
-/* 
+/*
   Tile data stored in VRAM between 0x8000 and 0x97FF
   1 tile = 16 bytes;
     0x1800 == 6144 bytes,
@@ -129,13 +130,13 @@ void initGPU(void) {
 
 // Private
 
-void gpuReset() {
+void gpuReset(void) {
   mode = VBLANK;
   modeClock = 116;
   initGPU();
 }
 
-void NextScanline() {
+void NextScanline(void) {
   if (GPU.registers.lcdYCoordinate == MAX_LINES) {
     GPU.registers.lcdYCoordinate = 0;
   } else {
@@ -185,11 +186,11 @@ void HandleLCDModeChange(const int inMode) {
 
 void gpuStep(int tick) {
   if (!(GPU.registers.lcdControl & LCD_DISPLAY_ENABLE)) {
-    int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-    printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-    printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-    printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-    printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+    //int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+    //printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+    //printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+    //printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+    //printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
     return;
   }
   modeClock += tick;
@@ -239,11 +240,11 @@ void gpuStep(int tick) {
   // PPU is Pixel Processing Unit - turns VRAM data into pixels on screen
   // Interchangable with GPU
   // 
-  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-  printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-  printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-  printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-  printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+//  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
+ // printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  //printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  //printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  //printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   #ifdef DEBUG_PRINT
   // const char* modeStr = determineModeClock();
   // printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
@@ -296,28 +297,29 @@ unsigned char gpuReadRegister(const unsigned short address) {
 }
 
 int gpuWriteByte(const unsigned short address, const unsigned char value) {
-  unsigned short modifiedAddress = address - 0x8000;
-  if (address < 0x2000) {
-    GPU.VRAM[address] = value;
+  const unsigned short modifiedAddress = address - 0x8000;
+  if (modifiedAddress < 0x2000) {
+    GPU.VRAM[modifiedAddress] = value;
   } else {
     printf("Invalid VRAM write address: 0x%04X\n", address);
     return 0;
   }
 
   if (address < 0x1800) {
-    updateTile(address, value);
+    updateTile(modifiedAddress, value);
   }
   // What goes in 0x9800-0x9FFF? Background map
+  gpuWriteVramToFile();
   return 1;
 }
 
 int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   // TODO: Register values with specific bits require bitwise operations
-  printf("gpuWriteRegister: address 0x%X, value 0x%X\n", address, value);
+  //printf("gpuWriteRegister: address 0x%X, value 0x%X\n", address, value);
   if (address == 0xFF40) {
     UpdateLcdControlRegister(value);
     GPU.registers.lcdControl = value;
-    printf("GPU ptr: %p, lcdControl: 0x%X\n", &GPU, GPU.registers.lcdControl);
+    //printf("GPU ptr: %p, lcdControl: 0x%X\n", &GPU, GPU.registers.lcdControl);
   } else if (address == 0xFF41) {
     GPU.registers.lcdStatus = value;
   } else if (address == 0xFF42) {
@@ -373,8 +375,8 @@ void UpdateLcdStatusRegister(const unsigned char value) {
 }
 
 void updateTile(const unsigned short addr, const unsigned char val) {
-  printf("Size of tiles = %d\n", sizeof(tiles));
-  printf("UpdateTile: registers.PC = %02X\n", registers.PC);
+  //printf("Size of tiles = %d\n", sizeof(tiles));
+  //printf("UpdateTile: registers.PC = %02X\n", registers.PC);
   // The base address is simply every even address due to GPU accessing two
   // bytes per row: E.g.,
   // First row contains addresses 0x00 && 0x01:
@@ -385,7 +387,7 @@ void updateTile(const unsigned short addr, const unsigned char val) {
   //  0x1FFE & 0x03 = 0x02
   const unsigned short baseAddress = (addr & 0x1FFE);
 
-  /* 
+  /*
     E.g. Incoming address = 0x1234
     0x123 = Tile number, thus the shift by 4 bits
     0x0004 = 0000 0000 0000 0100 | LSB is the Tile Row specifier (zero) | 010 is the sub row identifier
