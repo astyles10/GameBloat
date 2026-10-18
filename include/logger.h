@@ -9,7 +9,5 @@ typedef enum LogLevel { ERROR, WARNING, DEBUG } LogLevel;
 
 void InitLogFiles(const char* logFilePath);
 void CleanupLogFiles(void);
-void LogError(const char* message);
-void LogWarning(const char* message);
-void LogDebug(const char* message);
 void Log(LogLevel logLevel, const char* message);
+void SetLogLevel(LogLevel level);

@@ -1,8 +1,8 @@
 #include "cpu.h"
+#include "logger.h"
 #include "memory.h"
 #include "opcode.h"
 #include "registers.h"
-#include <stdio.h>
 
 // Function declarations
 
@@ -602,7 +602,7 @@ void jp_Z_nn(unsigned short immediate) {
 
 void extOps(void) {
   // This shouldn't be called, if the instruction is 0xCB we refer to the CB opcode table in cpuCycle
-  printf("Invalid extOps call\n");
+  Log(WARNING, "Invalid extOps call\n");
 }
 
 void call_Z_nn(unsigned short immediate) {

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <time.h>
 #include <unistd.h>
 
 FILE* errorLogFile;
@@ -17,7 +18,13 @@ char* errorLogPath = NULL;
 char* warningLogPath = NULL;
 char* debugLogPath = NULL;
 
+LogLevel currentLogLevel = ERROR;
+
 char* CreateLogfile(const char* logFileName, const char* dirPath);
+void LogError(const char* message);
+void LogWarning(const char* message);
+void LogDebug(const char* message);
+size_t GetCurrentTimestamp(char* timestamp);
 
 void InitLogFiles(const char* logFilePath) {
   int failed = 0;
@@ -72,19 +79,47 @@ void CleanupLogFiles(void) {
   free(debugLogPath);
 }
 
+size_t FormatLogMessage(LogLevel logLevel, const char* message) {
+  const char* timestamp = GetCurrentTimestamp();
+  free(timestamp);
+}
+
+size_t GetCurrentTimestamp(char* outTimestamp) {
+  struct tm* timeStr = NULL;
+  time_t currentTime = time(NULL);
+  timeStr = localtime(&currentTime);
+  const char timeBuffer[20];
+  // YYYY-MM-DD HH:MM:SS.nanos
+  size_t result = strftime(timeBuffer, sizeof(timeBuffer), "%Y-%m-%d %H:%M:%S", timeStr);
+  if (result == 0) {
+    fprintf(stderr, "strftime() failed, probably not enough room\n");
+    return result;
+  }
+  outTimestamp = malloc(result+1);
+  memmove(outTimestamp, timeBuffer, sizeof(timeBuffer));
+  return result;
+}
+
 void LogError(const char* message) {
-  // fprintf(errorLogFile, "%s\n", message);
-  printf("Error: %s\n", message);
+  if (currentLogLevel >= ERROR) {
+    // fprintf(errorLogFile, "%s\n", message);
+    // [LogLevel] timestamp: 
+    printf("Error: %s\n", message);
+  }
 }
 
 void LogWarning(const char* message) {
-  // fprintf(warningLogFile, "%s\n", message);
-  printf("Warning: %s\n", message);
+  if (currentLogLevel >= WARNING) {
+    // fprintf(warningLogFile, "%s\n", message);
+    printf("Warning: %s\n", message);
+  }
 }
 
 void LogDebug(const char* message) {
-  // fprintf(debugLogFile, "%s", message);
-  printf("Debug: %s\n", message);
+  if (currentLogLevel >= DEBUG) {
+    // fprintf(debugLogFile, "%s", message);
+    printf("Debug: %s\n", message);
+  }
 }
 
 void Log(LogLevel logLevel, const char* message) {
@@ -99,4 +134,8 @@ void Log(LogLevel logLevel, const char* message) {
       LogDebug(message);
       break;
   }
+}
+
+void SetLogLevel(LogLevel level) {
+  currentLogLevel = level;
 }
