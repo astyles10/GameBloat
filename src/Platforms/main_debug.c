@@ -4,6 +4,10 @@
 #include "gpu.h"
 #include "logger.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #define __USE_POSIX 1
 #define __USE_POSIX199309 1
 
@@ -47,6 +51,12 @@ int main (int argc, char **argv) {
     printf("Usage: %s <path to game>\n", argv[0]);
     return 1;
   }
+  SetLogLevel(DEBUG);
+  Log(ERROR, "This is an error message");
+  Log(WARNING, "Warning message!!");
+  Log(DEBUG, "Deeeeeeeebug");
+  Log(WARNING, "Formatted message = %d", 73);
+  return 0;
   InitSignalHandlers();
   InitLogFiles(NULL);
   char *aGameFilename = argv[1];
