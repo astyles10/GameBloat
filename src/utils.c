@@ -10,6 +10,14 @@ unsigned char UpdateBit(unsigned char* byte, unsigned char bitPosition, unsigned
   return bitChanged;
 }
 
+char* GetCurrentUnixTimeAsString() {
+  time_t currentTime = time(NULL);
+  int length = snprintf(NULL, 0, "%ld", currentTime);
+  char* timeStr = (char*)malloc(length + 1);
+  snprintf(timeStr, length + 1, "%ld", currentTime);
+  return timeStr;
+}
+
 size_t GetCurrentTimestamp(char** outTimestamp) {
   struct tm* timeStr = NULL;
   time_t currentTime = time(NULL);

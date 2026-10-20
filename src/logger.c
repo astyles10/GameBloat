@@ -1,7 +1,7 @@
 #include "logger.h"
 #include "utils.h"
 
-#include <asm-generic/errno-base.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,12 +14,15 @@ const char* logLevelStrings[] = {
   "DEBUG"
 };
 
+// atomic_bool allowLogToFile = true; // Future functionality
 FILE* logFile;
-static const char logFileName[] = "gamebloat_log.txt";
+static const char defaultLogfileDirectory[] = "logs/";
+static const char defaultLogfileName[] = "gamebloat_log";
+static const char defaultLogfileExtension[] = ".txt";
 char* logFilePath = NULL;
 LogLevel currentLogLevel = eError;
 
-char* CreateLogfile(const char* logFileName, const char* dirPath);
+char* CreateLogfile(const char* newLogFileName, const char* dirPath);
 size_t FormatLogMessage(LogLevel logLevel, const char* message, char** outFormattedMessage);
 const char* LogLevelToStr(LogLevel logLevel);
 
@@ -30,29 +33,34 @@ void InitLogFiles(const char* inFilePath) {
   } else {
     mkdirFailed = mkdir("logs", 0755);
   }
-  if (mkdirFailed && !(mkdirFailed == EEXIST)) {
-    perror("mkdir: ");
+
+  if (mkdirFailed && !(errno == EEXIST)) {
+    fprintf(stderr, "Error %d: ", mkdirFailed);
+    perror("mkdir");
     return;
   }
 
   if (inFilePath == NULL) {
-    logFilePath = CreateLogfile(logFileName, "logs/");
+    logFilePath = CreateLogfile(defaultLogfileName, defaultLogfileDirectory);
   } else {
-    logFilePath = CreateLogfile(logFileName, inFilePath);
+    logFilePath = CreateLogfile(defaultLogfileName, inFilePath);
   }
 
   logFile = fopen(logFilePath, "w");
   if (logFile == NULL) {
-    printf("%s\n", logFilePath);
+    fprintf(stderr, "Failed to open logfile %s, no log file will be produced.\n", logFilePath);
     perror("fopen");
-    exit(1);
   }
 }
 
 char* CreateLogfile(const char* newLogFileName, const char* dirPath) {
-  char* strPtr = (char *)malloc(strlen(dirPath) + strlen(newLogFileName) + 1);
-  strcpy(strPtr, dirPath);
-  strcat(strPtr, logFileName);
+  const char* timestamp = GetCurrentUnixTimeAsString();
+  size_t logfileNameLength = strlen(dirPath) + strlen(newLogFileName) + strlen(timestamp) + strlen(defaultLogfileExtension) + 1;
+  char* strPtr = (char *)malloc(logfileNameLength + 1);
+  int length = snprintf(strPtr, logfileNameLength + 1, "%s%s_%s%s", dirPath, newLogFileName, timestamp, defaultLogfileExtension);
+  if (length != logfileNameLength) {
+    fprintf(stderr, "snprintf() failed, logfile may have incorrect name\n\tlength: %d\n\tlogfileNameLength: %lu\n", length, logfileNameLength);
+  }
   if (access(strPtr, F_OK)) {
     remove(strPtr);
   }
@@ -97,19 +105,24 @@ size_t FormatLogMessage(LogLevel logLevel, const char* message, char** formatted
 }
 
 void Log(LogLevel logLevel, const char* message, ...) {
+  if (logLevel > currentLogLevel) {
+    return;
+  }
   va_list args;
   va_start(args, message);
   char* fmtMessage = NULL;
   int length = FormatArgString(&fmtMessage, message, args);
   va_end(args);
-
   if (!length) {
-    fprintf(stderr, "Somehow didn't get a format length?\n");
+    fprintf(stderr, "Failed to format variadic args string..\n");
   }
   char* formattedLogMessage = NULL;
   size_t formattedMessageSize = FormatLogMessage(logLevel, fmtMessage, &formattedLogMessage);
   if (formattedMessageSize != 0) {
     printf("%s", formattedLogMessage);
+    if (logFile != NULL) {
+      fprintf(logFile, "%s", formattedLogMessage);
+    }
   }
 }
 

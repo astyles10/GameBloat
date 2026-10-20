@@ -51,14 +51,17 @@ int main (int argc, char **argv) {
     printf("Usage: %s <path to game>\n", argv[0]);
     return 1;
   }
-  SetLogLevel(eDebug);
+  SetLogLevel(eError);
+  
+  InitSignalHandlers();
+  InitLogFiles(NULL);
   Log(eError, "This is an error message");
   Log(eWarning, "Warning message!!");
   Log(eDebug, "Deeeeeeeebug");
-  Log(eWarning, "Formatted message = %d", 73);
+  Log(eError, "Formatted message = %d", 73);
+  Log(eError, "Str formatted msg %s %s", "abcdefesdf", "123345dvg");
+
   return 0;
-  InitSignalHandlers();
-  InitLogFiles(NULL);
   char *aGameFilename = argv[1];
   resetGame(aGameFilename);
 
