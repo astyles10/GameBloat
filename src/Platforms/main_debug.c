@@ -51,11 +51,11 @@ int main (int argc, char **argv) {
     printf("Usage: %s <path to game>\n", argv[0]);
     return 1;
   }
-  SetLogLevel(DEBUG);
-  Log(ERROR, "This is an error message");
-  Log(WARNING, "Warning message!!");
-  Log(DEBUG, "Deeeeeeeebug");
-  Log(WARNING, "Formatted message = %d", 73);
+  SetLogLevel(eDebug);
+  Log(eError, "This is an error message");
+  Log(eWarning, "Warning message!!");
+  Log(eDebug, "Deeeeeeeebug");
+  Log(eWarning, "Formatted message = %d", 73);
   return 0;
   InitSignalHandlers();
   InitLogFiles(NULL);

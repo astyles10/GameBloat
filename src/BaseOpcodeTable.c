@@ -602,7 +602,7 @@ void jp_Z_nn(unsigned short immediate) {
 
 void extOps(void) {
   // This shouldn't be called, if the instruction is 0xCB we refer to the CB opcode table in cpuCycle
-  Log(WARNING, "Invalid extOps call\n");
+  Log(eWarning, "Invalid extOps call\n");
 }
 
 void call_Z_nn(unsigned short immediate) {

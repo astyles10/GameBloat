@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 
-typedef enum LogLevel { ERROR, WARNING, DEBUG } LogLevel;
+typedef enum LogLevel { eError, eWarning, eDebug } LogLevel;
 
 void InitLogFiles(const char* logFilePath);
 void CleanupLogFiles(void);

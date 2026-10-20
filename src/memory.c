@@ -55,27 +55,27 @@ unsigned char mmuReadByte(const unsigned short address) {
     if (address == 0xFF00) {
       // TODO: Implement joypad
       snprintf(logMessage, 81, baseLogMessage, address, "Joypad");
-      Log(WARNING, logMessage);
+      Log(eWarning, logMessage);
     } else if (address == 0xFF02 || address == 0xFF02) {
       // TODO: implement Serial
       snprintf(logMessage, 81, baseLogMessage, address, "Serial");
-      Log(WARNING, logMessage);
+      Log(eWarning, logMessage);
     } else if (address >= 0xFF04 && address <= 0xFF07) {
       // TODO: implement Divider & Timer registers
       snprintf(logMessage, 81, baseLogMessage, address, "Timer/Divider");
-      Log(WARNING, logMessage);
+      Log(eWarning, logMessage);
     } else if (address == 0xFF0F) {
       return interruptRegisters.request;
     } else if (address >= 0xFF10 && address <= 0xFF3F) {
       // TODO: implement Audio
       snprintf(logMessage, 81, baseLogMessage, address, "Audio");
-      Log(WARNING, logMessage);
+      Log(eWarning, logMessage);
     } else if (address >= 0xFF40 && address <= 0xFF4B) {
       return gpuReadRegister(address);
     } else if (address >= 0xFF4D && address <= 0xFF77) {
       // TODO: implement CGB registers
       snprintf(logMessage, 81, baseLogMessage, address, "CGB registers");
-      Log(WARNING, logMessage);
+      Log(eWarning, logMessage);
     }
     // printf("ReadByte: reading unimplemented IO address 0x%02X\n", address);
     return 0;
