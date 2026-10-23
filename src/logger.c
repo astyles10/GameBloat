@@ -11,7 +11,9 @@
 const char* logLevelStrings[] = {
   "ERROR",
   "WARN",
-  "DEBUG"
+  "DEBUG",
+  "TEST FAIL",
+  "TEST PASS"
 };
 
 // atomic_bool allowLogToFile = true; // Future functionality
@@ -77,6 +79,8 @@ const char* LogLevelToStr(LogLevel logLevel) {
     case eError:
     case eWarning:
     case eDebug:
+    case eTestPass:
+    case eTestFail:
       return logLevelStrings[logLevel];
     default:
       return "";

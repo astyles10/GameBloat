@@ -2,7 +2,8 @@
 #include <stdarg.h>
 #include <sys/stat.h>
 
-typedef enum LogLevel { eError, eWarning, eDebug } LogLevel;
+// TODO: Add functionality to allow multiple logfiles instead of a single global one.
+typedef enum LogLevel { eError, eWarning, eDebug, eTestPass, eTestFail } LogLevel;
 
 void InitLogFiles(const char* logFilePath);
 void CleanupLogFiles(void);
