@@ -9,11 +9,12 @@
 #include <unistd.h>
 
 const char* logLevelStrings[] = {
+  "TEST_FAIL",
+  "TEST_PASS",
+  "TEST_INFO",
   "ERROR",
   "WARN",
   "DEBUG",
-  "TEST FAIL",
-  "TEST PASS"
 };
 
 // atomic_bool allowLogToFile = true; // Future functionality
@@ -76,11 +77,12 @@ void CleanupLogFiles(void) {
 
 const char* LogLevelToStr(LogLevel logLevel) {
   switch (logLevel) {
+    case eTestInfo:
+    case eTestFail:
+    case eTestPass:
     case eError:
     case eWarning:
     case eDebug:
-    case eTestPass:
-    case eTestFail:
       return logLevelStrings[logLevel];
     default:
       return "";
