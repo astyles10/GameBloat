@@ -1,5 +1,6 @@
 #include "cpu.h"
 #include "interrupt.h"
+#include "logger.h"
 #include "registers.h"
 
 enum InterruptAddresses {
@@ -24,7 +25,7 @@ unsigned char validateInterrupt(unsigned char interruptBit) {
       return 1;
     }
   }
-  // printf("requestInterrupt: bit %d is not a valid interrupt!\n", interruptBit);
+  // Log(eWarning, "requestInterrupt: bit %d is not a valid interrupt!\n", interruptBit);
   return 0;
 }
 
@@ -71,11 +72,9 @@ void interruptStep(void) {
     }
   }
 
-  #ifdef DEBUG_PRINT
-  printf("*********************************\n");
-  printf("++++ Interrupts ++++\n");
-  printf("Master Enable: %d\n", interruptRegisters.masterEnable);
-  printf("Interrupts Enable: %d\n", interruptRegisters.enable);
-  printf("Request: 0x%02X\n", interruptRegisters.request);
-  #endif
+  Log(eDebug, "*********************************\n");
+  Log(eDebug, "++++ Interrupts ++++\n");
+  Log(eDebug, "Master Enable: %d\n", interruptRegisters.masterEnable);
+  Log(eDebug, "Interrupts Enable: %d\n", interruptRegisters.enable);
+  Log(eDebug, "Request: 0x%02X\n", interruptRegisters.request);
 }

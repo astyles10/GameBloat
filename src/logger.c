@@ -132,7 +132,13 @@ void Log(LogLevel logLevel, const char* message, ...) {
   }
 }
 
-void SetLogLevel(LogLevel level) {
-  currentLogLevel = level;
+bool SetLogLevel(LogLevel level) {
+  if (level >= eTestFail && level <= eDebug) {
+    currentLogLevel = level;
+    return true;
+  } else {
+    fprintf(stderr, "Invalid log level: %d\n", level);
+    return false;
+  }
 }
 

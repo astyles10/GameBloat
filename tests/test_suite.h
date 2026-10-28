@@ -31,16 +31,15 @@ typedef struct test_suite_t {
   struct test_suite_t* this;
 } TestSuite;
 
-void TestEnvironmenentInit(void);
+void TestEnvironmentInit(void);
 void InitTestSuite(char* suiteName, TestSuite* suite);
 void ExecuteTestCases(TestSuite* suite);
 void RegisterTestCase(TestSuite* suite, const char* testName, Test test);
 void DestroySuite(TestSuite* expiredSuite);
 void PrintTestResults(TestSuite* suite);
 
-void TestEnvironmenentInit (void) {
+void TestEnvironmentInit (void) {
   InitLogFiles("test_results/");
-  SetLogLevel(eTestFail);
 }
 
 void InitTestSuite(char* suiteName, TestSuite* suite) {

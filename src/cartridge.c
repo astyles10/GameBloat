@@ -1,10 +1,11 @@
 #include "cartridge.h"
 
+#include "logger.h"
+#include "MBC.h"
+
 #include <stdlib.h>
 #include <string.h>
 
-#include "MBC.h"
-#include "memory.h"
 
 struct cartridge cartridge;
 const unsigned short HeaderStart = 0x100;
@@ -73,13 +74,13 @@ int loadCartridge(const char *cartName) {
     return success;
   } else {
     if ((success = readCartROMToMemory(fp))) {
-      printf("Cart ROM read into memory successfully!\n");
+      Log(eDebug, "Cart ROM read into memory successfully!\n");
 
       if ((success = initializeRAM(cartridge.header.ramSize))) {
-        printf("Cart RAM allocation successful!\n");
+        Log(eDebug, "Cart RAM allocation successful!\n");
         if ((success = setMBCType(cartridge.header.cartridgeType))) {
           cartridge.mbc = &MBC;
-          printf("Cart MBC setting successful!\n");
+          Log(eDebug, "Cart MBC setting successful!\n");
         }
       }
     }
@@ -97,7 +98,7 @@ int readCartROMToMemory(FILE *fp) {
     if (validateCartSize(cartSize)) {
       cartridge.rom = (unsigned char *)malloc(sizeof(char) * cartSize);
       if (!cartridge.rom) {
-        printf("Loading cart ROM failed: could not allocate memory.\n");
+        Log(eError, "Loading cart ROM failed: could not allocate memory.\n");
         return 0;
       }
       fread(cartridge.rom, 1, cartSize, fp);
@@ -120,7 +121,7 @@ int initializeRAM(const unsigned char cartRamSize) {
       ramSize = (1024 * 32);
       break;
     default:
-      printf("initializeRAM: Invalid cartridge RAM size!\n");
+      Log(eError, "initializeRAM: Invalid cartridge RAM size!\n");
       return 0;
   }
 
@@ -128,7 +129,7 @@ int initializeRAM(const unsigned char cartRamSize) {
     cartridge.ram = (unsigned char *)malloc(ramSize);
 
     if (!cartridge.ram) {
-      printf("setMBCType1: Failed to allocate memory!\n");
+      Log(eError, "setMBCType1: Failed to allocate memory!\n");
       return 0;
     }
 
@@ -163,18 +164,18 @@ int validateCartSize(const unsigned int cartSize) {
         expectedRomSize = 0x180000;  // 1.5MB
         break;
       default:
-        printf("loadCartridge: invalid ROM size flag = %d\n",
+        Log(eError, "loadCartridge: invalid ROM size flag = %d\n",
                cartridge.header.romSize);
         return 0;
     }
   } else {
-    printf("loadCartridge: invalid ROM size flag = %d\n",
+    Log(eError, "loadCartridge: invalid ROM size flag = %d\n",
            cartridge.header.romSize);
     return 0;
   }
 
   if (expectedRomSize != cartSize) {
-    printf("loadCartridge: mismatched cart size: Expected size %d, got %d\n",
+    Log(eError, "loadCartridge: mismatched cart size: Expected size %d, got %d\n",
            expectedRomSize, cartSize);
     return 0;
   }

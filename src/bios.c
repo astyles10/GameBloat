@@ -2,6 +2,7 @@
 
 #include "cartridge.h"
 #include "bios.h"
+#include "logger.h"
 
 const unsigned char nintendoLogoBitmap[0x30] = {
     0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83,
@@ -30,12 +31,12 @@ int validateCart(const char *fileName) {
     fseek(fp, 0, SEEK_END);
     long cartSize = ftell(fp);
     if (cartSize < 0x14F) {
-      printf("Error: Cartridge is too small. Exiting...\n");
+      Log(eDebug, "Error: Cartridge is too small. Exiting...\n");
       cartValid = 0;
     } else {
       rewind(fp);
       if (!(checkLogo(fp) && checkHeaderValues(fp))) {
-        printf("Error: Cartridge invalid. Exiting...\n");
+        Log(eError, "Error: Cartridge invalid. Exiting...\n");
         cartValid = 0;
       }
     }
@@ -53,14 +54,14 @@ int checkLogo(FILE *fp) {
   int isMatch = 1;
   for (i = 0; i < logoEnd; i++) {
     if (nintendoLogoBitmap[i] != cartridge.header.nintendoLogo[i]) {
-      printf(
+      Log(eError,
           "Powerup error: logo byte %d does not match. Expected 0x%02X, got "
           "0x%02X.\n",
           i, nintendoLogoBitmap[i], cartridge.header.nintendoLogo[i]);
       isMatch = 0;
     } else {
 #ifdef DEBUG
-      printf("Powerup: byte %d: 0x%02X matches logo bitmap.\n", i,
+      Log(eDebug, "Powerup: byte %d: 0x%02X matches logo bitmap.\n", i,
              nintendoLogoBitmap[i]);
 #endif
     }
@@ -80,10 +81,8 @@ int checkHeaderValues(FILE *fp) {
   int valueSum = 0;
 
   for (i = 0; i < headerValuesSize; i++) {
-#ifdef DEBUG
-    printf("0x%02X: Value = 0x%02X\n", (i + HEADER_VALUES_START),
+    Log(eDebug, "0x%02X: Value = 0x%02X\n", (i + HEADER_VALUES_START),
            headerValues[i]);
-#endif
     valueSum += headerValues[i];
   }
 
@@ -91,10 +90,10 @@ int checkHeaderValues(FILE *fp) {
                      // sum of header values
 
   if ((valueSum & 1)) {
-    printf("Powerup error: Sum of header values invalid: 0x%02X\n", valueSum);
+    Log(eError, "Powerup error: Sum of header values invalid: 0x%02X\n", valueSum);
     isValid = 0;
   } else {
-    printf("Powerup: Sum of header values passed with: 0x%02X\n", valueSum);
+    Log(eError, "Powerup: Sum of header values passed with: 0x%02X\n", valueSum);
   }
   return isValid;
 }

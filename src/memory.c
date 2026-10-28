@@ -22,8 +22,6 @@ void initializeMemory(void) {
 }
 
 unsigned char mmuReadByte(const unsigned short address) {
-  static const char baseLogMessage[] = "mmuReadByte: Unimplemented memory address 0x%X (%s)";
-  char logMessage[81];
   if (address < 0x8000) {
     // 0x0000 - 0x3FFF / 0x4000-0x7FFF: from cartridge
     // 0x4000-0x7FFF is switchable bank in cartridge (handled in mbc 'constructor' from cart type.)
@@ -39,7 +37,7 @@ unsigned char mmuReadByte(const unsigned short address) {
     return wRAM[(address - 0xC000)];
   } else if (address < 0xFE00) {
     // Echo RAM (mirror of 0xC000 - 0xDDFF); prohibited
-    printf("Illegal read attempt from unusable area: %d!\n",
+    Log(eWarning, "Illegal read attempt from unusable area: %d!\n",
            (address - 0xFE00));
     return wRAM[address - 0xE000];
   } else if (address < 0xFEA0) {
@@ -47,37 +45,32 @@ unsigned char mmuReadByte(const unsigned short address) {
     return OAM[address - 0xFE00];
   } else if (address < 0xFF00) {
     // 0xFEA0 - 0xFEFF Unusable
-    printf("Illegal read attempt from unusable area: %d!\n",
+    Log(eWarning, "Illegal read attempt from unusable area: %d!\n",
            (address - 0xFEA0));
     return 0;
   } else if (address < 0xFF80) {
     // TODO: When implementing serial & I/O, move this code into separate serial.c file
     if (address == 0xFF00) {
       // TODO: Implement joypad
-      snprintf(logMessage, 81, baseLogMessage, address, "Joypad");
-      Log(eWarning, logMessage);
+      Log(eWarning, "mmuReadByte: Unimplemented memory address 0x%X (%s)", address, "Joypad");
     } else if (address == 0xFF02 || address == 0xFF02) {
       // TODO: implement Serial
-      snprintf(logMessage, 81, baseLogMessage, address, "Serial");
-      Log(eWarning, logMessage);
+      Log(eWarning, "mmuReadByte: Unimplemented memory address 0x%X (%s)", address, "Serial");
     } else if (address >= 0xFF04 && address <= 0xFF07) {
       // TODO: implement Divider & Timer registers
-      snprintf(logMessage, 81, baseLogMessage, address, "Timer/Divider");
-      Log(eWarning, logMessage);
+      Log(eWarning, "mmuReadByte: Unimplemented memory address 0x%X (%s)", address, "Timer/Divider");
     } else if (address == 0xFF0F) {
       return interruptRegisters.request;
     } else if (address >= 0xFF10 && address <= 0xFF3F) {
       // TODO: implement Audio
-      snprintf(logMessage, 81, baseLogMessage, address, "Audio");
-      Log(eWarning, logMessage);
+      Log(eWarning, "mmuReadByte: Unimplemented memory address 0x%X (%s)", address, "Audio");
     } else if (address >= 0xFF40 && address <= 0xFF4B) {
       return gpuReadRegister(address);
     } else if (address >= 0xFF4D && address <= 0xFF77) {
       // TODO: implement CGB registers
-      snprintf(logMessage, 81, baseLogMessage, address, "CGB registers");
-      Log(eWarning, logMessage);
+      Log(eWarning, "mmuReadByte: Unimplemented memory address 0x%X (%s)", address, "CGB registers");
     }
-    // printf("ReadByte: reading unimplemented IO address 0x%02X\n", address);
+    // Log(eWarning, "ReadByte: reading unimplemented IO address 0x%02X\n", address);
     return 0;
   } else if (address < 0xFFFF) {
     // 0xFF80 - 0xFFFE: High RAM
@@ -85,7 +78,7 @@ unsigned char mmuReadByte(const unsigned short address) {
   } else if (address == 0xFFFF) {
     return interruptRegisters.enable;
   } else {
-    // printf("mmuReadByte: Invalid memory address: %d!\n", address);
+    // Log(eError, "mmuReadByte: Invalid memory address: %d!\n", address);
     return 0;
   }
 }
@@ -107,40 +100,40 @@ int mmuWriteByte(const unsigned short address, const unsigned char value) {
     wRAM[address - 0xC000] = value;
     return 1;
   } else if (address < 0xFE00) {
-    // printf("Warning: mmuWriteByte wrote to echo wRAM!\n");
+    // Log(eWarning, "mmuWriteByte wrote to echo wRAM!\n");
     wRAM[address - 0xE000] = value;
     return 1;
   } else if (address < 0xFEA0) {
     OAM[address - 0xFE00] = value;
     return 1;
   } else if (address < 0xFF00) {
-    // printf("Illegal read attempt from unusable area: %d!\n",
+    // Log(eWarning, "Illegal read attempt from unusable area: %d!\n",
     //        (address - 0xFEA0));
     return 0;
   } else if (address < 0xFF80) {
     if (address == 0xFF00) {
       // TODO: Implement joypad
-      // printf("Writing to Joypad port %u\n", address);
+      // Log(eDebug, "Writing to Joypad port %u\n", address);
     } else if (address == 0xFF02 || address == 0xFF02) {
       // TODO: implement Serial
-      // printf("Writing to Serial port %u\n", address);
+      // Log(eDebug, "Writing to Serial port %u\n", address);
     } else if (address >= 0xFF04 && address <= 0xFF07) {
       // TODO: implement Divider & Timer registers
-      // printf("Writing to Timer/Divider port %u\n", address);
+      // Log(eDebug, "Writing to Timer/Divider port %u\n", address);
     } else if (address == 0xFF0F) {
       writeInterrupt(address, value);
       return 1;
     } else if (address >= 0xFF10 && address <= 0xFF3F) {
       // TODO: implement Audio
-      // printf("Writing to Audio port %u\n", address);
+      // Log(eDebug, "Writing to Audio port %u\n", address);
     } else if (address >= 0xFF40 && address <= 0xFF4B) {
       gpuWriteRegister(address, value);
       return 1;
     } else if (address >= 0xFF4D && address <= 0xFF77) {
       // TODO: implement CGB registers
-      // printf("Writing to CGB port %u\n", address);
+      // Log(eDebug, "Writing to CGB port %u\n", address);
     }
-    // printf("mmuWriteByte: Writing to unimplemented io port address 0x%02X with value %u\n", address, (unsigned short)value);
+    // Log(eDebug, "mmuWriteByte: Writing to unimplemented io port address 0x%02X with value %u\n", address, (unsigned short)value);
     ioPorts[address - 0xFF00] = value;
     return 1;
   } else if (address < 0xFFFF) {
@@ -150,7 +143,7 @@ int mmuWriteByte(const unsigned short address, const unsigned char value) {
     writeInterrupt(address, value);
     return 1;
   } else {
-    // printf("mmuWriteByte: Invalid memory address: %d!\n", address);
+    // Log(eError, "mmuWriteByte: Invalid memory address: %d!\n", address);
     return 0;
   }
 }

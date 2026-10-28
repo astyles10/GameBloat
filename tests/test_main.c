@@ -1,4 +1,5 @@
 #include "test_suite.h"
+#include <unistd.h>
 
 bool testFunction(void);
 bool anotherTestFunction(void);
@@ -21,17 +22,12 @@ bool finalTestFunction(void) {
 }
 
 const char ArgDelimiter = '=';
-// TODO: Test log level should be separate from the exec log level
 const char* ArgLogLevel = "log_level";
 const char* ArgLogLevelValue[] = {
-  "fail", "pass", "info"
-};
-enum TestLogLevel {
-  eFail,
-  ePass,
-  eInfo,
+  "fail", "pass", "info", "error", "warning", "debug"
 };
 const size_t LogLevelValueLen = sizeof(ArgLogLevelValue) / sizeof(void*);
+
 LogLevel ArgToLogLevel(const char* arg);
 
 void HandleArguments(int argc, char** argv) {
@@ -48,7 +44,8 @@ void HandleArguments(int argc, char** argv) {
       argHandled = HandleLogLevel(arg);
     }
     if (!argHandled) {
-      printf("Exiting...\n");
+      printf("Usage: %s --log_level=[fail|pass|info|error|warn|debug]\n", argv[0]);
+      exit(1);
     }
   }
 }
@@ -59,18 +56,7 @@ bool HandleLogLevel(const char* arg) {
     arg += 1;
     for (size_t j = 0; j < LogLevelValueLen; ++j) {
       if (strcmp(arg, ArgLogLevelValue[j]) == 0) {
-       switch (j) {
-         case ePass:
-           SetLogLevel(eTestPass);
-           break;
-        case eFail:
-           SetLogLevel(eTestFail);
-           break;
-        case eInfo:
-           SetLogLevel(eTestInfo);
-           break;
-       }
-        handled = true;
+        handled = SetLogLevel(j);
         printf("Setting log level to %s\n", arg);
         break;
       }
@@ -84,7 +70,7 @@ bool HandleLogLevel(const char* arg) {
 
 int main(int argc, char** argv) {
   HandleArguments(argc, argv);
-  TestEnvironmenentInit();
+  TestEnvironmentInit();
   TestSuite cpuTestSuite;
   InitTestSuite("CPU", &cpuTestSuite);
   RegisterTestCase(&cpuTestSuite, "Test 1 == 1", testFunction);

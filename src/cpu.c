@@ -3,11 +3,10 @@
 
 #include "cartridge.h"
 #include "interrupt.h"
+#include "logger.h"
 #include "memory.h"
 #include "opcode.h"
 #include "registers.h"
-
-#include <stdio.h>
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
 
@@ -105,7 +104,6 @@ void reset(void) {
   int i;
   for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
     mmuWriteByte(resetAddresses[i], resetValues[i]);
-    // printf("%d Init: writing address 0x%X with value 0x%X\n", i, resetAddresses[i], resetValues[i]);
   }
 
   interruptRegisters.enable = 0;
@@ -115,12 +113,10 @@ void reset(void) {
 int loadROM(const char *cartName) {
   initializeMemory();
   reset();
-  #ifdef DEBUG_PRINT
-  printf("loadROM: Register AF = 0x%X F = 0x%x\n", registers.AF, registers.F);
-  printf("loadROM: Register F Zero: %d Negative: %d HalfCarry: %d Carry: %d\n",
+  Log(eDebug, "loadROM: Register AF = 0x%X F = 0x%x\n", registers.AF, registers.F);
+  Log(eDebug, "loadROM: Register F Zero: %d Negative: %d HalfCarry: %d Carry: %d\n",
          checkFlag(flagZero), checkFlag(flagNegative), checkFlag(flagHalfCarry),
          checkFlag(flagCarry));
-  #endif
   loadCartridge(cartName);
   return 0;
 }
@@ -139,7 +135,6 @@ int cpuStep(void) {
     i++;
     (void)i;
   }
-  //printf("GameBloat: registers.pc = 0x%X\n", registers.PC);
 
   int tickStart = tickCounter;
 
@@ -153,7 +148,7 @@ int cpuStep(void) {
 //  DebugPrintCpuState();
 
   int ticksUsed = tickCounter - tickStart;
-  //printf("CPU ticks = %d\n", ticksUsed);
+  //Log(eDebug, "CPU ticks = %d\n", ticksUsed);
   return ticksUsed;
 }
 
@@ -199,34 +194,34 @@ void ExecuteOpcode(const opcode inOpcode, const unsigned short inOperand) {
 void DebugPrintInstruction(opcode inOpcode, unsigned short inOperand) {
   switch (inOpcode.operandType) {
     case (OPERAND_CHAR):
-      printf("Executing instruction = %s, operand = 0x%X\n", inOpcode.asmName,
+      Log(eDebug, "Executing instruction = %s, operand = 0x%X\n", inOpcode.asmName,
         inOperand);
     break;
     case (OPERAND_SHORT):
-      printf("Executing instruction = %s, operand = 0x%X\n", inOpcode.asmName,
+      Log(eDebug, "Executing instruction = %s, operand = 0x%X\n", inOpcode.asmName,
         inOperand);
     break;
     case (NO_OPERANDS):
-      printf("Executing instruction = %s\n", inOpcode.asmName);
+      Log(eDebug, "Executing instruction = %s\n", inOpcode.asmName);
     break;
   }
 }
 
 void DebugPrintCpuState(void) {
   static int cycles = 0;
-  printf("\n*********************************\n");
-  printf("++++ CPU ++++\n");
-  printf(
+  Log(eDebug, "\n*********************************\n");
+  Log(eDebug, "++++ CPU ++++\n");
+  Log(eDebug,
       "Registers\nA: 0x%02X B: 0x%02X C: 0x%02X D: 0x%02X\nE: 0x%02X F: 0x%02X "
       "H: 0x%02X L: 0x%02X\n",
       registers.A, registers.B, registers.C, registers.D, registers.E,
       registers.F, registers.H, registers.L);
-  printf("Flags: Z: %d N: %d H: %d C: %d\n", checkFlag(flagZero),
+  Log(eDebug, "Flags: Z: %d N: %d H: %d C: %d\n", checkFlag(flagZero),
          checkFlag(flagNegative), checkFlag(flagHalfCarry),
          checkFlag(flagCarry));
-  printf("PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
-  printf("Total cycles (ticks): %lu\n", tickCounter);
-  printf("\n");
+  Log(eDebug, "PC: 0x%02X SP: 0x%02X\n", registers.PC, registers.SP);
+  Log(eDebug, "Total cycles (ticks): %lu\n", tickCounter);
+  Log(eDebug, "\n");
 
   opcode aNextOpcode;
   unsigned char aNextInstruction = mmuReadByte(registers.PC);
@@ -242,11 +237,11 @@ void DebugPrintCpuState(void) {
   } else if (aNextOpcode.operandType == OPERAND_SHORT) {
     aNextOperand = mmuReadShort(registers.PC + 1);
   }
-  printf("Next instruction = 0x%02X (%s 0x%02X)\n", aNextInstruction, aNextOpcode.asmName, aNextOperand);
-  printf("\n");
+  Log(eDebug, "Next instruction = 0x%02X (%s 0x%02X)\n", aNextInstruction, aNextOpcode.asmName, aNextOperand);
+  Log(eDebug, "\n");
 
-  printf("Cycles: %ld\n", tickCounter);
-  printf("\n*********************************\n");
+  Log(eDebug, "Cycles: %ld\n", tickCounter);
+  Log(eDebug, "\n*********************************\n");
 
   ++cycles;
 }
@@ -329,7 +324,7 @@ void ldh_A_n(unsigned char n) {
   const unsigned short memLocation = 0xFF00 + n;
   registers.A = mmuReadByte(memLocation);
   if (memLocation == 0xFF44) {
-    printf("ldh_A_n: set register A to 0x%X\n", registers.A);
+    Log(eDebug, "ldh_A_n: set register A to 0x%X\n", registers.A);
   }
 }
 
@@ -589,10 +584,8 @@ void inc_sHL(void) {
 
   value++;
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("inc_sHL: Failed to increment source at address %d!\n",
+    Log(eError, "inc_sHL: Failed to increment source at address %d!\n",
            registers.HL);
-    #endif
   }
 
   if (value) {
@@ -614,9 +607,7 @@ void dec_sHL(void) {
 
   value--;
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("Failed to decrement source at address %d!\n", registers.HL);
-    #endif
+    Log(eError, "Failed to decrement source at address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -693,9 +684,7 @@ void swap_sHL(void) {
   value = ((value & HIGH_NIBBLE) >> 4) | ((value & LOW_NIBBLE) << 4);
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("swap_sHL: Failed to write to address %d!\n", registers.HL);
-    #endif
+    Log(eError, "swap_sHL: Failed to write to address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -764,7 +753,7 @@ void undefined(void) {}
 void halt(void) {
   if (interruptRegisters.masterEnable) {
     // TODO: Determine how to perform a halt
-    printf("Would halt!\n");
+    Log(eDebug, "Would halt!\n");
   } else {
     registers.PC++;
   }
@@ -866,9 +855,7 @@ void rlc_sHL(void) {
   value += checkFlag(flagCarry);
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("rlc_sHL: Failed to write byte to %d!", registers.HL);
-    #endif
+    Log(eError, "rlc_sHL: Failed to write byte to %d!", registers.HL);
   }
 
   if (value) {
@@ -908,9 +895,7 @@ void rl_sHL(void) {
 
   value <<= 1;
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("rl_sHL: Failed to write byte to address %d!\n", registers.HL);
-    #endif
+    Log(eError, "rl_sHL: Failed to write byte to address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -959,9 +944,7 @@ void rrc_sHL(void) {
   }
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("rrc_sHL: Failed to write value at %d!\n", registers.HL);
-    #endif
+    Log(eError, "rrc_sHL: Failed to write value at %d!\n", registers.HL);
   }
 
   if (value) {
@@ -1002,9 +985,7 @@ void rr_sHL(void) {
   value >>= 1;
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("rr_sHL: Failed to write to address %d!\n", registers.HL);
-    #endif
+    Log(eError,"rr_sHL: Failed to write to address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -1044,9 +1025,7 @@ void sla_sHL(void) {
 
   value <<= 1;
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("sla_sHL: Failed to write to address %d!\n", registers.HL);
-    #endif
+    Log(eError,"sla_sHL: Failed to write to address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -1087,9 +1066,7 @@ void sra_sHL(void) {
   value = (value >> 1) | (value & 0x80);
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("sra_sHL: Failed to write to address %d!\n", registers.HL);
-    #endif
+    Log(eError,"sra_sHL: Failed to write to address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -1130,9 +1107,7 @@ void srl_sHL(void) {
   value >>= 1;
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("srl_sHL: Failed to write to address %d!\n", registers.HL);
-    #endif
+    Log(eError,"srl_sHL: Failed to write to address %d!\n", registers.HL);
   }
 
   if (value) {
@@ -1177,9 +1152,7 @@ void set_b_sHL(unsigned char bitPosition) {
   value |= (1 << bitPosition);
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("set_b_sHL: Failed to write to address %d!\n", registers.HL);
-    #endif
+    Log(eError,"set_b_sHL: Failed to write to address %d!\n", registers.HL);
   }
 }
 
@@ -1192,9 +1165,7 @@ void res_b_sHL(unsigned char bitPosition) {
   value &= ~(1 << bitPosition);
 
   if (!mmuWriteByte(registers.HL, value)) {
-    #ifdef DEBUG_PRINT
-    printf("res_b_sHL: Failed to write value to address %d!\n", registers.HL);
-    #endif
+    Log(eError,"res_b_sHL: Failed to write value to address %d!\n", registers.HL);
   }
 }
 
@@ -1202,9 +1173,7 @@ void res_b_sHL(unsigned char bitPosition) {
 
 void jp_nn(unsigned short nn) {
   registers.PC = nn;
-  #ifdef DEBUG_PRINT
-  printf("jp_nn: Registers.PC = 0x%0X\n", registers.PC);
-  #endif
+  Log(eDebug, "jp_nn: Registers.PC = 0x%0X\n", registers.PC);
 }
 
 void jp_cc_nn(unsigned short nn, unsigned char flag, unsigned char condition) {
@@ -1290,3 +1259,4 @@ void reti(void) {
   ret();
   ei();
 }
+

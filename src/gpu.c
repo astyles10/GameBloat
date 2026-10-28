@@ -1,5 +1,7 @@
 #include "gpu.h"
+
 #include "interrupt.h"
+#include "logger.h"
 #include "registers.h"
 #include "utils.h"
 
@@ -187,10 +189,10 @@ void HandleLCDModeChange(const int inMode) {
 void gpuStep(int tick) {
   if (!(GPU.registers.lcdControl & LCD_DISPLAY_ENABLE)) {
     //int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
-    //printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-    //printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-    //printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-    //printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
+    //Log(eDebug, "lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+    //Log(eDebug, "Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+    //Log(eDebug, "Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+    //Log(eDebug, "Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
     return;
   }
   modeClock += tick;
@@ -241,22 +243,20 @@ void gpuStep(int tick) {
   // Interchangable with GPU
   // 
 //  int lcdEnabled = (GPU.registers.lcdControl & LCD_DISPLAY_ENABLE);
- // printf("lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
-  //printf("Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
-  //printf("Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
-  //printf("Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
-  #ifdef DEBUG_PRINT
+ // Log(eDebug, "lcdControl register: 0x%X, LCD enabled: %d\nMode: %s, Clock: %d\n", GPU.registers.lcdControl, lcdEnabled ? 1 : 0, determineModeClock(), modeClock);
+  //Log(eDebug, "Scroll X: %u Scroll Y: %u, line number: %u\n", GPU.registers.scrollX, GPU.registers.scrollY, GPU.registers.lcdYCoordinate);
+  //Log(eDebug, "Window X: %u Y: %u\n", GPU.registers.lcdWindowX, GPU.registers.lcdWindowY);
+  //Log(eDebug, "Window Tile Map: %u\n", GPU.registers.lcdControl & WINDOW_TILE_MAP_DISPLAY_SELECT);
   // const char* modeStr = determineModeClock();
-  // printf("++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
+  // Log(eDebug, "++++ GPU ++++\nGPU mode clock: %d\nMode: %s\nLine: %d\n", modeClock, modeStr,
         //  GPU.registers.lcdYCoordinate);
-  #endif
 }
 
 unsigned char gpuReadByte(const unsigned short address) {
   if (address < 0x2000) {
     return GPU.VRAM[address];
   }
-  printf("GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
+  Log(eWarning, "GPU ReadByte attempted to read invalid vRAM address: 0x%X\n",
          address);
   return 0;
 }
@@ -292,7 +292,7 @@ unsigned char gpuReadRegister(const unsigned short address) {
   } else if (address == 0xFF4B) {
     return GPU.registers.lcdWindowX;
   }
-  printf("readRegister: Unimplemented register address 0x%02X\n", address);
+  Log(eWarning, "readRegister: Unimplemented register address 0x%02X\n", address);
   return 0;
 }
 
@@ -301,7 +301,7 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
   if (modifiedAddress < 0x2000) {
     GPU.VRAM[modifiedAddress] = value;
   } else {
-    printf("Invalid VRAM write address: 0x%04X\n", address);
+    Log(eWarning, "Invalid VRAM write address: 0x%04X\n", address);
     return 0;
   }
 
@@ -315,11 +315,11 @@ int gpuWriteByte(const unsigned short address, const unsigned char value) {
 
 int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   // TODO: Register values with specific bits require bitwise operations
-  //printf("gpuWriteRegister: address 0x%X, value 0x%X\n", address, value);
+  //Log(eDebug, "gpuWriteRegister: address 0x%X, value 0x%X\n", address, value);
   if (address == 0xFF40) {
     UpdateLcdControlRegister(value);
     GPU.registers.lcdControl = value;
-    //printf("GPU ptr: %p, lcdControl: 0x%X\n", &GPU, GPU.registers.lcdControl);
+    //Log(eDebug, "GPU ptr: %p, lcdControl: 0x%X\n", &GPU, GPU.registers.lcdControl);
   } else if (address == 0xFF41) {
     GPU.registers.lcdStatus = value;
   } else if (address == 0xFF42) {
@@ -339,7 +339,7 @@ int gpuWriteRegister(const unsigned short address, const unsigned char value) {
   } else if (address == 0xFF4B) {
     GPU.registers.lcdWindowY = value;
   }
-  // printf("writeRegister: Unimplemented register address 0x%02X\n", address);
+  // Log(eWarning, "writeRegister: Unimplemented register address 0x%02X\n", address);
   return 1;
 }
 
@@ -375,8 +375,8 @@ void UpdateLcdStatusRegister(const unsigned char value) {
 }
 
 void updateTile(const unsigned short addr, const unsigned char val) {
-  //printf("Size of tiles = %d\n", sizeof(tiles));
-  //printf("UpdateTile: registers.PC = %02X\n", registers.PC);
+  //Log(eDebug, "Size of tiles = %d\n", sizeof(tiles));
+  //Log(eDebug, "UpdateTile: registers.PC = %02X\n", registers.PC);
   // The base address is simply every even address due to GPU accessing two
   // bytes per row: E.g.,
   // First row contains addresses 0x00 && 0x01:
@@ -404,7 +404,7 @@ void updateTile(const unsigned short addr, const unsigned char val) {
     unsigned char writeValue = ((pixelRowLsb & bitIndex) ? 1 : 0);
     writeValue += ((pixelRowMsb & bitIndex) ? 2 : 0);
     if (writeValue > 0)
-      printf("Writing value tile %u, row %u, pixel %u\n", tile, subRow, pixel);
+      Log(eDebug, "Writing value tile %u, row %u, pixel %u\n", tile, subRow, pixel);
     tiles[tile][subRow][pixel] = writeValue;
   }
 }
@@ -438,12 +438,12 @@ void renderScan() {
   }
 
   if (tile > 383) {
-    printf("Invalid Tile number %u\n", tile);
+    Log(eWarning, "Invalid Tile number %u\n", tile);
     return;
   }
 
   int tileHasColour = 0;
-  // printf("=-=-=-=-=- RenderScan Tile Data =-=-=-=-=-\n");
+  // Log(eDebug, "=-=-=-=-=- RenderScan Tile Data =-=-=-=-=-\n");
   for (int i = 0; i < 160; ++i) {
     unsigned char colour = tiles[tile][y][x];
     if (colour > 0) {
@@ -463,7 +463,7 @@ void renderScan() {
       if ((GPU.registers.lcdControl & BG_WINDOW_TILE_DATA_SELECT) && tile < 128) {
         tile += 256;
         if (tile > 383) {
-          printf("Invalid Tile number %u\n", tile);
+          Log(eWarning, "Invalid Tile number %u\n", tile);
           return;
         }
       }
