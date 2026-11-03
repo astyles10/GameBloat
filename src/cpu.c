@@ -79,6 +79,7 @@ unsigned char stopped = 0;
 
 void setFlag(unsigned char flag) {
   registers.F |= flag;
+  int i = 3;
 }
 
 void removeFlag(unsigned char flag) {

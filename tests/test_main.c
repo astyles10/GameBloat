@@ -28,8 +28,6 @@ const char* ArgLogLevelValue[] = {
 };
 const size_t LogLevelValueLen = sizeof(ArgLogLevelValue) / sizeof(void*);
 
-LogLevel ArgToLogLevel(const char* arg);
-
 void HandleArguments(int argc, char** argv) {
   for (int i = 1; i < argc; ++i) {
     const char* arg = argv[i];

@@ -1,5 +1,0 @@
---recurse=yes
---exclude=node_modules
---exclude=Testing
---exclude=.git
---exclude=build
