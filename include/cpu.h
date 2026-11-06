@@ -1,5 +1,6 @@
 #pragma once
 #include <cJSON.h>
+#include "opcode.h"
 
 extern const unsigned char flagCarry;
 extern const unsigned char flagHalfCarry;
@@ -7,10 +8,11 @@ extern const unsigned char flagNegative;
 extern const unsigned char flagZero;
 extern unsigned long int tickCounter;
 
-void reset(void);
+void cpuReset(void);
 void cpuClose(void);
 int loadROM(const char *);
 int cpuStep(void);
+void ExecuteOpcode(const opcode inOpcode, const unsigned short inOperand);
 cJSON* GetCPUDataAsJSON(void);
 
 // 8-Bit loads

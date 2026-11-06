@@ -1,4 +1,8 @@
+#ifndef TESTS_MAIN
+#define TESTS_MAIN
+
 #include "test_suite.h"
+#include "cpu_tests.h"
 #include <unistd.h>
 
 bool testFunction(void);
@@ -69,13 +73,22 @@ bool HandleLogLevel(const char* arg) {
 int main(int argc, char** argv) {
   HandleArguments(argc, argv);
   TestEnvironmentInit();
-  TestSuite cpuTestSuite;
-  InitTestSuite("CPU", &cpuTestSuite);
-  RegisterTestCase(&cpuTestSuite, "Test 1 == 1", testFunction);
-  RegisterTestCase(&cpuTestSuite, "Should fail true != false", anotherTestFunction);
-  RegisterTestCase(&cpuTestSuite, "strcmp", finalTestFunction);
+  TestSuite demoTestSuite;
+  InitTestSuite("CPU", &demoTestSuite);
+  RegisterTestCase(&demoTestSuite, "Test 1 == 1", testFunction);
+  RegisterTestCase(&demoTestSuite, "Should fail true != false", anotherTestFunction);
+  RegisterTestCase(&demoTestSuite, "strcmp", finalTestFunction);
+  ExecuteTestCases(&demoTestSuite);
+  PrintTestResults(&demoTestSuite);
+
+  BuildCpuTestSuite();
   ExecuteTestCases(&cpuTestSuite);
   PrintTestResults(&cpuTestSuite);
   DestroySuite(&cpuTestSuite);
+
+  DestroySuite(&demoTestSuite);
   return 0;
 }
+
+#endif
+

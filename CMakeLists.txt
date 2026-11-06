@@ -69,11 +69,13 @@ target_compile_options(Debug PUBLIC)
 # ##################################################### #
 
 
-set(TESTS_SOURCES "tests/test_main.c")
+file(GLOB_RECURSE TESTS_SOURCES ${PROJECT_SOURCE_DIR}/tests/*.c)
+#set(TESTS_SOURCES "tests/test_main.c")
 list(APPEND TESTS_SOURCES ${BASE_SOURCES})
 
 add_executable(Tests ${TESTS_SOURCES})
 target_include_directories(Tests PUBLIC ${PROJECT_SOURCE_DIR}/libs/cJSON)
+target_include_directories(Tests PUBLIC ${PROJECT_SOURCE_DIR}/tests/include)
 # target_compile_definitions(Debug PUBLIC "DEBUG_PRINT")
 target_compile_options(Tests PUBLIC)
 

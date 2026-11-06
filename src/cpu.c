@@ -1,11 +1,11 @@
 #include "cpu.h"
+#include "cpu_constants.h"
 #include "gpu.h"
 
 #include "cartridge.h"
 #include "interrupt.h"
 #include "logger.h"
 #include "memory.h"
-#include "opcode.h"
 #include "registers.h"
 
 // https://archives.glitchcity.info/wiki/GB_Programming.html
@@ -37,29 +37,8 @@ Z 	Zero Flag.
 Functions with register name hard coded are Upper case to suit struct naming
 */
 
-static const unsigned char LOW_NIBBLE = 0x000F;
-static const unsigned char HIGH_NIBBLE = 0x00F0;
-static const unsigned short LOW_BYTE = 0x00FF;
-static const unsigned short HIGH_BYTE = 0xFF00;
-static const unsigned short LOW_WORD = 0x0000FFFF;
-static const unsigned int HIGH_WORD = 0xFFFF0000;
-
-const unsigned short resetAddresses[] = {
-    0xFF05, 0xFF06, 0xFF07, 0xFF10, 0xFF11, 0xFF12, 0xFF14, 0xFF16,
-    0xFF17, 0xFF19, 0xFF1A, 0xFF1B, 0xFF1C, 0xFF1E, 0xFF20, 0xFF21,
-    0xFF22, 0xFF23, 0xFF24, 0xFF25, 0xFF26, 0xFF40, 0xFF42, 0xFF43,
-    0xFF45, 0xFF47, 0xFF48, 0xFF49, 0xFF4A, 0xFF4B
-};
-
-const unsigned char resetValues[] = {
-    0x00, 0x00, 0x00, 0x80, 0xBF, 0xF3, 0xBF, 0x3F, 0x00, 0xBF,
-    0x7F, 0xFF, 0x9F, 0xBF, 0xFF, 0x00, 0x00, 0xBF, 0x77, 0xF3,
-    0xF1, 0x91, 0x00, 0x00, 0x00, 0xFC, 0xFF, 0xFF, 0x00, 0x00
-};
-
 opcode DetermineOpcode(void);
 unsigned short DetermineOperand(opcode inOpcode);
-void ExecuteOpcode(const opcode inOpcode, const unsigned short inOperand);
 void DebugPrintCpuState(void);
 void DebugPrintInstruction(opcode, unsigned short);
 
@@ -79,7 +58,6 @@ unsigned char stopped = 0;
 
 void setFlag(unsigned char flag) {
   registers.F |= flag;
-  int i = 3;
 }
 
 void removeFlag(unsigned char flag) {
@@ -94,7 +72,7 @@ unsigned char checkFlag(unsigned char flag) {
   }
 }
 
-void reset(void) {
+void cpuReset(void) {
   registers.AF = 0x01B0;
   registers.BC = 0x0013;
   registers.DE = 0x00D8;
@@ -102,8 +80,7 @@ void reset(void) {
   registers.SP = 0xFFFE;
   registers.PC = 0x0100;
 
-  int i;
-  for (i = 0; i < (sizeof(resetValues) / sizeof(char)); i++) {
+  for (size_t i = 0; i < resetValuesCount; i++) {
     mmuWriteByte(resetAddresses[i], resetValues[i]);
   }
 
@@ -113,7 +90,7 @@ void reset(void) {
 
 int loadROM(const char *cartName) {
   initializeMemory();
-  reset();
+  cpuReset();
   Log(eDebug, "loadROM: Register AF = 0x%X F = 0x%x\n", registers.AF, registers.F);
   Log(eDebug, "loadROM: Register F Zero: %d Negative: %d HalfCarry: %d Carry: %d\n",
          checkFlag(flagZero), checkFlag(flagNegative), checkFlag(flagHalfCarry),
